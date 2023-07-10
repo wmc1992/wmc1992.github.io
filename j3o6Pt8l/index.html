@@ -6,17 +6,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/002_%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0/03_%E5%B1%80%E9%83%A8%E6%90%9C%E7%B4%A2%E7%AE%97%E6%B3%95/">
-        <link rel="shortcut icon" href="../../img/favicon.ico">
-        <title>Local Search Algrithm（局部搜索算法） - 算法工程师笔记</title>
-        <link href="../../css/bootstrap.min.css" rel="stylesheet">
-        <link href="../../css/font-awesome.min.css" rel="stylesheet">
-        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="canonical" href="https://mingchao.wang/003_%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/001_%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/07_%E5%B0%86softmax%2B%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8E%A8%E5%B9%BF%E5%88%B0%E5%A4%9A%E6%A0%87%E7%AD%BE%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>将“softmax+交叉熵”推广到多标签分类问题 - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
-        <link href="../../css/extra.css" rel="stylesheet">
+        <link href="../../../css/extra.css" rel="stylesheet">
 
-        <script src="../../js/jquery-1.10.2.min.js" defer></script>
-        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
@@ -35,7 +35,7 @@
     <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
                 <!-- Expander button -->
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -71,41 +71,37 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#local-search-algrithm" class="nav-link">Local Search Algrithm（局部搜索算法）</a>
+            <li class="nav-item" data-level="1"><a href="#softmax" class="nav-link">将“softmax+交叉熵”推广到多标签分类问题</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#local-search" class="nav-link">Local Search(局部搜索)的过程</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#local-search_1" class="nav-link">Local Search(局部搜索)的几大要素</a>
+            <li class="nav-item" data-level="2"><a href="#loss" class="nav-link">单标签分类loss</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#hill-climbing" class="nav-link">Hill Climbing（爬山法）</a>
+            <li class="nav-item" data-level="2"><a href="#loss_1" class="nav-link">多标签分类loss</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#simulated-annealing" class="nav-link">Simulated Annealing（模拟退火算法）</a>
+            <li class="nav-item" data-level="2"><a href="#_1" class="nav-link">用于多标签分类</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#tabutaboo-searchts" class="nav-link">TABU/TABOO Search（TS、禁忌搜索）</a>
+            <li class="nav-item" data-level="2"><a href="#pytorch" class="nav-link">Pytorch代码</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#hill-climbing-algorithm" class="nav-link">下面这个也是Hill Climbing Algorithm</a>
+            <li class="nav-item" data-level="2"><a href="#loss_2" class="nav-link">使用该loss时遇到的问题</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#_1" class="nav-link">示意图</a>
+            <li class="nav-item" data-level="3"><a href="#_2" class="nav-link">任务背景</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#_2" class="nav-link">伪代码</a>
+            <li class="nav-item" data-level="3"><a href="#_3" class="nav-link">问题说明</a>
               <ul class="nav flex-column">
               </ul>
             </li>
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#_3" class="nav-link">链接资料</a>
+            <li class="nav-item" data-level="2"><a href="#_4" class="nav-link">参考</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -116,126 +112,150 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="local-search-algrithm">Local Search Algrithm（局部搜索算法）<a class="headerlink" href="#local-search-algrithm" title="Permanent link">#</a></h1>
-<h2 id="local-search">Local Search(局部搜索)的过程<a class="headerlink" href="#local-search" title="Permanent link">#</a></h2>
-<ul>
-<li>算法从一个或者若干个初始解出发</li>
-<li>在算法中参数的控制下由当前状态的邻域中产生若干个候选解</li>
-<li>以某种策略在候选解中确定新的当前解</li>
-<li>重复执行上述搜索过程，直到满足算法终止条件；在这期间伴随参数的调节</li>
-<li>结束搜索过程，并输出最终结果</li>
-</ul>
-<h2 id="local-search_1">Local Search(局部搜索)的几大要素<a class="headerlink" href="#local-search_1" title="Permanent link">#</a></h2>
-<ul>
-<li>目标函数：用来判断解的优劣</li>
-<li>邻域的定义：根据不同的问题，采用不同的邻域定义方式</li>
-<li>初始解的产生方法</li>
-<li>迭代过程中新解的产生和接受规则</li>
-<li>迭代终止条件</li>
-</ul>
-<h2 id="hill-climbing">Hill Climbing（爬山法）<a class="headerlink" href="#hill-climbing" title="Permanent link">#</a></h2>
-<p>伪代码如下：</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">\begin{aligned}
-&amp;s \leftarrow GenerateInitialSolution() \\
-&amp;repeat \\
-&amp;\qquad s \enspace \leftarrow Improve(N(s)) \\
-&amp;until \enspace no \enspace improvement \enspace is \enspace possible
-\end{aligned}
-</div>
-<script type="math/tex; mode=display">\begin{aligned}
-&s \leftarrow GenerateInitialSolution() \\
-&repeat \\
-&\qquad s \enspace \leftarrow Improve(N(s)) \\
-&until \enspace no \enspace improvement \enspace is \enspace possible
-\end{aligned}
-</script>
-</div>
-<h2 id="simulated-annealing">Simulated Annealing（模拟退火算法）<a class="headerlink" href="#simulated-annealing" title="Permanent link">#</a></h2>
-<p>伪代码如下：</p>
+<h1 id="softmax">将“softmax+交叉熵”推广到多标签分类问题<a class="headerlink" href="#softmax" title="Permanent link">#</a></h1>
+<h2 id="loss">单标签分类loss<a class="headerlink" href="#loss" title="Permanent link">#</a></h2>
+<p>多分类任务的softmax loss，为了和后面的多标签分类在叫法上保持一致性，也称为"单标签分类"的loss：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">
-\begin{aligned}
-&amp; s \leftarrow GenerateInitialSolution() \\
-&amp; T \leftarrow T_0 \\
-&amp; while \enspace termination \enspace conditions \enspace not \enspace met \enspace do \\
-&amp; \qquad s' \leftarrow PickAtRandom(N(s)) \\
-&amp; \qquad if \enspace (f(s') &lt; f(s)) \enspace then \\
-&amp; \qquad \qquad s \leftarrow s' \qquad \qquad \# \enspace use \enspace s' \enspace replaces \enspace s \\
-&amp; \qquad else \\
-&amp; \qquad \qquad Accept \enspace s' \enspace as \enspace new \enspace solution \enspace with \enspace probability \enspace p(T, s', s) \\
-&amp; \qquad endif \\
-&amp; \qquad Update(T) \\
-&amp; endwhile
-\end{aligned}
+\begin{equation}
+\begin{split} L &amp; = - \log \frac{e^{s_t}}{\sum_{i=1}^{n} e^{s_i}} \\
+&amp; = - \log \frac{1}{\sum_{i=1}^{n} e^{s_i - s_t}} \\
+&amp; = \log \sum_{i=1}^{n} e^{s_i - s_t} \\
+&amp; = \log \big (1 + \sum_{i=1,i \not= t}^{n} e^{s_i - s_t} \big)
+\end{split}
+\end{equation}
 </div>
 <script type="math/tex; mode=display">
-\begin{aligned}
-& s \leftarrow GenerateInitialSolution() \\
-& T \leftarrow T_0 \\
-& while \enspace termination \enspace conditions \enspace not \enspace met \enspace do \\
-& \qquad s' \leftarrow PickAtRandom(N(s)) \\
-& \qquad if \enspace (f(s') < f(s)) \enspace then \\
-& \qquad \qquad s \leftarrow s' \qquad \qquad \# \enspace use \enspace s' \enspace replaces \enspace s \\
-& \qquad else \\
-& \qquad \qquad Accept \enspace s' \enspace as \enspace new \enspace solution \enspace with \enspace probability \enspace p(T, s', s) \\
-& \qquad endif \\
-& \qquad Update(T) \\
-& endwhile
-\end{aligned}
+\begin{equation}
+\begin{split} L & = - \log \frac{e^{s_t}}{\sum_{i=1}^{n} e^{s_i}} \\
+& = - \log \frac{1}{\sum_{i=1}^{n} e^{s_i - s_t}} \\
+& = \log \sum_{i=1}^{n} e^{s_i - s_t} \\
+& = \log \big (1 + \sum_{i=1,i \not= t}^{n} e^{s_i - s_t} \big)
+\end{split}
+\end{equation}
 </script>
 </div>
-<h2 id="tabutaboo-searchts">TABU/TABOO Search（TS、禁忌搜索）<a class="headerlink" href="#tabutaboo-searchts" title="Permanent link">#</a></h2>
-<p>伪代码如下：</p>
+<p>对上述公式的最后一行进行分析，其中 <span class="arithmatex"><span class="MathJax_Preview">s_i</span><script type="math/tex">s_i</script></span> 表示非目标类别得分，<span class="arithmatex"><span class="MathJax_Preview">s_t</span><script type="math/tex">s_t</script></span> 表示目标类别得分，<span class="arithmatex"><span class="MathJax_Preview">s_i</span><script type="math/tex">s_i</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">s_t</span><script type="math/tex">s_t</script></span> 的取值范围理论上是没有限制的，正负都有可能。</p>
+<p>由于取对数、求和、求<span class="arithmatex"><span class="MathJax_Preview">e</span><script type="math/tex">e</script></span>的幂都是都是单调增的，所以极小化上述公式的最后一行就等同于极小化 <span class="arithmatex"><span class="MathJax_Preview">s_i-s_t</span><script type="math/tex">s_i-s_t</script></span>。极小化 <span class="arithmatex"><span class="MathJax_Preview">s_i-s_t</span><script type="math/tex">s_i-s_t</script></span> 也就是说希望 <span class="arithmatex"><span class="MathJax_Preview">s_i &lt; s_t</span><script type="math/tex">s_i < s_t</script></span>。由此可以得出如下结论：</p>
+<p>该loss的目标是：<strong>对于每条数据，每个目标类别的得分都大于每个非目标类的得分</strong>；</p>
+<h2 id="loss_1">多标签分类loss<a class="headerlink" href="#loss_1" title="Permanent link">#</a></h2>
+<p>将单标签分类loss的目标扩展到多标签分类：<strong>对于每条数据，每个目标类别的得分都大于每个非目标类的得分</strong>；</p>
+<p>对应的loss公式为：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">
-\begin{aligned}
-&amp; s \leftarrow GenerateInitialSolution() \\
-&amp; InitializeTabuLists(TL_1, TL_2, ... , TL_r) \\
-&amp; k \leftarrow 0 \\
-&amp; while \enspace termination \enspace condition \enspace not \enspace met \enspace do \\
-&amp; \qquad AllowedSet(s, k) \leftarrow \{s' \in N(s) | s \enspace does \enspace not \enspace violate \enspace a \enspace tabu \enspace condition, \\
-&amp; \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad or \enspace it \enspace satisfies \enspace at \enspace least \enspace one \enspace aspiration \enspace condition \} \\
-&amp; \qquad s \leftarrow ChooseBestOf(AllowedSet(s, k)) \\
-&amp; \qquad UpdateTabuListsAndAspirationConditions() \\
-&amp; \qquad k \leftarrow k + 1 \\
-&amp; endwhile
-\end{aligned}
+\begin{align}
+\log \big ( 1 + \sum_{i \in \Omega_{neg}, j \in \Omega_{pos}} e^{s_i - s_j} \big ) = \
+\log \big ( 1 + \sum_{i \in \Omega_{neg}} e^{s_i} \sum_{j \in \Omega_{pos}} e^{-s_j} \big )
+\end{align}
 </div>
 <script type="math/tex; mode=display">
-\begin{aligned}
-& s \leftarrow GenerateInitialSolution() \\
-& InitializeTabuLists(TL_1, TL_2, ... , TL_r) \\
-& k \leftarrow 0 \\
-& while \enspace termination \enspace condition \enspace not \enspace met \enspace do \\
-& \qquad AllowedSet(s, k) \leftarrow \{s' \in N(s) | s \enspace does \enspace not \enspace violate \enspace a \enspace tabu \enspace condition, \\
-& \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad or \enspace it \enspace satisfies \enspace at \enspace least \enspace one \enspace aspiration \enspace condition \} \\
-& \qquad s \leftarrow ChooseBestOf(AllowedSet(s, k)) \\
-& \qquad UpdateTabuListsAndAspirationConditions() \\
-& \qquad k \leftarrow k + 1 \\
-& endwhile
-\end{aligned}
+\begin{align}
+\log \big ( 1 + \sum_{i \in \Omega_{neg}, j \in \Omega_{pos}} e^{s_i - s_j} \big ) = \
+\log \big ( 1 + \sum_{i \in \Omega_{neg}} e^{s_i} \sum_{j \in \Omega_{pos}} e^{-s_j} \big )
+\end{align}
 </script>
 </div>
-<h2 id="hill-climbing-algorithm">下面这个也是Hill Climbing Algorithm<a class="headerlink" href="#hill-climbing-algorithm" title="Permanent link">#</a></h2>
-<h3 id="_1">示意图<a class="headerlink" href="#_1" title="Permanent link">#</a></h3>
-<p><img alt="hill_climbing示意图" src="/Gl2fm9Ql/assets/hill_climbing示意图.png" /></p>
-<h3 id="_2">伪代码<a class="headerlink" href="#_2" title="Permanent link">#</a></h3>
-<pre><code>Hill_Climbing algorithm for minimization problem
+<p>其中<span class="arithmatex"><span class="MathJax_Preview">\Omega_{neg}</span><script type="math/tex">\Omega_{neg}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\Omega_{pos}</span><script type="math/tex">\Omega_{pos}</script></span>分别是正负样本的类别集合；</p>
+<p>这个loss很容易理解，并且直接使用这个loss就可以进行训练并且可以收敛；</p>
+<p>但是这个loss只能用于训练，不能用于推断，在推断时不知道每条数据有多少个类别是pos，有多少个类别是neg；</p>
+<h2 id="_1">用于多标签分类<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
+<p>增加一个新类别 <span class="arithmatex"><span class="MathJax_Preview">s_0</span><script type="math/tex">s_0</script></span> 作为阈值：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{align}
+&amp; \log \big ( 1 + \sum_{i \in \Omega_{neg}, j \in \Omega_{pos}} e^{s_i - s_j} + \
+\sum_{i \in \Omega_{neg}} e^{s_i - s_0} + \
+\sum_{j \in \Omega_{pos}} e^{s_0 - s_j} \big )
+\end{align}
+</div>
+<script type="math/tex; mode=display">
+\begin{align}
+& \log \big ( 1 + \sum_{i \in \Omega_{neg}, j \in \Omega_{pos}} e^{s_i - s_j} + \
+\sum_{i \in \Omega_{neg}} e^{s_i - s_0} + \
+\sum_{j \in \Omega_{pos}} e^{s_0 - s_j} \big )
+\end{align}
+</script>
+</div>
+<p>将新类别<span class="arithmatex"><span class="MathJax_Preview">s_0</span><script type="math/tex">s_0</script></span>的输出得分恒定为0，目的有两个：</p>
+<ul>
+<li>一是可以将公式(4)化简；</li>
+<li>另一个更重要的目的是这样就可以进行推断了。推断时，所有得分大于0的为pos，得分小于0的为neg；</li>
+</ul>
+<p>当然这里将<span class="arithmatex"><span class="MathJax_Preview">s_0</span><script type="math/tex">s_0</script></span>的输出得分恒定为其他值，比如1也没有问题，但是代码实现起来麻烦，另外推理时的得分要跟1做比较，得分小于1的表示neg，得分大于1的表示pos。</p>
+<p>对公式(3)不做任何化简，仅将<span class="arithmatex"><span class="MathJax_Preview">s_0</span><script type="math/tex">s_0</script></span>设置为0，就已经能够训练和推理了，可以思考一下这里如何实现训练和推理的细节。</p>
+<p>将 <span class="arithmatex"><span class="MathJax_Preview">s_0=0</span><script type="math/tex">s_0=0</script></span> 代入公式(3)并进行化简：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{equation}
+\begin{split}
+&amp; \log \big ( 1 + \sum_{i \in \Omega_{neg}, j \in \Omega_{pos}} e^{s_i - s_j} + \
+\sum_{i \in \Omega_{neg}} e^{s_i - s_0} + \
+\sum_{j \in \Omega_{pos}} e^{s_0 - s_j} \big ) \\
+= &amp; \log \big( e^{s_0} e^{-s_0} +  \sum_{i \in \Omega_{neg}} e^{s_i} \sum_{j \in \Omega_{pos}} e^{-s_j} + e^{-s_0} \sum_{i \in \Omega_{neg}} e^{s_i} + e^{s_0} \sum_{j \in \Omega_{pos}} e^{-s_j} \big) \\
+= &amp; \log \big ( e^{s_0} + \sum_{i \in \Omega_{neg}} e^{s_i} \big ) + \
+\log \big ( e^{-s_0} + \sum_{j \in \Omega_{pos}} e^{-s_j} \big ) \\
+= &amp; \log \big ( 1 + \sum_{i \in \Omega_{neg}} e^{s_i} \big ) + \log \big ( 1 + \sum_{j \in \Omega_{pos}} e^{-s_j} \big )
+\end{split}
+\end{equation}
+</div>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{split}
+& \log \big ( 1 + \sum_{i \in \Omega_{neg}, j \in \Omega_{pos}} e^{s_i - s_j} + \
+\sum_{i \in \Omega_{neg}} e^{s_i - s_0} + \
+\sum_{j \in \Omega_{pos}} e^{s_0 - s_j} \big ) \\
+= & \log \big( e^{s_0} e^{-s_0} +  \sum_{i \in \Omega_{neg}} e^{s_i} \sum_{j \in \Omega_{pos}} e^{-s_j} + e^{-s_0} \sum_{i \in \Omega_{neg}} e^{s_i} + e^{s_0} \sum_{j \in \Omega_{pos}} e^{-s_j} \big) \\
+= & \log \big ( e^{s_0} + \sum_{i \in \Omega_{neg}} e^{s_i} \big ) + \
+\log \big ( e^{-s_0} + \sum_{j \in \Omega_{pos}} e^{-s_j} \big ) \\
+= & \log \big ( 1 + \sum_{i \in \Omega_{neg}} e^{s_i} \big ) + \log \big ( 1 + \sum_{j \in \Omega_{pos}} e^{-s_j} \big )
+\end{split}
+\end{equation}
+</script>
+</div>
+<p>在代码中实现时就按照公式 <span class="arithmatex"><span class="MathJax_Preview">\log \big ( 1 + \sum_{i \in \Omega_{neg}} e^{s_i} \big ) + \log \big ( 1 + \sum_{j \in \Omega_{pos}} e^{-s_j} \big )</span><script type="math/tex">\log \big ( 1 + \sum_{i \in \Omega_{neg}} e^{s_i} \big ) + \log \big ( 1 + \sum_{j \in \Omega_{pos}} e^{-s_j} \big )</script></span> 进行实现。</p>
+<h2 id="pytorch">Pytorch代码<a class="headerlink" href="#pytorch" title="Permanent link">#</a></h2>
+<pre><code class="language-python">def multi_label_categorical_cross_entropy(y_true, y_pred):
+    y_pred = (1 - 2 * y_true) * y_pred
+    # 计算公式中的 s_i
+    y_pred_neg = y_pred - y_true * 1e12
+    # 计算公式中的 -s_j
+    y_pred_pos = y_pred - (1 - y_true) * 1e12
 
-Procedure HillClimbing():
-    x := getInitial(); // get initial feasible solution x
-    while (the stopping condition is not reached):
-        x' = localSearch(Neighborhood(x)); // select the optimal solution from the neighborhood of x as x'
-        if (c'x' &lt;= c'x):
-            x := x'
-        else:
-            return x
-    end
+    # 补上得分恒为0的 s_0 类别
+    zeros = torch.zeros_like(y_pred[..., :1])
+    y_pred_neg = torch.cat([y_pred_neg, zeros], dim=-1)
+    y_pred_pos = torch.cat([y_pred_pos, zeros], dim=-1)
+
+    # 计算 logsumexp
+    neg_loss = torch.logsumexp(y_pred_neg, dim=-1)
+    pos_loss = torch.logsumexp(y_pred_pos, dim=-1)
+    return torch.mean(neg_loss + pos_loss)
 </code></pre>
-<h2 id="_3">链接资料<a class="headerlink" href="#_3" title="Permanent link">#</a></h2>
-<p>https://www.cnblogs.com/liuyingsme/p/9857714.html</p>
-<p>https://www.cnblogs.com/JiePro/p/Metaheuristics_0.html</p></div>
+<h2 id="loss_2">使用该loss时遇到的问题<a class="headerlink" href="#loss_2" title="Permanent link">#</a></h2>
+<h3 id="_2">任务背景<a class="headerlink" href="#_2" title="Permanent link">#</a></h3>
+<p>任务总共有10个类别：address, book, company, game, government, movie, name, organization, position, scene；</p>
+<p>训练集中有5000条数据标注了其中的五个类别：address, book, company, game, government；</p>
+<p>训练集中另外5000条数据标注了另外的五个类别：movie, name, organization, position, scene；</p>
+<h3 id="_3">问题说明<a class="headerlink" href="#_3" title="Permanent link">#</a></h3>
+<p>计算loss时需要增加一个mask把没有标注的类别去掉；</p>
+<p>常规的mask写法如下：</p>
+<pre><code class="language-python">pred = pred * label_mask
+</code></pre>
+<p>在使用该loss时，以上用法有问题；正确的用法是：</p>
+<pre><code class="language-python">pred = pred - (1 - label_mask) * 1e12
+</code></pre>
+<p>原因是对于logsumexp来说，输入0并不是不产生loss，输入负无穷才是不产生loss，如下：</p>
+<pre><code class="language-python">from scipy.special import logsumexp
+
+print(logsumexp([0.1, 0.2, 0.3]) == logsumexp([0.1, 0.2, 0.3, -1e12]))
+print(logsumexp([0.1, 0.2, 0.3]) == logsumexp([0.1, 0.2, 0.3, 0]))
+</code></pre>
+<p>输出：</p>
+<pre><code>True
+False
+</code></pre>
+<h2 id="_4">参考<a class="headerlink" href="#_4" title="Permanent link">#</a></h2>
+<p>苏剑林. (Apr. 25, 2020). 《将“softmax+交叉熵”推广到多标签分类问题 》[Blog post]. Retrieved from https://kexue.fm/archives/7359</p></div>
             </div>
         </div>
 
@@ -245,13 +265,13 @@ Procedure HillClimbing():
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
         <script>
-            var base_url = "../..",
+            var base_url = "../../..",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="../../js/base.js" defer></script>
-        <script src="../../mathjax-config.js" defer></script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
-        <script src="../../search/main.js" defer></script>
+        <script src="../../../search/main.js" defer></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

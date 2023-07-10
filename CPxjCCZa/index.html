@@ -6,17 +6,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/002_%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0/03_%E5%B1%80%E9%83%A8%E6%90%9C%E7%B4%A2%E7%AE%97%E6%B3%95/">
-        <link rel="shortcut icon" href="../../img/favicon.ico">
-        <title>Local Search Algrithm（局部搜索算法） - 算法工程师笔记</title>
-        <link href="../../css/bootstrap.min.css" rel="stylesheet">
-        <link href="../../css/font-awesome.min.css" rel="stylesheet">
-        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="canonical" href="https://mingchao.wang/003_%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/001_%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/03_Softmax%E5%87%BD%E6%95%B0%E6%B1%82%E5%AF%BC/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Softmax 函数求导 - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
-        <link href="../../css/extra.css" rel="stylesheet">
+        <link href="../../../css/extra.css" rel="stylesheet">
 
-        <script src="../../js/jquery-1.10.2.min.js" defer></script>
-        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
@@ -35,7 +35,7 @@
     <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
                 <!-- Expander button -->
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -71,41 +71,21 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#local-search-algrithm" class="nav-link">Local Search Algrithm（局部搜索算法）</a>
+            <li class="nav-item" data-level="1"><a href="#softmax" class="nav-link">Softmax 函数求导</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#local-search" class="nav-link">Local Search(局部搜索)的过程</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#local-search_1" class="nav-link">Local Search(局部搜索)的几大要素</a>
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、问题描述</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#hill-climbing" class="nav-link">Hill Climbing（爬山法）</a>
+            <li class="nav-item" data-level="2"><a href="#2softmax" class="nav-link">2、对softmax求导</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#simulated-annealing" class="nav-link">Simulated Annealing（模拟退火算法）</a>
+            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、总结</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#tabutaboo-searchts" class="nav-link">TABU/TABOO Search（TS、禁忌搜索）</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#hill-climbing-algorithm" class="nav-link">下面这个也是Hill Climbing Algorithm</a>
-              <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#_1" class="nav-link">示意图</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#_2" class="nav-link">伪代码</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#_3" class="nav-link">链接资料</a>
+            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -116,126 +96,202 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="local-search-algrithm">Local Search Algrithm（局部搜索算法）<a class="headerlink" href="#local-search-algrithm" title="Permanent link">#</a></h1>
-<h2 id="local-search">Local Search(局部搜索)的过程<a class="headerlink" href="#local-search" title="Permanent link">#</a></h2>
+<h1 id="softmax">Softmax 函数求导<a class="headerlink" href="#softmax" title="Permanent link">#</a></h1>
+<h2 id="1">1、问题描述<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>softmax的公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\vec{\hat{y}} = \text{softmax}(\vec{z})\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\vec{\hat{y}} = \text{softmax}(\vec{z})\end{equation}</script>
+</div>
+<p>上述公式中：</p>
 <ul>
-<li>算法从一个或者若干个初始解出发</li>
-<li>在算法中参数的控制下由当前状态的邻域中产生若干个候选解</li>
-<li>以某种策略在候选解中确定新的当前解</li>
-<li>重复执行上述搜索过程，直到满足算法终止条件；在这期间伴随参数的调节</li>
-<li>结束搜索过程，并输出最终结果</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">\vec{z}</span><script type="math/tex">\vec{z}</script></span> 表示softmax的输入，是一个向量，维度为<span class="arithmatex"><span class="MathJax_Preview">d</span><script type="math/tex">d</script></span>，即 <span class="arithmatex"><span class="MathJax_Preview">\vec{z}=[z_1, z_2, \cdots, z_d]</span><script type="math/tex">\vec{z}=[z_1, z_2, \cdots, z_d]</script></span>；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">\vec{\hat{y}}</span><script type="math/tex">\vec{\hat{y}}</script></span> 表示softmax的输出，是一个向量，维度为<span class="arithmatex"><span class="MathJax_Preview">d</span><script type="math/tex">d</script></span>，即 <span class="arithmatex"><span class="MathJax_Preview">\vec{\hat{y}}=[\hat{y}_1, \hat{y}_2, \cdots, \hat{y}_d]</span><script type="math/tex">\vec{\hat{y}}=[\hat{y}_1, \hat{y}_2, \cdots, \hat{y}_d]</script></span>；</li>
 </ul>
-<h2 id="local-search_1">Local Search(局部搜索)的几大要素<a class="headerlink" href="#local-search_1" title="Permanent link">#</a></h2>
+<p>将softmax的具体公式代入到公式（1）中，则有：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}
+\begin{split}
+\vec{\hat{y}} &amp;= \text{softmax}(\vec{z}) \\
+&amp;= \text{softmax}([z_1, z_2, \cdots, z_d]) \\
+&amp;= \Big[ \frac{e^{z_1}}{\sum_{i=1}^d e^{z_i}}, \frac{e^{z_2}}{\sum_{i=1}^d e^{z_i}}, \cdots, \frac{e^{z_d}}{\sum_{i=1}^d e^{z_i}} \Big] \\
+&amp;= [\hat{y}_1, \hat{y}_2, \cdots, \hat{y}_d]
+\end{split}
+\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}
+\begin{split}
+\vec{\hat{y}} &= \text{softmax}(\vec{z}) \\
+&= \text{softmax}([z_1, z_2, \cdots, z_d]) \\
+&= \Big[ \frac{e^{z_1}}{\sum_{i=1}^d e^{z_i}}, \frac{e^{z_2}}{\sum_{i=1}^d e^{z_i}}, \cdots, \frac{e^{z_d}}{\sum_{i=1}^d e^{z_i}} \Big] \\
+&= [\hat{y}_1, \hat{y}_2, \cdots, \hat{y}_d]
+\end{split}
+\end{equation}</script>
+</div>
+<p>对softmax求导就是要求解下式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\frac{\partial \vec{\hat{y}}}{\partial \vec{z}}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\frac{\partial \vec{\hat{y}}}{\partial \vec{z}}\end{equation}</script>
+</div>
+<h2 id="2softmax">2、对softmax求导<a class="headerlink" href="#2softmax" title="Permanent link">#</a></h2>
+<p>由于是向量对向量求导，所以其最终结果为Jacobi矩阵，如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}
+\frac{\partial \vec{\hat{y}}}{\partial \vec{z}}=\begin{bmatrix}
+   \frac{\partial \hat{y}_1}{\partial z_1} &amp; \frac{\partial \hat{y}_1}{\partial z_2} &amp; \cdots &amp; \frac{\partial \hat{y}_1}{\partial z_n} \\
+   \frac{\partial \hat{y}_2}{\partial z_1} &amp; \frac{\partial \hat{y}_2}{\partial z_2} &amp; \cdots &amp; \frac{\partial \hat{y}_2}{\partial z_n} \\
+   \vdots &amp; \vdots &amp; \cdots &amp; \vdots \\
+   \frac{\partial \hat{y}_m}{\partial z_1} &amp; \frac{\partial \hat{y}_m}{\partial z_2} &amp; \cdots &amp; \frac{\partial \hat{y}_m}{\partial z_n} \\
+\end{bmatrix}
+\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}
+\frac{\partial \vec{\hat{y}}}{\partial \vec{z}}=\begin{bmatrix}
+   \frac{\partial \hat{y}_1}{\partial z_1} & \frac{\partial \hat{y}_1}{\partial z_2} & \cdots & \frac{\partial \hat{y}_1}{\partial z_n} \\
+   \frac{\partial \hat{y}_2}{\partial z_1} & \frac{\partial \hat{y}_2}{\partial z_2} & \cdots & \frac{\partial \hat{y}_2}{\partial z_n} \\
+   \vdots & \vdots & \cdots & \vdots \\
+   \frac{\partial \hat{y}_m}{\partial z_1} & \frac{\partial \hat{y}_m}{\partial z_2} & \cdots & \frac{\partial \hat{y}_m}{\partial z_n} \\
+\end{bmatrix}
+\end{equation}</script>
+</div>
+<p>该矩阵中每一行的求导方式是相同的，我们仅求导第 <span class="arithmatex"><span class="MathJax_Preview">j</span><script type="math/tex">j</script></span> 行。</p>
+<p>将上述Jacobi矩阵的第<span class="arithmatex"><span class="MathJax_Preview">j</span><script type="math/tex">j</script></span>行摘取出来，并进行变形整理得：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}
+\begin{split}
+\frac{\partial \hat{y}_j}{\partial \vec{z}}
+&amp;=[ \frac{\partial \hat{y}_j}{\partial z_1}, \frac{\partial \hat{y}_j}{\partial z_2}, \cdots ,\frac{\partial \hat{y}_j}{\partial z_j}, \cdots,\frac{\partial \hat{y}_j}{\partial z_n}] \\
+&amp;=[ \frac{\partial}{\partial z_1}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big), \frac{\partial}{\partial z_2}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big), \cdots ,\frac{\partial}{\partial z_j}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big), \cdots,\frac{\partial}{\partial z_n}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big)]
+\end{split}
+\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}
+\begin{split}
+\frac{\partial \hat{y}_j}{\partial \vec{z}}
+&=[ \frac{\partial \hat{y}_j}{\partial z_1}, \frac{\partial \hat{y}_j}{\partial z_2}, \cdots ,\frac{\partial \hat{y}_j}{\partial z_j}, \cdots,\frac{\partial \hat{y}_j}{\partial z_n}] \\
+&=[ \frac{\partial}{\partial z_1}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big), \frac{\partial}{\partial z_2}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big), \cdots ,\frac{\partial}{\partial z_j}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big), \cdots,\frac{\partial}{\partial z_n}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big)]
+\end{split}
+\end{equation}</script>
+</div>
+<p><span class="arithmatex"><span class="MathJax_Preview">\frac{\partial \hat{y}_j}{\partial \vec{z}}</span><script type="math/tex">\frac{\partial \hat{y}_j}{\partial \vec{z}}</script></span>是一个向量，该向量中有 <span class="arithmatex"><span class="MathJax_Preview">d</span><script type="math/tex">d</script></span> 个元素，下面逐个元素进行求解（下述公式中的(6)、(7)、(9)三个式子推导过程完全相同，只看一个即可；公式(8)的推导过程与另外三个式子是不同的）：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}
+\begin{split}
+\frac{\partial \hat{y}_j}{\partial z_1}
+&amp;=\frac{\partial}{\partial z_1}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big)=\frac{\frac{\partial}{\partial z_1}(e^{z_j}) \cdot \sum_{i=1}^d e^{z_i} - e^{z_j} \cdot \frac{\partial}{\partial z_1}(\sum_{i=1}^d e^{z_i}) }{(\sum_{i=1}^d e^{z_i})^2} \\
+&amp;= \frac{0 - e^{z_j} e^{z_1}}{(\sum_{i=1}^d e^{z_i})^2}= - \frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \frac{e^{z_1}}{\sum_{i=1}^d e^{z_i}}= - \hat{y}_j \hat{y}_1
+\end{split}
+\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}
+\begin{split}
+\frac{\partial \hat{y}_j}{\partial z_1}
+&=\frac{\partial}{\partial z_1}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big)=\frac{\frac{\partial}{\partial z_1}(e^{z_j}) \cdot \sum_{i=1}^d e^{z_i} - e^{z_j} \cdot \frac{\partial}{\partial z_1}(\sum_{i=1}^d e^{z_i}) }{(\sum_{i=1}^d e^{z_i})^2} \\
+&= \frac{0 - e^{z_j} e^{z_1}}{(\sum_{i=1}^d e^{z_i})^2}= - \frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \frac{e^{z_1}}{\sum_{i=1}^d e^{z_i}}= - \hat{y}_j \hat{y}_1
+\end{split}
+\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}
+\begin{split}
+\frac{\partial \hat{y}_j}{\partial z_2}
+&amp;=\frac{\partial}{\partial z_2}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big)=\frac{\frac{\partial}{\partial z_2}(e^{z_j}) \cdot \sum_{i=1}^d e^{z_i} - e^{z_j} \cdot \frac{\partial}{\partial z_2}(\sum_{i=1}^d e^{z_i}) }{(\sum_{i=1}^d e^{z_i})^2} \\
+&amp;= \frac{0 - e^{z_j} e^{z_2}}{(\sum_{i=1}^d e^{z_i})^2}= - \frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \frac{e^{z_2}}{\sum_{i=1}^d e^{z_i}}= - \hat{y}_j \hat{y}_2
+\end{split}
+\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}
+\begin{split}
+\frac{\partial \hat{y}_j}{\partial z_2}
+&=\frac{\partial}{\partial z_2}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big)=\frac{\frac{\partial}{\partial z_2}(e^{z_j}) \cdot \sum_{i=1}^d e^{z_i} - e^{z_j} \cdot \frac{\partial}{\partial z_2}(\sum_{i=1}^d e^{z_i}) }{(\sum_{i=1}^d e^{z_i})^2} \\
+&= \frac{0 - e^{z_j} e^{z_2}}{(\sum_{i=1}^d e^{z_i})^2}= - \frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \frac{e^{z_2}}{\sum_{i=1}^d e^{z_i}}= - \hat{y}_j \hat{y}_2
+\end{split}
+\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\vdots</div>
+<script type="math/tex; mode=display">\vdots</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}
+\begin{split}
+\frac{\partial \hat{y}_j}{\partial z_j}
+&amp;=\frac{\partial}{\partial z_j}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big)=\frac{\frac{\partial}{\partial z_j}(e^{z_j}) \cdot \sum_{i=1}^d e^{z_i} - e^{z_j} \cdot \frac{\partial}{\partial z_j}(\sum_{i=1}^d e^{z_i}) }{(\sum_{i=1}^d e^{z_i})^2} \\
+&amp;= \frac{e^{z_j} \cdot \sum_{i=1}^d e^{z_i} - e^{z_j} e^{z_j}}{(\sum_{i=1}^d e^{z_i})^2}=\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} - (\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}})^2 = \hat{y}_j - (\hat{y}_j)^2
+\end{split}
+\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}
+\begin{split}
+\frac{\partial \hat{y}_j}{\partial z_j}
+&=\frac{\partial}{\partial z_j}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big)=\frac{\frac{\partial}{\partial z_j}(e^{z_j}) \cdot \sum_{i=1}^d e^{z_i} - e^{z_j} \cdot \frac{\partial}{\partial z_j}(\sum_{i=1}^d e^{z_i}) }{(\sum_{i=1}^d e^{z_i})^2} \\
+&= \frac{e^{z_j} \cdot \sum_{i=1}^d e^{z_i} - e^{z_j} e^{z_j}}{(\sum_{i=1}^d e^{z_i})^2}=\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} - (\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}})^2 = \hat{y}_j - (\hat{y}_j)^2
+\end{split}
+\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\vdots</div>
+<script type="math/tex; mode=display">\vdots</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}
+\begin{split}
+\frac{\partial \hat{y}_j}{\partial z_d}
+&amp;=\frac{\partial}{\partial z_d}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big)=\frac{\frac{\partial}{\partial z_d}(e^{z_j}) \cdot \sum_{i=1}^d e^{z_i} - e^{z_j} \cdot \frac{\partial}{\partial z_d}(\sum_{i=1}^d e^{z_i}) }{(\sum_{i=1}^d e^{z_i})^2} \\
+&amp;= \frac{0 - e^{z_j} e^{z_d}}{(\sum_{i=1}^d e^{z_i})^2}= - \frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \frac{e^{z_d}}{\sum_{i=1}^d e^{z_i}}= - \hat{y}_j \hat{y}_d
+\end{split}
+\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}
+\begin{split}
+\frac{\partial \hat{y}_j}{\partial z_d}
+&=\frac{\partial}{\partial z_d}\big(\frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \big)=\frac{\frac{\partial}{\partial z_d}(e^{z_j}) \cdot \sum_{i=1}^d e^{z_i} - e^{z_j} \cdot \frac{\partial}{\partial z_d}(\sum_{i=1}^d e^{z_i}) }{(\sum_{i=1}^d e^{z_i})^2} \\
+&= \frac{0 - e^{z_j} e^{z_d}}{(\sum_{i=1}^d e^{z_i})^2}= - \frac{e^{z_j}}{\sum_{i=1}^d e^{z_i}} \frac{e^{z_d}}{\sum_{i=1}^d e^{z_i}}= - \hat{y}_j \hat{y}_d
+\end{split}
+\end{equation}</script>
+</div>
+<p>这样就求解出了上述Jacobi矩阵的第<span class="arithmatex"><span class="MathJax_Preview">j</span><script type="math/tex">j</script></span>行，如下式所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}
+\begin{split}
+\frac{\partial \hat{y}_j}{\partial \vec{z}}
+&amp;=[ \frac{\partial \hat{y}_j}{\partial z_1}, \frac{\partial \hat{y}_j}{\partial z_2}, \cdots ,\frac{\partial \hat{y}_j}{\partial z_j}, \cdots,\frac{\partial \hat{y}_j}{\partial z_n}] \\
+&amp;=[- \hat{y}_j \hat{y}_1, - \hat{y}_j \hat{y}_2, \cdots, \hat{y}_j - (\hat{y}_j)^2, \cdots, - \hat{y}_j \hat{y}_d]
+\end{split}
+\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}
+\begin{split}
+\frac{\partial \hat{y}_j}{\partial \vec{z}}
+&=[ \frac{\partial \hat{y}_j}{\partial z_1}, \frac{\partial \hat{y}_j}{\partial z_2}, \cdots ,\frac{\partial \hat{y}_j}{\partial z_j}, \cdots,\frac{\partial \hat{y}_j}{\partial z_n}] \\
+&=[- \hat{y}_j \hat{y}_1, - \hat{y}_j \hat{y}_2, \cdots, \hat{y}_j - (\hat{y}_j)^2, \cdots, - \hat{y}_j \hat{y}_d]
+\end{split}
+\end{equation}</script>
+</div>
+<p>从该结果中可以看出，仅有第 <span class="arithmatex"><span class="MathJax_Preview">j</span><script type="math/tex">j</script></span> 个元素是比较特殊的，其他的 <span class="arithmatex"><span class="MathJax_Preview">d-1</span><script type="math/tex">d-1</script></span> 个元素的求导过程是相同的；这个结论不只适用于上述Jacobi矩阵的第 <span class="arithmatex"><span class="MathJax_Preview">j</span><script type="math/tex">j</script></span> 行，对整个Jacobi矩阵来说：主对角线上的元素求导过程是相同的，非主对角线上的元素求解过程是相同的；</p>
+<p>接下来可直接写出最终的Jacobi矩阵了：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}
+\frac{\partial \vec{\hat{y}}}{\partial \vec{z}}=\begin{bmatrix}
+   \hat{y}_1-(\hat{y}_1)^2 &amp; -\hat{y}_1 \hat{y}_2 &amp; \cdots &amp; -\hat{y}_1 \hat{y}_d \\
+   -\hat{y}_2 \hat{y}_1 &amp; \hat{y}_2-(\hat{y}_2)^2 &amp; \cdots &amp; -\hat{y}_2 \hat{y}_d \\
+   \vdots &amp; \vdots &amp; \cdots &amp; \vdots \\
+   -\hat{y}_d \hat{y}_1 &amp; -\hat{y}_d \hat{y}_2 &amp; \cdots &amp; \hat{y}_d-(\hat{y}_d)^2 \\
+\end{bmatrix}
+\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}
+\frac{\partial \vec{\hat{y}}}{\partial \vec{z}}=\begin{bmatrix}
+   \hat{y}_1-(\hat{y}_1)^2 & -\hat{y}_1 \hat{y}_2 & \cdots & -\hat{y}_1 \hat{y}_d \\
+   -\hat{y}_2 \hat{y}_1 & \hat{y}_2-(\hat{y}_2)^2 & \cdots & -\hat{y}_2 \hat{y}_d \\
+   \vdots & \vdots & \cdots & \vdots \\
+   -\hat{y}_d \hat{y}_1 & -\hat{y}_d \hat{y}_2 & \cdots & \hat{y}_d-(\hat{y}_d)^2 \\
+\end{bmatrix}
+\end{equation}</script>
+</div>
+<p>至此，对softmax函数的求导全部完成。</p>
+<h2 id="3">3、总结<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<p>本文主要是对神经网络中的常用函数softmax进行求导。</p>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
 <ul>
-<li>目标函数：用来判断解的优劣</li>
-<li>邻域的定义：根据不同的问题，采用不同的邻域定义方式</li>
-<li>初始解的产生方法</li>
-<li>迭代过程中新解的产生和接受规则</li>
-<li>迭代终止条件</li>
-</ul>
-<h2 id="hill-climbing">Hill Climbing（爬山法）<a class="headerlink" href="#hill-climbing" title="Permanent link">#</a></h2>
-<p>伪代码如下：</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">\begin{aligned}
-&amp;s \leftarrow GenerateInitialSolution() \\
-&amp;repeat \\
-&amp;\qquad s \enspace \leftarrow Improve(N(s)) \\
-&amp;until \enspace no \enspace improvement \enspace is \enspace possible
-\end{aligned}
-</div>
-<script type="math/tex; mode=display">\begin{aligned}
-&s \leftarrow GenerateInitialSolution() \\
-&repeat \\
-&\qquad s \enspace \leftarrow Improve(N(s)) \\
-&until \enspace no \enspace improvement \enspace is \enspace possible
-\end{aligned}
-</script>
-</div>
-<h2 id="simulated-annealing">Simulated Annealing（模拟退火算法）<a class="headerlink" href="#simulated-annealing" title="Permanent link">#</a></h2>
-<p>伪代码如下：</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">
-\begin{aligned}
-&amp; s \leftarrow GenerateInitialSolution() \\
-&amp; T \leftarrow T_0 \\
-&amp; while \enspace termination \enspace conditions \enspace not \enspace met \enspace do \\
-&amp; \qquad s' \leftarrow PickAtRandom(N(s)) \\
-&amp; \qquad if \enspace (f(s') &lt; f(s)) \enspace then \\
-&amp; \qquad \qquad s \leftarrow s' \qquad \qquad \# \enspace use \enspace s' \enspace replaces \enspace s \\
-&amp; \qquad else \\
-&amp; \qquad \qquad Accept \enspace s' \enspace as \enspace new \enspace solution \enspace with \enspace probability \enspace p(T, s', s) \\
-&amp; \qquad endif \\
-&amp; \qquad Update(T) \\
-&amp; endwhile
-\end{aligned}
-</div>
-<script type="math/tex; mode=display">
-\begin{aligned}
-& s \leftarrow GenerateInitialSolution() \\
-& T \leftarrow T_0 \\
-& while \enspace termination \enspace conditions \enspace not \enspace met \enspace do \\
-& \qquad s' \leftarrow PickAtRandom(N(s)) \\
-& \qquad if \enspace (f(s') < f(s)) \enspace then \\
-& \qquad \qquad s \leftarrow s' \qquad \qquad \# \enspace use \enspace s' \enspace replaces \enspace s \\
-& \qquad else \\
-& \qquad \qquad Accept \enspace s' \enspace as \enspace new \enspace solution \enspace with \enspace probability \enspace p(T, s', s) \\
-& \qquad endif \\
-& \qquad Update(T) \\
-& endwhile
-\end{aligned}
-</script>
-</div>
-<h2 id="tabutaboo-searchts">TABU/TABOO Search（TS、禁忌搜索）<a class="headerlink" href="#tabutaboo-searchts" title="Permanent link">#</a></h2>
-<p>伪代码如下：</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">
-\begin{aligned}
-&amp; s \leftarrow GenerateInitialSolution() \\
-&amp; InitializeTabuLists(TL_1, TL_2, ... , TL_r) \\
-&amp; k \leftarrow 0 \\
-&amp; while \enspace termination \enspace condition \enspace not \enspace met \enspace do \\
-&amp; \qquad AllowedSet(s, k) \leftarrow \{s' \in N(s) | s \enspace does \enspace not \enspace violate \enspace a \enspace tabu \enspace condition, \\
-&amp; \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad or \enspace it \enspace satisfies \enspace at \enspace least \enspace one \enspace aspiration \enspace condition \} \\
-&amp; \qquad s \leftarrow ChooseBestOf(AllowedSet(s, k)) \\
-&amp; \qquad UpdateTabuListsAndAspirationConditions() \\
-&amp; \qquad k \leftarrow k + 1 \\
-&amp; endwhile
-\end{aligned}
-</div>
-<script type="math/tex; mode=display">
-\begin{aligned}
-& s \leftarrow GenerateInitialSolution() \\
-& InitializeTabuLists(TL_1, TL_2, ... , TL_r) \\
-& k \leftarrow 0 \\
-& while \enspace termination \enspace condition \enspace not \enspace met \enspace do \\
-& \qquad AllowedSet(s, k) \leftarrow \{s' \in N(s) | s \enspace does \enspace not \enspace violate \enspace a \enspace tabu \enspace condition, \\
-& \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad or \enspace it \enspace satisfies \enspace at \enspace least \enspace one \enspace aspiration \enspace condition \} \\
-& \qquad s \leftarrow ChooseBestOf(AllowedSet(s, k)) \\
-& \qquad UpdateTabuListsAndAspirationConditions() \\
-& \qquad k \leftarrow k + 1 \\
-& endwhile
-\end{aligned}
-</script>
-</div>
-<h2 id="hill-climbing-algorithm">下面这个也是Hill Climbing Algorithm<a class="headerlink" href="#hill-climbing-algorithm" title="Permanent link">#</a></h2>
-<h3 id="_1">示意图<a class="headerlink" href="#_1" title="Permanent link">#</a></h3>
-<p><img alt="hill_climbing示意图" src="/Gl2fm9Ql/assets/hill_climbing示意图.png" /></p>
-<h3 id="_2">伪代码<a class="headerlink" href="#_2" title="Permanent link">#</a></h3>
-<pre><code>Hill_Climbing algorithm for minimization problem
-
-Procedure HillClimbing():
-    x := getInitial(); // get initial feasible solution x
-    while (the stopping condition is not reached):
-        x' = localSearch(Neighborhood(x)); // select the optimal solution from the neighborhood of x as x'
-        if (c'x' &lt;= c'x):
-            x := x'
-        else:
-            return x
-    end
-</code></pre>
-<h2 id="_3">链接资料<a class="headerlink" href="#_3" title="Permanent link">#</a></h2>
-<p>https://www.cnblogs.com/liuyingsme/p/9857714.html</p>
-<p>https://www.cnblogs.com/JiePro/p/Metaheuristics_0.html</p></div>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/105758059">https://zhuanlan.zhihu.com/p/105758059</a></p>
+</li>
+<li>
+<p><a href="https://www.cnblogs.com/pinard/p/10750718.html">https://www.cnblogs.com/pinard/p/10750718.html</a></p>
+</li>
+</ul></div>
             </div>
         </div>
 
@@ -245,13 +301,13 @@ Procedure HillClimbing():
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
         <script>
-            var base_url = "../..",
+            var base_url = "../../..",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="../../js/base.js" defer></script>
-        <script src="../../mathjax-config.js" defer></script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
-        <script src="../../search/main.js" defer></script>
+        <script src="../../../search/main.js" defer></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

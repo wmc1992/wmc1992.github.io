@@ -6,9 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/005_%E5%B7%A5%E5%85%B7%E6%A1%86%E6%9E%B6/001_huggingface/accelerate/">
+        <link rel="canonical" href="https://mingchao.wang/005_%E5%B7%A5%E5%85%B7%E6%A1%86%E6%9E%B6/001_huggingface/datasets/">
         <link rel="shortcut icon" href="../../../img/favicon.ico">
-        <title>Accelerate - 算法工程师笔记</title>
+        <title>Datasets - 算法工程师笔记</title>
         <link href="../../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../../css/base.css" rel="stylesheet">
@@ -71,33 +71,17 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#accelerate" class="nav-link">Accelerate</a>
+            <li class="nav-item" data-level="1"><a href="#datasets" class="nav-link">Datasets</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#1-config" class="nav-link">1、生成配置文件: config</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、运行（两卡数据并行）</a>
-              <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#21" class="nav-link">2.1 启动命令说明</a>
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、准备与加载本地数据</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#22" class="nav-link">2.2 单卡与两卡速度对比</a>
+            <li class="nav-item" data-level="2"><a href="#2-dataset" class="nav-link">2、对 dataset 进行访问</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、暂时略过的一些功能</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#deepspeed" class="nav-link">DeepSpeed</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#_1" class="nav-link">其他</a>
+            <li class="nav-item" data-level="2"><a href="#3-tokenize" class="nav-link">3、对数据进行 tokenize</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -108,132 +92,160 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="accelerate">Accelerate<a class="headerlink" href="#accelerate" title="Permanent link">#</a></h1>
-<h2 id="1-config">1、生成配置文件: <code>config</code><a class="headerlink" href="#1-config" title="Permanent link">#</a></h2>
+<h1 id="datasets">Datasets<a class="headerlink" href="#datasets" title="Permanent link">#</a></h1>
+<h2 id="1">1、准备与加载本地数据<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
 <blockquote>
-<p>这部分的参考文档为：</p>
+<p>该部分参考的文档有：</p>
 <ul>
-<li><a href="https://huggingface.co/docs/accelerate/quicktour#launching-your-distributed-script">Launching your distributed script</a></li>
+<li><a href="https://huggingface.co/docs/datasets/loading">https://huggingface.co/docs/datasets/loading</a></li>
+<li><a href="https://huggingface.co/docs/datasets/nlp_load">https://huggingface.co/docs/datasets/nlp_load</a></li>
 </ul>
 </blockquote>
-<p>生成配置文件命令如下所示，其中 <code>path_to_config.yaml</code> 是生成的配置文件的存储路径：</p>
-<pre><code>accelerate config --config_file path_to_config.yaml
+<p>本地数据可以处理成 csv 或者 json 格式的数据。csv 格式的数据本来就是每行对应一条数据，这个不用说。json 格式也要处理成这种每行一条数据的格式，文件中每行是一个 json 格式的数据，举例如下：</p>
+<pre><code>{&quot;a&quot;: 1, &quot;b&quot;: 2.0, &quot;c&quot;: &quot;foo&quot;, &quot;d&quot;: false}
+{&quot;a&quot;: 4, &quot;b&quot;: -5.5, &quot;c&quot;: null, &quot;d&quot;: true}
 </code></pre>
-<p>比如生成的一个配置文件的样例为（单节点，2个GPU）：</p>
-<pre><code class="language-yaml">compute_environment: LOCAL_MACHINE
-distributed_type: MULTI_GPU
-downcast_bf16: 'no'
-gpu_ids: all
-machine_rank: 0
-main_training_function: main
-mixed_precision: fp16
-num_machines: 1
-num_processes: 2
-rdzv_backend: static
-same_network: true
-tpu_env: []
-tpu_use_cluster: false
-tpu_use_sudo: false
-use_cpu: false
-</code></pre>
-<h2 id="2">2、运行（两卡数据并行）<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
-<blockquote>
-<p>这部分的参考文档为：</p>
-<ul>
-<li>
-<p><a href="https://huggingface.co/docs/accelerate/quicktour#launching-your-distributed-script">Launching your distributed script</a></p>
-</li>
-<li>
-<p><a href="https://huggingface.co/docs/accelerate/basic_tutorials/launch">Launching your 🤗 Accelerate scripts</a></p>
-</li>
-</ul>
-</blockquote>
-<h3 id="21">2.1 启动命令说明<a class="headerlink" href="#21" title="Permanent link">#</a></h3>
-<p>运行的命令模版如下所示，首先指定上一步骤生成的 accelerate 的配置文件，然后指定训练的脚本，最后一部分是训练脚本中所需的参数：</p>
-<pre><code>accelerate launch --config_file path_to_config.yaml \
-  path_to_script.py \
-  --args_for_the_script
-</code></pre>
-<p>下面直接使用 accelerate 执行一下训练流程，一方面熟悉一下如何启动，另一方面看一下两卡时的加速效果。使用的机器是有2张 A40 显卡的机器，模型采用 gpt2，数据是某个开源数据，大概3W+条数据，使用的代码是 transformers 库中的样例代码，链接为：<a href="https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_clm.py">run_clm</a>
-。</p>
-<h3 id="22">2.2 单卡与两卡速度对比<a class="headerlink" href="#22" title="Permanent link">#</a></h3>
-<p>分别测试单卡训练和两卡训练，单卡训练和两卡训练的启动命令如下所示。单卡训练没有使用 accelerate 启动，而是直接使用 python 启动；两卡训练使用 accelerate 启动。</p>
-<pre><code># 单卡训练的启动命令
-CUDA_VISIBLE_DEVICES=1 python3 examples/pytorch/language-modeling/run_clm.py \
-  --model_name_or_path gpt2 \
-  --train_file ./data/data.json \
-  --output_dir ./outputs \
-  --do_train \
-  --do_eval \
-  --fp16 \
-  --per_device_train_batch_size 16 \
-  --per_device_eval_batch_size 16 \
-  --gradient_accumulation_steps 4 \
-  --overwrite_output_dir
+<p>加载本地的 csv 和 json 格式数据的代码如下：</p>
+<pre><code class="language-python">from datasets import load_dataset
 
-# 两卡训练的启动命令
-accelerate launch \
-  --config_file ./accelerate/default_accelerate_config.yaml \
-  examples/pytorch/language-modeling/run_clm.py \
-  --model_name_or_path gpt2 \
-  --train_file ./data/data.json \
-  --output_dir ./outputs \
-  --do_train \
-  --do_eval \
-  --fp16 \
-  --per_device_train_batch_size 16 \
-  --per_device_eval_batch_size 16 \
-  --gradient_accumulation_steps 4 \
-  --overwrite_output_dir
+# 加载 csv 格式的数据
+dataset = load_dataset(&quot;csv&quot;, data_files=&quot;my_file.csv&quot;)
+
+# 加载 json 格式的数据
+dataset = load_dataset(&quot;json&quot;, data_files=&quot;my_file.json&quot;)
 </code></pre>
-<p>训练过程中的截图如下表所示，可以看出无论是单卡还是双卡，GPU的利用率都是比较高的，单卡和两卡的耗时也比较接近两倍关系，加速效果还是比较可观的。</p>
-<table>
-<thead>
-<tr>
-<th>测试环境</th>
-<th>训练时效果截图</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>单卡</td>
-<td><img alt="" src="/sLWQpZX6/assets/03.png" /><br><img alt="" src="/sLWQpZX6/assets/04.png" /></td>
-</tr>
-<tr>
-<td>两卡</td>
-<td><img alt="" src="/sLWQpZX6/assets/01.png" /><br><img alt="" src="/sLWQpZX6/assets/02.png" /></td>
-</tr>
-</tbody>
-</table>
-<h2 id="3">3、暂时略过的一些功能<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<p>另外还可以在加载时，指定训练集和测试集，此时参数 <code>data_files</code> 对应的值是一个字典。样例代码如下所示：</p>
+<pre><code class="language-python">from datasets import load_dataset
+
+dataset = load_dataset(&quot;json&quot;, data_files={&quot;train&quot;: [&quot;my_text_1.json&quot;, &quot;my_text_2.json&quot;], &quot;test&quot;: &quot;my_test_file.json&quot;})
+</code></pre>
+<h2 id="2-dataset">2、对 dataset 进行访问<a class="headerlink" href="#2-dataset" title="Permanent link">#</a></h2>
+<blockquote>
+<p>该部分参考的文档有：</p>
 <ul>
-<li>
-<p>如果要在自己的训练代码中使用 accelerate 库，需要修改哪些代码：<a href="https://huggingface.co/docs/accelerate/quicktour#main-use">参考链接1</a>、<a href="https://huggingface.co/docs/accelerate/basic_tutorials/migration">参考链接2</a></p>
-</li>
-<li>
-<p>评估部分如果要做分布式评估，代码需要做哪些修改：<a href="https://huggingface.co/docs/accelerate/quicktour#distributed-evaluation">参考链接</a></p>
-</li>
-<li>
-<p>只在主进程中执行某些代码，比如打印进度条，代码要如何写：<a href="https://huggingface.co/docs/accelerate/quicktour#execute-a-statement-only-on-one-processes">参考链接</a></p>
-</li>
-<li>
-<p>模型的加载和存储：<a href="https://huggingface.co/docs/accelerate/quicktour#savingloading-a-model">参考链接</a></p>
-</li>
-<li>
-<p>训练过程中整个状态的存储和加载：<a href="https://huggingface.co/docs/accelerate/quicktour#savingloading-entire-states">参考链接1</a>、<a href="https://huggingface.co/docs/accelerate/usage_guides/checkpoint">参考链接2</a></p>
-</li>
-<li>
-<p>模型很大而显存不足时如何推理：<a href="https://huggingface.co/docs/accelerate/usage_guides/big_modeling">参考链接</a></p>
-</li>
-<li>
-<p>使用 accelerate 库之后如何实现梯度累积功能：<a href="https://huggingface.co/docs/accelerate/usage_guides/gradient_accumulation">参考链接</a></p>
-</li>
+<li><a href="https://huggingface.co/docs/datasets/access">https://huggingface.co/docs/datasets/access</a></li>
 </ul>
-<h2 id="deepspeed">DeepSpeed<a class="headerlink" href="#deepspeed" title="Permanent link">#</a></h2>
-<p>这个 accelerate 的文档里为什么说对 deepspeed 的支持还在试验中，接口随时会改变，链接: <a href="https://huggingface.co/docs/accelerate/quicktour#deepspeed">https://huggingface.co/docs/accelerate/quicktour#deepspeed</a></p>
-<h2 id="_1">其他<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
-<p>在阅读 accelerate 的文档时，有一个地方很细节，就是在使用混合精度训练时，如果某一次的梯度溢出了，那么会跳过这个 step，在这个 step 中不对权重进行更新。</p>
-<p>到下一个 step 时，根据一定的策略调小参数 <code>loss scaling factor</code>，下一个 step 就可能梯度不再溢出了，然后就继续训练。这个细节的文档为: <a href="https://huggingface.co/docs/accelerate/quicktour#mixed-precision-training">参考链接</a></p></div>
+</blockquote>
+<p>以数据集 <code>rotten_tomatoes</code> 为例进行说明，加载数据集的代码如下。加载之后会获取到一个 <code>Dataset</code> 对象，下面主要是介绍该对象的使用方法。</p>
+<pre><code class="language-python">from datasets import load_dataset
+dataset = load_dataset(&quot;rotten_tomatoes&quot;, split=&quot;train&quot;)
+</code></pre>
+<h4 id="21">2.1 用索引或列名进行访问<a class="headerlink" href="#21" title="Permanent link">#</a></h4>
+<pre><code class="language-python"># -------------------
+# 使用索引访问
+# -------------------
+dataset[0]
+# 输出：
+# {'label': 1, 'text': 'the rock is destined to be the 21st century\'s new &quot; conan &quot; and that he\'s going to make a splash even greater than arnold schwarzenegger , jean-claud van damme or steven segal .'}
+
+dataset[-1]
+# 输出：
+# {'label': 0, 'text': 'things really get weird , though not particularly scary : the movie is all portent and no content .'}
+
+
+# -------------------
+# 使用列名访问
+# -------------------
+dataset[&quot;text&quot;]
+# 输出：
+# [
+#     'the rock is destined to be the 21st century\'s new &quot; conan &quot; and that he\'s going to make a splash even greater than arnold schwarzenegger , jean-claud van damme or steven segal .',
+#     'the gorgeously elaborate continuation of &quot; the lord of the rings &quot; trilogy is so huge that a column of words cannot adequately describe co-writer/director peter jackson\'s expanded vision of j . r . r . tolkien\'s middle-earth .',
+#     'effective but too-tepid biopic',
+#     ...,
+#     'things really get weird , though not particularly scary : the movie is all portent and no content .'
+# ]
+
+
+# -------------------
+# 索引和列名结合使用
+# -------------------
+dataset[0][&quot;text&quot;]
+# 输出：
+# 'the rock is destined to be the 21st century\'s new &quot; conan &quot; and that he\'s going to make a splash even greater than arnold schwarzenegger , jean-claud van damme or steven segal .'
+</code></pre>
+<p>说明：索引和列名结合使用时，要先使用索引，后使用列名。虽然顺序反过来结果是相同的，但是速度会慢很多。</p>
+<h4 id="22">2.2 分片<a class="headerlink" href="#22" title="Permanent link">#</a></h4>
+<pre><code class="language-python"># Get the first three rows
+dataset[:3]
+# 输出：
+# {
+#     'label': [1, 1, 1],
+#     'text': [
+#         'the rock is destined to be the 21st century\'s new &quot; conan &quot; and that he\'s going to make a splash even greater than arnold schwarzenegger , jean-claud van damme or steven segal .',
+#         'the gorgeously elaborate continuation of &quot; the lord of the rings &quot; trilogy is so huge that a column of words cannot adequately describe co-writer/director peter jackson\'s expanded vision of j . r . r . tolkien\'s middle-earth .',
+#         'effective but too-tepid biopic'
+#     ]
+# }
+
+# Get rows between three and six
+dataset[3:6]
+# 输出：
+# {
+#     'label': [1, 1, 1],
+#     'text': [
+#         'if you sometimes like to go to the movies to have fun , wasabi is a good place to start .',
+#         &quot;emerges as something rare , an issue movie that's so honest and keenly observed that it doesn't feel like one .&quot;,
+#         'the film provides some great insight into the neurotic mindset of all comics -- even those who have reached the absolute top of the game .'
+#     ]
+# }
+</code></pre>
+<h2 id="3-tokenize">3、对数据进行 tokenize<a class="headerlink" href="#3-tokenize" title="Permanent link">#</a></h2>
+<blockquote>
+<p>该部分参考的文档有：</p>
+<ul>
+<li><a href="https://huggingface.co/docs/datasets/use_dataset">https://huggingface.co/docs/datasets/use_dataset</a></li>
+</ul>
+</blockquote>
+<h4 id="31-tokenizer">3.1 直接将文本传入给 tokenizer<a class="headerlink" href="#31-tokenizer" title="Permanent link">#</a></h4>
+<p>这里只是介绍 tokenize 的最简单的用法，关于 tokenize 的详细用法可以见 Tokenizers 库的文档。</p>
+<p>下面，tokenize 以模型 <code>bert-base-uncased</code> 为例，数据集以 <code>rotten_tomatoes</code> 为例进行说明。加载 tokenizer 和数据集的代码如下：</p>
+<pre><code class="language-python">from transformers import AutoTokenizer
+from datasets import load_dataset
+tokenizer = AutoTokenizer.from_pretrained(&quot;bert-base-uncased&quot;)
+dataset = load_dataset(&quot;rotten_tomatoes&quot;, split=&quot;train&quot;)
+</code></pre>
+<p>对数据集中的单条数据做 tokenize 的代码如下，返回值中有三个字段 <code>input_ids</code>、<code>token_type_ids</code>、<code>attention_mask</code>。然后有一点可以看出，当输入是单条文本时，返回值中每个字段对应的值都是单个向量；而当输入多条文本时，返回值中每个字段对应的是向量的列表。</p>
+<pre><code class="language-python">tokenizer(dataset[0][&quot;text&quot;])
+# 输出：
+# {
+#     'input_ids': [101, 1103, 2067, 1110, 17348, 1106, 1129, 1103, 6880, 1432, 112, 188, 1207, 107, 14255, 1389, 107, 1105, 1115, 1119, 112, 188, 1280, 1106, 1294, 170, 24194, 1256, 3407, 1190, 170, 11791, 5253, 188, 1732, 7200, 10947, 12606, 2895, 117, 179, 7766, 118, 172, 15554, 1181, 3498, 6961, 3263, 1137, 188, 1566, 7912, 14516, 6997, 119, 102], 
+#     'token_type_ids': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+#     'attention_mask': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+# }
+
+tokenizer(dataset[&quot;text&quot;])
+# 输出：
+# {
+#     'input_ids': [
+#         [101, 1996, 2600, 2003, 16036, 2000, 2022, 1996, 7398, 2301, 1005, 1055, 2047, 1000, 16608, 1000, 1998, 2008, 2002, 1005, 1055, 2183, 2000, 2191, 1037, 17624, 2130, 3618, 2084, 7779, 29058, 8625, 13327, 1010, 3744, 1011, 18856, 19513, 3158, 5477, 4168, 2030, 7112, 16562, 2140, 1012, 102], 
+#         [101, 1996, 9882, 2135, 9603, 13633, 1997, 1000, 1996, 2935, 1997, 1996, 7635, 1000, 11544, 2003, 2061, 4121, 2008, 1037, 5930, 1997, 2616, 3685, 23613, 6235, 2522, 1011, 3213, 1013, 2472, 2848, 4027, 1005, 1055, 4423, 4432, 1997, 1046, 1012, 1054, 1012, 1054, 1012, 23602, 1005, 1055, 2690, 1011, 3011, 1012, 102], 
+#         ... ...
+#     ], 
+#     'token_type_ids': [
+#         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+#         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+#         ... ...
+#     ], 
+#     'attention_mask': [
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+#         ... ...
+#     ]
+# }
+</code></pre>
+<h4 id="32-map">3.2 使用 map 函数<a class="headerlink" href="#32-map" title="Permanent link">#</a></h4>
+<p>使用 map 函数时需要先定义一个对数据做 tokenize 的函数，比如下述样例代码中的 <code>tokenization</code> 函数。当调用 map 函数时指定了参数 <code>batched</code> 时，那么自定义的函数 <code>tokenization</code> 的入参也是多条数据的，对该入参的使用方式和对 <code>Dataset</code> 对象的使用方式基本完全相同。</p>
+<pre><code class="language-python">def tokenization(example):
+    return tokenizer(example[&quot;text&quot;])
+
+dataset = dataset.map(tokenization, batched=True)
+</code></pre>
+<p>上述样例代码只是对 map 函数的最简单的用法，其他的高级用法比如 map 函数还允许输入与输出的数据数量不同等等功能。</p>
+<h4 id="33-dataset">3.3 设置 dataset 的格式<a class="headerlink" href="#33-dataset" title="Permanent link">#</a></h4>
+<p>huggingface 的这个 datasets 库不仅支持 PyTorch，还支持 TensorFlow，所以对数据集做完 tokenize 之后，还需要设置其是哪种框架。另外数据集中可能还包括部署 tensor 的字段，这些字段最好在训练之前丢弃掉，否则在训练的 loop 中可能会报错。这两个操作可以通过如下一行代码实现：</p>
+<pre><code class="language-python">dataset.set_format(type=&quot;torch&quot;, columns=[&quot;input_ids&quot;, &quot;token_type_ids&quot;, &quot;attention_mask&quot;, &quot;labels&quot;])
+</code></pre></div>
             </div>
         </div>
 

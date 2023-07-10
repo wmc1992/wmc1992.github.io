@@ -6,17 +6,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/004_GPT%E4%B8%8EBERT/007_GPT/">
-        <link rel="shortcut icon" href="../../img/favicon.ico">
-        <title>GPT - 算法工程师笔记</title>
-        <link href="../../css/bootstrap.min.css" rel="stylesheet">
-        <link href="../../css/font-awesome.min.css" rel="stylesheet">
-        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="canonical" href="https://mingchao.wang/004_GPT%E4%B8%8EBERT/007_GPT/%E7%94%9F%E6%88%90%E5%BC%8F%E4%BB%BB%E5%8A%A1%E8%A7%A3%E7%A0%81%E6%96%B9%E6%B3%95/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>生成式任务解码方法 - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
-        <link href="../../css/extra.css" rel="stylesheet">
+        <link href="../../../css/extra.css" rel="stylesheet">
 
-        <script src="../../js/jquery-1.10.2.min.js" defer></script>
-        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
@@ -35,7 +35,7 @@
     <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
                 <!-- Expander button -->
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -71,38 +71,26 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#gpt" class="nav-link">GPT</a>
+            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link">生成式任务解码方法</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、模型结构与预训练</a>
-              <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#11-gptelmo" class="nav-link">1.1 GPT与ELMo的区别</a>
+            <li class="nav-item" data-level="2"><a href="#_2" class="nav-link">任务说明</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#12" class="nav-link">1.2 模型结构与预训练</a>
+            <li class="nav-item" data-level="2"><a href="#_3" class="nav-link">暴力搜索（穷举）</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、有监督微调</a>
+            <li class="nav-item" data-level="2"><a href="#_4" class="nav-link">贪心搜索</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、代码操作细节</a>
-              <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#31" class="nav-link">3.1 训练时偏移一位的实现</a>
+            <li class="nav-item" data-level="2"><a href="#beam-search" class="nav-link">beam search（集束搜索）</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#32" class="nav-link">3.2 推理代码</a>
+            <li class="nav-item" data-level="2"><a href="#4" class="nav-link">4、解码时各种参数的作用</a>
               <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#33" class="nav-link">3.3 解码时如何减少模型的重复输出</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
@@ -116,142 +104,119 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="gpt">GPT<a class="headerlink" href="#gpt" title="Permanent link">#</a></h1>
-<p>GPT 的全称为 Generative Pre-training Transformer。</p>
-<h2 id="1">1、模型结构与预训练<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
-<h3 id="11-gptelmo">1.1 GPT与ELMo的区别<a class="headerlink" href="#11-gptelmo" title="Permanent link">#</a></h3>
-<ol>
-<li>
-<p>网络结构上：ELMo 使用浅层（2层）BiLSTM 网络，然后虽然 BiLSTM 网络是双向的，但是其两个方向是相互独立的。GPT 使用深层（12层）Transformer 网络，然后 Transformer 是能够同时看到两个方向的文本的。</p>
-</li>
-<li>
-<p>下游任务时：ELMo 是将多个层的输出都用上，并且根据任务的不同，每层的权重不同。GPT 是不同的下游任务都是用模型中最后一层 Transformer 的输出。</p>
-</li>
-</ol>
-<h3 id="12">1.2 模型结构与预训练<a class="headerlink" href="#12" title="Permanent link">#</a></h3>
-<p>... 略 ...</p>
-<h2 id="2">2、有监督微调<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
-<p>先放上原论文中经典的图：</p>
-<p><img alt="" src="/5QjuqLH5/assets/01.png" /></p>
-<p><strong>分类任务</strong>：Bert模型如果要做 sequence classification 任务，其需要给每条样本专门增加 [CLS] 这个token，使用该token对应的向量做分类。而GPT则不需要新增一个特殊的token，它是直接使用整个输入token序列的下一个位置预测的向量做分类。</p>
-<p><strong>自然语言推理</strong>：将前提（premise）和假设（hypothesis）通过分隔符（Delimiter）隔开，两端加上起始和终止token。再依次通过transformer和全连接得到预测结果；</p>
-<p><strong>语义相似度</strong>：输入的两个句子，正向和反向各拼接一次，然后分别输入给transformer，得到的特征向量拼接后再送给全连接得到预测结果；</p>
-<p><strong>问答和常识推理</strong>：将 n 个选项的问题抽象化为 n 个二分类问题，即每个选项分别和内容进行拼接，然后各送入transformer和全连接中，最后选择置信度最高的作为预测结果。</p>
-<h2 id="3">3、代码操作细节<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<h3 id="31">3.1 训练时偏移一位的实现<a class="headerlink" href="#31" title="Permanent link">#</a></h3>
-<p>从上文已经知道GPT的训练是已知前面的字符，预测后面的字符，对应的公式为：<span class="arithmatex"><span class="MathJax_Preview">p(x_1,...,x_n)=\prod_{i=1}^n p(x_i|x_1,...,x_{i-1})</span><script type="math/tex">p(x_1,...,x_n)=\prod_{i=1}^n p(x_i|x_1,...,x_{i-1})</script></span>，那么这个根据前面的字符预测当前字符在代码中是如何实现的呢？下面分别说明项目 <a href="https://github.com/huggingface/transformers">huggingface/transformers</a> 和项目 <a href="https://github.com/karpathy/minGPT">karpathy/minGPT</a> 中是如何实现的。</p>
-<p>先说下大体的思路，实现上述公式的代码有两种方式：</p>
-<ul>
-<li>
-<p>数据载入时 "input_ids" 和 "labels" 完全相同，然后在模型计算loss时做一下偏移，项目 <a href="https://github.com/huggingface/transformers">huggingface/transformers</a> 中就是这样做的；</p>
-</li>
-<li>
-<p>数据载入时就对 "input_ids" 和 "labels" 做好偏移，比如 "input_ids" 为 <code>1 2 3 4 5 6 7 8 9</code>，而 "labels" 为 <code>2 3 4 5 6 7 8 9 &lt;eos&gt;</code>。项目 <a href="https://github.com/karpathy/minGPT">karpathy/minGPT</a> 采用的是这种方式。</p>
-</li>
-</ul>
-<h4 id="huggingfacetransformers"><strong><a href="https://github.com/huggingface/transformers">huggingface/transformers</a> 项目</strong><a class="headerlink" href="#huggingfacetransformers" title="Permanent link">#</a></h4>
-<p>该项目中，其在数据处理部分获取 "input_ids" 和 "labels" 时的代码如下所示（<a href="https://github.com/huggingface/transformers/blob/v4.28.1/examples/pytorch/language-modeling/run_clm_no_trainer.py#L446">官方代码链接</a>）：</p>
-<pre><code class="language-python">    def group_texts(examples):
-        ... ...
-        result = {
-            k: [t[i : i + block_size] for i in range(0, total_length, block_size)]
-            for k, t in concatenated_examples.items()
-        }
-        result[&quot;labels&quot;] = result[&quot;input_ids&quot;].copy()
-        return result
-</code></pre>
-<p>上述代码主要看倒数第二行，可以看到 "labels" 的值是直接copy的 "input_ids"，所以在此时 "input_ids" 与 "labels" 肯定是相同的。</p>
-<p>然后再看一下在该项目中GPT2模型计算loss时的代码，如下（<a href="https://github.com/huggingface/transformers/blob/v4.28.1/src/transformers/models/gpt2/modeling_gpt2.py#L1104">官方代码链接</a>）：</p>
-<pre><code class="language-python">        loss = None
-        if labels is not None:
-            # move labels to correct device to enable model parallelism
-            labels = labels.to(lm_logits.device)
-            # Shift so that tokens &lt; n predict n
-            shift_logits = lm_logits[..., :-1, :].contiguous()
-            shift_labels = labels[..., 1:].contiguous()
-            # Flatten the tokens
-            loss_fct = CrossEntropyLoss()
-            loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
-</code></pre>
-<p>上述代码中，<code>lm_logits</code> 表示模型前向传播输出的结果，其shape为[batch_size, seq_len, vocab_size]；<code>labels</code> 就是 copy 自 "input_ids" 的，其shape为[batch_size, seq_len]。主要看上述代码的第6行和第7行可知，其对 <code>labels</code> 去掉了第一个token，对 <code>lm_logits</code> 去掉了最后一个token，这样也就实现了根据前面的token预测下一个token了。</p>
-<h4 id="karpathymingpt"><strong><a href="https://github.com/karpathy/minGPT">karpathy/minGPT</a> 项目</strong><a class="headerlink" href="#karpathymingpt" title="Permanent link">#</a></h4>
-<p>该项目是实现了一个最简版的GPT，主要目的是方便新手理解GPT是如何实现的。也由于该项目是一个玩具项目，所以其训练数据并不是从文件中读取的，而是随机生成的，代码如下（<a href="https://github.com/karpathy/minGPT/blob/master/demo.ipynb">官方代码链接</a>）：</p>
-<pre><code class="language-python">    def __getitem__(self, idx):
-        ... ...
-        # the inputs to the transformer will be the offset sequence
-        x = cat[:-1].clone()
-        y = cat[1:].clone()
-        # we only want to predict at output locations, mask out the loss at the input locations
-        y[:self.length-1] = -1
-        return x, y
-</code></pre>
-<p>上述代码中 <code>cat</code> 是随机生成的 token 序列，<code>x</code> 是 "input_ids"，<code>y</code> 是 "labels"。可以看出其操作与huggingface的transformers中模型的前向推理时所作的操作是完全相同的。</p>
-<h3 id="32">3.2 推理代码<a class="headerlink" href="#32" title="Permanent link">#</a></h3>
-<p>由于项目 <a href="https://github.com/karpathy/minGPT">karpathy/minGPT</a> 中只实现了最核心的功能，非常利于理解原理，所以还是使用该项目中的代码。推理部分的代码如下（<a href="https://github.com/karpathy/minGPT/blob/master/mingpt/model.py#L283">官方代码链接</a>）：</p>
-<pre><code class="language-python">def generate(self, idx, max_new_tokens, temperature=1.0, do_sample=False, top_k=None):
-    &quot;&quot;&quot;
-    Take a conditioning sequence of indices idx (LongTensor of shape (b,t)) and complete
-    the sequence max_new_tokens times, feeding the predictions back into the model each time.
-    Most likely you'll want to make sure to be in model.eval() mode of operation for this.
-    &quot;&quot;&quot;
-    for _ in range(max_new_tokens):
-        # if the sequence context is growing too long we must crop it at block_size
-        idx_cond = idx if idx.size(1) &lt;= self.block_size else idx[:, -self.block_size:]
-        # forward the model to get the logits for the index in the sequence
-        logits, _ = self(idx_cond)
-        # pluck the logits at the final step and scale by desired temperature
-        logits = logits[:, -1, :] / temperature
-        # optionally crop the logits to only the top k options
-        if top_k is not None:
-            v, _ = torch.topk(logits, top_k)
-            logits[logits &lt; v[:, [-1]]] = -float('Inf')
-        # apply softmax to convert logits to (normalized) probabilities
-        probs = F.softmax(logits, dim=-1)
-        # either sample from the distribution or take the most likely element
-        if do_sample:
-            idx_next = torch.multinomial(probs, num_samples=1)
-        else:
-            _, idx_next = torch.topk(probs, k=1, dim=-1)
-        # append sampled index to the running sequence and continue
-        idx = torch.cat((idx, idx_next), dim=1)
+<h1 id="_1">生成式任务解码方法<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<h2 id="_2">任务说明<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
+<p>以机器翻译任务为例，假设待翻译的中文是 "我爱中国"，翻译成的英文是 "I love China"。另外为了简化后续的说明，我们假设英文里面总共就三个单词："I"、"love"、"China"。</p>
+<p>生成式任务的理论公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(x_1, ..., x_n) = \prod_{i=1}^n p(x_i|x_1,...,x_{i-1})</div>
+<script type="math/tex; mode=display">p(x_1, ..., x_n) = \prod_{i=1}^n p(x_i|x_1,...,x_{i-1})</script>
+</div>
+<h2 id="_3">暴力搜索（穷举）<a class="headerlink" href="#_3" title="Permanent link">#</a></h2>
+<p>这个很容易理解，就是把所有可能的序列都列出来，并且计算出每种可能的联合概率，然后选取联合概率最大的那个序列。按照上面英文中总共有三个单词 "I"、"love"、"China" 假设，所有的序列如下所示，总共是 <span class="arithmatex"><span class="MathJax_Preview">3^3 = 27</span><script type="math/tex">3^3 = 27</script></span>：</p>
+<pre><code>I I I
+I I love
+I I China
+I love I
+I love love
+I love China
+I China I
+I China love
+I China China
 
-    return idx
+love I I 
+love I love
+love I China
+love love I
+love love love
+love love China
+love China I
+love China love
+love China China
+
+China I I
+China I love
+China I China
+China love I 
+China love love
+China love China
+China China I
+China China love
+China China China
 </code></pre>
-<p>该代码中是比较简单的，比如这里没有遇到某个结束字符就中断for循环的逻辑。</p>
-<h3 id="33">3.3 解码时如何减少模型的重复输出<a class="headerlink" href="#33" title="Permanent link">#</a></h3>
-<p>在使用生成式模型时，比较常见的一个现象就是模型经常会输出重复的文本。然后 openai 的 API 中有两个参数 <code>presence_penalty</code> 和 <code>frequency_penalty</code> 用于在解码时控制允许在多大程度上输出重复文本（官方解释文档：<a href="https://platform.openai.com/docs/api-reference/parameter-details">Frequency and presence penalties</a>）。</p>
-<p>该方法的大概思路是：根据每个 token 是否已经被选中过，以及被选中过的频次，对当前位置的模型输出的 logits 做一些修改。使那些出现过、或者出现过多次的 token 的概率降低。计算公式如下：</p>
-<pre><code>mu[j] -&gt; mu[j] - c[j] * alpha_frequency - float(c[j] &gt; 0) * alpha_presence
+<p>典型的 "元素可以重复使用的组合问题"（刷个题，代码如下）：</p>
+<pre><code class="language-python">result = []
+
+def backtrace(arr: List[str], tmp):
+    if len(tmp) == len(arr):
+        result.append(copy.deepcopy(tmp))
+        return
+
+    for item in arr:
+        tmp.append(item)
+        backtrace(arr, tmp)
+        tmp = tmp[:-1]
+
+def solution(arr: List[str]):
+    backtrace(arr, [])
+    return result
 </code></pre>
-<p>其中：</p>
+<h2 id="_4">贪心搜索<a class="headerlink" href="#_4" title="Permanent link">#</a></h2>
+<p>贪心搜索也好理解，针对当前的位置，模型会预测出一个 logits，对该 logits 进行 softmax 操作之后，就能够得到整个 vocab 中每个字的概率值，直接选取概率值最大的那个字作为当前位置的预测结果。就是说并不考虑整个序列的联合概率，每个位置直接使用生成那个位置的结果时概率最大的那个字。</p>
+<p>使用贪心搜索不能够保证最终得到的序列是最优的，但是速度会非常的快。</p>
+<h2 id="beam-search">beam search（集束搜索）<a class="headerlink" href="#beam-search" title="Permanent link">#</a></h2>
+<p>还是以待翻译的中文是 "我爱中国"，翻译成的英文是 "I love China" 为例，举例说明。假设beam search的束宽（beam size）为k=2。</p>
 <ul>
 <li>
-<p><code>mu[j]</code>：表示模型在 token 序列的位置 j 处输出的 logits；</p>
+<p>在 t1 时刻：</p>
+<ul>
+<li>预测 "I"、"love"、"China" 的概率分别为 0.4、0.5、0.1。此时选取概率最大的两个作为结果，为 "I" 和 "love"。</li>
+</ul>
 </li>
 <li>
-<p><code>c[j]</code>：表示在 token 序列的位置 j 之前每个 token 分别已经被选中的频次；</p>
+<p>在 t2 时刻：</p>
+<ul>
+<li>
+<p>将前一时刻输出的 "I" 作为输入时，预测 "I"、"love"、"China" 的概率分别为 0.3、0.6、0.1。将之前时刻序列的概率乘上当前时刻的概率，可以得到 "I I"、"I love"、"I China" 的概率分别为 0.12、0.24、0.04。</p>
 </li>
 <li>
-<p><code>float(c[j] &gt; 0)</code>：当 <code>c[j] &gt; 0</code> 为 true 时该值 1 ，否则为 0 ；</p>
+<p>将前一时刻输出的 "love" 作为输入时，预测 "I"、"love"、"China" 的概率分别为 0.3、0.3、0.4。将之前时刻序列的概率乘上当前时刻的概率，可以得到 "love I"、"love love"、"love China" 的概率分别为 0.15、0.15、0.2。</p>
 </li>
 <li>
-<p><code>alpha_frequency</code>：可配置的超参数之一；</p>
-</li>
-<li>
-<p><code>alpha_presence</code>：可配置的超参数之一；</p>
+<p>从当前时刻的 6 个序列 "I I"、"I love"、"I China"、"love I"、"love love"、"love China" 中选择出概率最大的两个序列，为 "I love" 和 "love China"。</p>
 </li>
 </ul>
-<p>可以看出参数 <code>alpha_presence</code> 只关心某个 token 是否在之前出现过，参数 <code>alpha_frequency</code> 还会关心某个 token 在之前出现过的频次，所以这两个参数可以结合使用。一般来说，如果想轻度抑制模型生成重复文本，可将这两个参数设置为 0.1 到 1 之间；如果想非常严格的控制生成重复文本的问题，可以将这两个参数设置为 2。</p>
+</li>
+<li>
+<p>在 t3 时刻：</p>
+<ul>
+<li>
+<p>将前一时刻输出的 "I love" 作为输入时，预测 "I"、"love"、"China" 的概率分别为 0.2、0.1、0.7。将之前时刻序列的概率乘上当前时刻的概率，可以得到 "I love I"、"I love love"、"I love China" 的概率分别为 0.048、0.024、0.168。</p>
+</li>
+<li>
+<p>将前一时刻输出的 "love China" 作为输入时，预测 "I"、"love"、"China" 的概率分别为 0.3、0.3、0.4。将之前时刻序列的概率乘上当前时刻的概率，可以得到 "love China I"、"love China love"、"love China China" 的概率分别为 0.06、0.06、0.08。</p>
+</li>
+<li>
+<p>由于这里是最后一个字符，所以从当前时刻的 6 个序列 "I love I"、"I love love"、"I love China"、"love China I"、"love China love"、"love China China" 中选择出概率最大那个序列最为最终结果，为 "I love China"。</p>
+</li>
+<li>
+<p>正常情况下还会有一个终止字符，当预测到那个终止字符时才算是结束，这里简化了。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>所以，对于beam search算法有：</p>
+<p>定义当前时刻为t，定义beam search的束宽（beam size）为k，待翻译的语言类型中总共有n个字。那么可知，在 t-1 时刻，会筛选出 k 种情况；在 t 时刻，会生成 k*n 种情况的概率，然后在这 k*n 个概率中选出概率最大的 k 个作为当前 t 时刻的预测结果。不断重复这个过程，直到最后一个时刻，直接选取 k*n 种情况中概率最大的那个作为结果。</p>
+<h2 id="4">4、解码时各种参数的作用<a class="headerlink" href="#4" title="Permanent link">#</a></h2>
+<p>温度、topk、topp、do_sample</p>
+<p>链接：<a href="https://www.zhihu.com/question/415657741/answer/2430106609">https://www.zhihu.com/question/415657741/answer/2430106609</a></p>
 <h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p><a href="https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf">https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/82829880">https://zhuanlan.zhihu.com/p/82829880</a></p>
 </li>
 <li>
-<p><a href="https://lilianweng.github.io/posts/2019-01-31-lm/#gpt">https://lilianweng.github.io/posts/2019-01-31-lm/#gpt</a></p>
-</li>
-<li>
-<p><a href="https://zhuanlan.zhihu.com/p/350017443">https://zhuanlan.zhihu.com/p/350017443</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/28048246">https://zhuanlan.zhihu.com/p/28048246</a></p>
 </li>
 </ul></div>
             </div>
@@ -263,13 +228,13 @@
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
         <script>
-            var base_url = "../..",
+            var base_url = "../../..",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="../../js/base.js" defer></script>
-        <script src="../../mathjax-config.js" defer></script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
-        <script src="../../search/main.js" defer></script>
+        <script src="../../../search/main.js" defer></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

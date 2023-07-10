@@ -6,17 +6,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/001_%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/Jacobi%E7%9F%A9%E9%98%B5/">
-        <link rel="shortcut icon" href="../../../img/favicon.ico">
-        <title>Jacobi矩阵 - 算法工程师笔记</title>
-        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
-        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
-        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="canonical" href="https://mingchao.wang/002_%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0/02_TFIDF/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>TFIDF - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
-        <link href="../../../css/extra.css" rel="stylesheet">
+        <link href="../../css/extra.css" rel="stylesheet">
 
-        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
-        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
@@ -35,7 +35,7 @@
     <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
                 <!-- Expander button -->
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -71,44 +71,8 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#jacobi" class="nav-link">Jacobi矩阵</a>
+            <li class="nav-item" data-level="1"><a href="#tfidf" class="nav-link">TFIDF</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#1jocabi" class="nav-link">1、Jocabi矩阵</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、几何理解</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#3jocabi" class="nav-link">3、另一个角度引出Jocabi矩阵</a>
-              <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#31" class="nav-link">3.1 单函数单变量</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#32" class="nav-link">3.2 单函数多变量</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#33" class="nav-link">3.3 多函数多变量</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#4jocabi" class="nav-link">4、Jocabi矩阵的应用</a>
-              <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#41" class="nav-link">4.1 向量对向量求导</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
               </ul>
             </li>
         </ul>
@@ -116,205 +80,25 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="jacobi">Jacobi矩阵<a class="headerlink" href="#jacobi" title="Permanent link">#</a></h1>
-<h2 id="1jocabi">1、Jocabi矩阵<a class="headerlink" href="#1jocabi" title="Permanent link">#</a></h2>
-<p>假设 <span class="arithmatex"><span class="MathJax_Preview">F : R_n \rightarrow R_m</span><script type="math/tex">F : R_n \rightarrow R_m</script></span> 是一个从 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 维欧氏空间映射到 <span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 维欧氏空间的函数。这个函数由 <span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 个实函数组成：</p>
+<h1 id="tfidf">TFIDF<a class="headerlink" href="#tfidf" title="Permanent link">#</a></h1>
+<p>TF（Term Frequency）：表示某个关键词在整篇文章中出现的频率。</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">
-\begin{equation}
-\begin{cases}
-   y_1 = f_1(x_1, x_2, ..., x_n) \\
-   y_2 = f_2(x_1, x_2, ..., x_n) \\
-   ... \\
-   y_m = f_m(x_1, x_2, ..., x_n) \\
-\end{cases}
-\end{equation}
+<div class="MathJax_Preview"> tf = \frac{词语t在文章中出现的次数}{文章中的总词数} </div>
+<script type="math/tex; mode=display"> tf = \frac{词语t在文章中出现的次数}{文章中的总词数} </script>
 </div>
-<script type="math/tex; mode=display">
-\begin{equation}
-\begin{cases}
-   y_1 = f_1(x_1, x_2, ..., x_n) \\
-   y_2 = f_2(x_1, x_2, ..., x_n) \\
-   ... \\
-   y_m = f_m(x_1, x_2, ..., x_n) \\
-\end{cases}
-\end{equation}
-</script>
-</div>
-<p>这些实函数的偏导数可以组成一个 <span class="arithmatex"><span class="MathJax_Preview">m*n</span><script type="math/tex">m*n</script></span> 的矩阵，这个矩阵就是Jocabi矩阵：</p>
+<p>IDF（InversDocument Frequency）：逆文本频率。文本频率是指某个关键词在整个语料所有文章中出现的次数。逆文本频率顾名思义，它是文本频率的倒数，主要用于降低所有文档中一些常见却对文档影响不大的词语的作用。</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">
-\begin{equation}
-J_F(x_1, x_2, ..., x_n) = \begin{bmatrix}
-\frac{\partial f_1}{\partial x_1} &amp; \frac{\partial f_1}{\partial x_2} &amp; ... &amp; \frac{\partial f_1}{\partial x_n} \\
-   \frac{\partial f_2}{\partial x_1} &amp; \frac{\partial f_2}{\partial x_2} &amp; ... &amp; \frac{\partial f_2}{\partial x_n} \\
-   ... &amp; ... &amp; ... &amp; ... \\
-   \frac{\partial f_m}{\partial x_1} &amp; \frac{\partial f_m}{\partial x_2} &amp; ... &amp; \frac{\partial f_m}{\partial x_n} \\
-\end{bmatrix}
-\end{equation}
+<div class="MathJax_Preview"> idf =\log \frac{语料库的文档总数 + 1}{包含词语t的文档数 + 1} </div>
+<script type="math/tex; mode=display"> idf =\log \frac{语料库的文档总数 + 1}{包含词语t的文档数 + 1} </script>
 </div>
-<script type="math/tex; mode=display">
-\begin{equation}
-J_F(x_1, x_2, ..., x_n) = \begin{bmatrix}
-\frac{\partial f_1}{\partial x_1} & \frac{\partial f_1}{\partial x_2} & ... & \frac{\partial f_1}{\partial x_n} \\
-   \frac{\partial f_2}{\partial x_1} & \frac{\partial f_2}{\partial x_2} & ... & \frac{\partial f_2}{\partial x_n} \\
-   ... & ... & ... & ... \\
-   \frac{\partial f_m}{\partial x_1} & \frac{\partial f_m}{\partial x_2} & ... & \frac{\partial f_m}{\partial x_n} \\
-\end{bmatrix}
-\end{equation}
-</script>
-</div>
-<p>在向量分析中，Jacobi矩阵是一阶偏导数以一定的方式排列成的矩阵；</p>
-<p>当 <span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 等于 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 时，Jacoba矩阵就变成了一个方阵，该方阵的行列式即为Jacobi行列式。</p>
-<h2 id="2">2、几何理解<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
-<p>Jocabi矩阵的重要性在于它体现了一个可微方程与给定点的最优线性逼近；</p>
-<p>如果 <span class="arithmatex"><span class="MathJax_Preview">p</span><script type="math/tex">p</script></span> 是 <span class="arithmatex"><span class="MathJax_Preview">R^n</span><script type="math/tex">R^n</script></span> 中的一个点，<span class="arithmatex"><span class="MathJax_Preview">F</span><script type="math/tex">F</script></span> 在 <span class="arithmatex"><span class="MathJax_Preview">p</span><script type="math/tex">p</script></span> 点可微，那么Jacobi矩阵 <span class="arithmatex"><span class="MathJax_Preview">J_F(p)</span><script type="math/tex">J_F(p)</script></span> 是在这点的导数；在此情况下 <span class="arithmatex"><span class="MathJax_Preview">J_F(p)</span><script type="math/tex">J_F(p)</script></span> 这个线性映射即为 <span class="arithmatex"><span class="MathJax_Preview">F</span><script type="math/tex">F</script></span> 在点 <span class="arithmatex"><span class="MathJax_Preview">p</span><script type="math/tex">p</script></span> 附近的最优线性逼近，也就是说当点 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 足够靠近点 <span class="arithmatex"><span class="MathJax_Preview">p</span><script type="math/tex">p</script></span> 时，我们有：</p>
+<p>最后：</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}F(x) \approx F(p) + J_p(p)(x-p)\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}F(x) \approx F(p) + J_p(p)(x-p)\end{equation}</script>
-</div>
-<p>关于这个<code>最优线性逼近</code>，写一下从几何方面对他的理解：</p>
-<p>我们知道，在几何中：矩阵表示的是线性变换，比如平移、旋转、缩放。当给定的矩阵中每个元素都是常数时，该矩阵对应的线性变换就是固定的，比如下图中的变换对应的矩阵为<span class="arithmatex"><span class="MathJax_Preview">\begin{bmatrix}1 &amp; 0 \\ 1 &amp; 1\end{bmatrix}</span><script type="math/tex">\begin{bmatrix}1 & 0 \\ 1 & 1\end{bmatrix}</script></span>：</p>
-<p><img alt="" src="/551gooOO/assets/01.jpeg" /></p>
-<p>上图中左侧的正方形经过变换矩阵<span class="arithmatex"><span class="MathJax_Preview">\begin{bmatrix}1 &amp; 0 \\ 1 &amp; 1\end{bmatrix}</span><script type="math/tex">\begin{bmatrix}1 & 0 \\ 1 & 1\end{bmatrix}</script></span>之后得到上图右侧的平行四边形；</p>
-<p>与上述这种变换的区别是，Jacobi矩阵中的每个元素并不都是常数，而是与 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 相关的，当给定一个具体的 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 之后，就可求出Jacobi矩阵中每个元素的值，此时在给定的 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 的极小邻域内是一个线性变换。这就是：<strong>Jocabi矩阵体现了一个可微方程与给定点的最优线性逼近</strong>。</p>
-<p>关于Jacobi矩阵在几何方便的理解可以参考bilibili上的视频：<a href="https://www.bilibili.com/video/BV1NJ411r7ja/">《雅可比矩阵是什么东西》</a>；</p>
-<h2 id="3jocabi">3、另一个角度引出Jocabi矩阵<a class="headerlink" href="#3jocabi" title="Permanent link">#</a></h2>
-<p>Jocabi矩阵是某种映射函数的导数，只不过这种映射函数比较复杂，下面从简单到复杂把几种映射函数和其导数都列一下。</p>
-<h3 id="31">3.1 单函数单变量<a class="headerlink" href="#31" title="Permanent link">#</a></h3>
-<p>假设 <span class="arithmatex"><span class="MathJax_Preview">F : R \rightarrow R</span><script type="math/tex">F : R \rightarrow R</script></span> 是一个从一维欧氏空间映射到一维欧氏空间的函数，这个函数的形式为 <span class="arithmatex"><span class="MathJax_Preview">y=f(x)</span><script type="math/tex">y=f(x)</script></span>，则其导数为：</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\frac{df}{dx}\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\frac{df}{dx}\end{equation}</script>
-</div>
-<h3 id="32">3.2 单函数多变量<a class="headerlink" href="#32" title="Permanent link">#</a></h3>
-<p>假设 <span class="arithmatex"><span class="MathJax_Preview">F : R_n \rightarrow R</span><script type="math/tex">F : R_n \rightarrow R</script></span> 是一个从 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 维欧氏空间映射到一维欧氏空间的函数，这个函数的形式为 <span class="arithmatex"><span class="MathJax_Preview">y=f(x_1, x_2, ..., x_n)</span><script type="math/tex">y=f(x_1, x_2, ..., x_n)</script></span>，则其导数为：</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}[\frac{\partial f}{\partial x_1}, \frac{\partial f}{\partial x_2}, ..., \frac{\partial f}{\partial x_n}]\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}[\frac{\partial f}{\partial x_1}, \frac{\partial f}{\partial x_2}, ..., \frac{\partial f}{\partial x_n}]\end{equation}</script>
+<div class="MathJax_Preview"> tf-idf = tf * idf </div>
+<script type="math/tex; mode=display"> tf-idf = tf * idf </script>
 </div>
 <blockquote>
-<p>PS：这里没有考虑应该是行向量还是列向量；</p>
-</blockquote>
-<h3 id="33">3.3 多函数多变量<a class="headerlink" href="#33" title="Permanent link">#</a></h3>
-<p>假设 <span class="arithmatex"><span class="MathJax_Preview">F : R_n \rightarrow R_m</span><script type="math/tex">F : R_n \rightarrow R_m</script></span> 是一个从 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 维欧氏空间映射到 <span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 维欧氏空间的函数，这些个函数的形式为</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">
-\begin{equation}
-\begin{cases}
-   y_1 = f_1(x_1, x_2, ..., x_n) \\
-   y_2 = f_2(x_1, x_2, ..., x_n) \\
-   ... \\
-   y_m = f_m(x_1, x_2, ..., x_n) \\
-\end{cases}
-\end{equation}
-</div>
-<script type="math/tex; mode=display">
-\begin{equation}
-\begin{cases}
-   y_1 = f_1(x_1, x_2, ..., x_n) \\
-   y_2 = f_2(x_1, x_2, ..., x_n) \\
-   ... \\
-   y_m = f_m(x_1, x_2, ..., x_n) \\
-\end{cases}
-\end{equation}
-</script>
-</div>
-<p>则其导数为：</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">
-\begin{equation}
-\begin{bmatrix}
-\frac{\partial f_1}{\partial x_1} &amp; \frac{\partial f_1}{\partial x_2} &amp; ... &amp; \frac{\partial f_1}{\partial x_n} \\
-   \frac{\partial f_2}{\partial x_1} &amp; \frac{\partial f_2}{\partial x_2} &amp; ... &amp; \frac{\partial f_2}{\partial x_n} \\
-   ... &amp; ... &amp; ... &amp; ... \\
-   \frac{\partial f_m}{\partial x_1} &amp; \frac{\partial f_m}{\partial x_2} &amp; ... &amp; \frac{\partial f_m}{\partial x_n} \\
-\end{bmatrix}
-\end{equation}
-</div>
-<script type="math/tex; mode=display">
-\begin{equation}
-\begin{bmatrix}
-\frac{\partial f_1}{\partial x_1} & \frac{\partial f_1}{\partial x_2} & ... & \frac{\partial f_1}{\partial x_n} \\
-   \frac{\partial f_2}{\partial x_1} & \frac{\partial f_2}{\partial x_2} & ... & \frac{\partial f_2}{\partial x_n} \\
-   ... & ... & ... & ... \\
-   \frac{\partial f_m}{\partial x_1} & \frac{\partial f_m}{\partial x_2} & ... & \frac{\partial f_m}{\partial x_n} \\
-\end{bmatrix}
-\end{equation}
-</script>
-</div>
-<p>也就是Jocabi矩阵。</p>
-<h2 id="4jocabi">4、Jocabi矩阵的应用<a class="headerlink" href="#4jocabi" title="Permanent link">#</a></h2>
-<h3 id="41">4.1 向量对向量求导<a class="headerlink" href="#41" title="Permanent link">#</a></h3>
-<p>给定一个函数 <span class="arithmatex"><span class="MathJax_Preview">f(x)</span><script type="math/tex">f(x)</script></span>，其有 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 个输入和 <span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 个输出，该函数的形式如下：</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}f(x_1, x_2, ..., x_n) = [f_1(x_1, x_2, ..., x_n), ..., f_m(x_1, x_2, ..., x_n)]\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}f(x_1, x_2, ..., x_n) = [f_1(x_1, x_2, ..., x_n), ..., f_m(x_1, x_2, ..., x_n)]\end{equation}</script>
-</div>
-<p>将其拆开分成两部分表示的话如下所示：</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">
-\begin{equation}
-\begin{cases}
-   y_1 = f_1(x_1, x_2, ..., x_n) \\
-   y_2 = f_2(x_1, x_2, ..., x_n) \\
-   ... \\
-   y_m = f_m(x_1, x_2, ..., x_n) \\
-\end{cases}
-\end{equation}
-</div>
-<script type="math/tex; mode=display">
-\begin{equation}
-\begin{cases}
-   y_1 = f_1(x_1, x_2, ..., x_n) \\
-   y_2 = f_2(x_1, x_2, ..., x_n) \\
-   ... \\
-   y_m = f_m(x_1, x_2, ..., x_n) \\
-\end{cases}
-\end{equation}
-</script>
-</div>
-<div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}f(x_1, x_2, ..., x_n) = [y1, y2, ..., y_m]\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}f(x_1, x_2, ..., x_n) = [y1, y2, ..., y_m]\end{equation}</script>
-</div>
-<p>对该函数 <span class="arithmatex"><span class="MathJax_Preview">f(x)</span><script type="math/tex">f(x)</script></span> 的求导结果就是一个Jocabi矩阵。</p>
-<p>即：</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">
-\begin{equation}
-\begin{split}
-\frac{\partial f}{\partial x} &amp;= \frac{\partial [y_1, y_2, ..., y_m]}{\partial [x_1, x_2, ..., x_n]} \\
-&amp;=\begin{bmatrix}
-   \frac{\partial y_1}{\partial x_1} &amp; \frac{\partial y_1}{\partial x_2} &amp; ... &amp; \frac{\partial y_1}{\partial x_n} \\
-   \frac{\partial y_2}{\partial x_1} &amp; \frac{\partial y_2}{\partial x_2} &amp; ... &amp; \frac{\partial y_2}{\partial x_n} \\
-   ... &amp; ... &amp; ... &amp; ... \\
-   \frac{\partial y_m}{\partial x_1} &amp; \frac{\partial y_m}{\partial x_2} &amp; ... &amp; \frac{\partial y_m}{\partial x_n} \\
-\end{bmatrix}
-\end{split}
-\end{equation}
-</div>
-<script type="math/tex; mode=display">
-\begin{equation}
-\begin{split}
-\frac{\partial f}{\partial x} &= \frac{\partial [y_1, y_2, ..., y_m]}{\partial [x_1, x_2, ..., x_n]} \\
-&=\begin{bmatrix}
-   \frac{\partial y_1}{\partial x_1} & \frac{\partial y_1}{\partial x_2} & ... & \frac{\partial y_1}{\partial x_n} \\
-   \frac{\partial y_2}{\partial x_1} & \frac{\partial y_2}{\partial x_2} & ... & \frac{\partial y_2}{\partial x_n} \\
-   ... & ... & ... & ... \\
-   \frac{\partial y_m}{\partial x_1} & \frac{\partial y_m}{\partial x_2} & ... & \frac{\partial y_m}{\partial x_n} \\
-\end{bmatrix}
-\end{split}
-\end{equation}
-</script>
-</div>
-<p>Jocabi矩阵是向量对向量的求导结果这个很容易理解，因为这就是其定义。</p>
-<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
-<ul>
-<li><a href="https://www.cnblogs.com/rswss/p/11440144.html">雅可比矩阵（整理）: https://www.cnblogs.com/rswss/p/11440144.html</a></li>
-<li><a href="https://www.zhihu.com/question/22586361">如何理解雅克比矩阵: https://www.zhihu.com/question/22586361</a></li>
-<li><a href="https://www.bilibili.com/video/BV1NJ411r7ja/">雅可比矩阵是什么东西: https://www.bilibili.com/video/BV1NJ411r7ja/</a></li>
-</ul></div>
+<p>注：根据<span class="arithmatex"><span class="MathJax_Preview">tf</span><script type="math/tex">tf</script></span>的定义可知采用上述公式算出的是词语<span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span>在一篇文章中的<span class="arithmatex"><span class="MathJax_Preview">tfidf</span><script type="math/tex">tfidf</script></span>值。如果要计算词语<span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span>在一份语料（可以是几十篇、几百篇、几万篇等）中的<span class="arithmatex"><span class="MathJax_Preview">tfidf</span><script type="math/tex">tfidf</script></span>值，可以再做一些处理，比如把词语<span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span>在每篇文章中计算的<span class="arithmatex"><span class="MathJax_Preview">tfidf</span><script type="math/tex">tfidf</script></span>值累加。</p>
+</blockquote></div>
             </div>
         </div>
 
@@ -324,13 +108,13 @@ J_F(x_1, x_2, ..., x_n) = \begin{bmatrix}
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
         <script>
-            var base_url = "../../..",
+            var base_url = "../..",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="../../../js/base.js" defer></script>
-        <script src="../../../mathjax-config.js" defer></script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
-        <script src="../../../search/main.js" defer></script>
+        <script src="../../search/main.js" defer></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

@@ -6,9 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/006_LLM/999_%E5%85%B6%E4%BB%96/ColossalAI%E7%9A%84RLHF%E6%A1%86%E6%9E%B6/">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/999_%E5%85%B6%E4%BB%96/OpenAI%E6%8F%90%E4%BE%9B%E7%9A%84API%E8%B0%83%E7%94%A8/">
         <link rel="shortcut icon" href="../../../img/favicon.ico">
-        <title>运行ColossalAI的RLHF框架 - 算法工程师笔记</title>
+        <title>OpenAI 的 API - 算法工程师笔记</title>
         <link href="../../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../../css/base.css" rel="stylesheet">
@@ -71,29 +71,13 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#colossalairlhf" class="nav-link">运行ColossalAI的RLHF框架</a>
+            <li class="nav-item" data-level="1"><a href="#openai-api" class="nav-link">OpenAI 的 API</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#_1" class="nav-link">目录结构简单说明</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#rewardmodel" class="nav-link">RewardModel使用的数据集</a>
+            <li class="nav-item" data-level="3"><a href="#_1" class="nav-link">调用样例</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#rewardmodel_1" class="nav-link">RewardModel训练</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#rlprompt" class="nav-link">RL训练（随机生成prompt）</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#rlprompt_1" class="nav-link">RL训练（使用prompt数据集训练）</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#_2" class="nav-link">关于显存的消耗</a>
+            <li class="nav-item" data-level="3"><a href="#_2" class="nav-link">参数详情说明</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -104,158 +88,48 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="colossalairlhf">运行ColossalAI的RLHF框架<a class="headerlink" href="#colossalairlhf" title="Permanent link">#</a></h1>
-<p>ColossalAI项目链接：<a href="https://github.com/hpcaitech/ColossalAI">https://github.com/hpcaitech/ColossalAI</a></p>
-<h2 id="_1">目录结构简单说明<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
-<p>主要的目录结构如下图所示，<code>examples</code> 目录下是一些样例的运行脚本，<code>chatgpt</code> 目录下是RLHF的核心代码。</p>
-<ul>
-<li>
-<p><code>train_reward_model.py</code>: 是用于训练reward model的训练脚本；</p>
-</li>
-<li>
-<p><code>train_prompts.py</code>: 运行该脚本需要传入一个prompt数据集，该脚本并没有载入上一步中已经训练好的reward model；</p>
-</li>
-<li>
-<p><code>train_dummy.py</code>: 运行该脚本不需要传入一个prompt数据集，因为该脚本中会从tokenizer中随机采样生成随机的prompt，这是用于测试能否跑通的一个脚本。同样的，该脚本没有载入上一步中已经训练好的reward model；</p>
-</li>
-</ul>
-<pre><code>ColossalAI/applications/ChatGPT
-├── chatgpt
-│   ├── dataset
-│   ├── experience_maker
-│   ├── nn
-│   ├── replay_buffer
-│   └── trainer
-├── examples
-│   ├── train_dummy.py
-│   ├── train_prompts.py
-│   └── train_reward_model.py
-├── ...
-└── requirements.txt
-</code></pre>
-<h2 id="rewardmodel">RewardModel使用的数据集<a class="headerlink" href="#rewardmodel" title="Permanent link">#</a></h2>
-<p>数据集为 <code>Dahoas/rm-static</code>，是一个英文数据集；链接为：<a href="https://huggingface.co/datasets/Dahoas/rm-static/discussions">https://huggingface.co/datasets/Dahoas/rm-static/discussions</a>；</p>
-<p>使用如下代码看一下这个数据集的结构：</p>
-<pre><code class="language-python">import json
-from datasets import load_dataset
+<h1 id="openai-api">OpenAI 的 API<a class="headerlink" href="#openai-api" title="Permanent link">#</a></h1>
+<p>API文档链接: <a href="https://platform.openai.com/">https://platform.openai.com/</a></p>
+<h3 id="_1">调用样例<a class="headerlink" href="#_1" title="Permanent link">#</a></h3>
+<pre><code class="language-python">import openai
+openai.api_key = &quot;sk-...&quot;
 
-data = load_dataset(&quot;Dahoas/rm-static&quot;)
-print(data)
-
-for item in data[&quot;train&quot;]:
-    print(json.dumps(item, indent=2))
-    break
+response = openai.ChatCompletion.create(
+    model=&quot;gpt-3.5-turbo&quot;,
+    messages=[
+        {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;你好&quot;},
+        {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;你好！有什么可以帮助您的吗？&quot;},
+        {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;你知道中国最大的湖泊是哪个吗？&quot;}
+    ]
+)
+print(response[&quot;choices&quot;][0][&quot;message&quot;][&quot;content&quot;])
 </code></pre>
-<p>输出结果如下。可以看出总数据量还是非常大的，有8万多的数据量。</p>
-<pre><code>DatasetDict({
-    test: Dataset({
-        features: ['prompt', 'response', 'chosen', 'rejected'],
-        num_rows: 5103
-    })
-    train: Dataset({
-        features: ['prompt', 'response', 'chosen', 'rejected'],
-        num_rows: 76256
-    })
-})
-{
-  &quot;prompt&quot;: &quot;\n\nHuman: Can you describe the steps to clean fingerprints and smudges from a laptop screen\n\nAssistant Yes, certainly. To clean your screen, you first need to use a microfiber cloth or soft, damp cloth to gently wipe down the surface of the screen. Next, you\u2019ll want to grab a soft, lint-free, microfiber cleaning cloth and gently rub it back and forth across the screen to remove fingerprints and smudges.\n\nHuman: Can I spray isopropyl alcohol onto the cloth and clean it that way?\n\nAssistant:&quot;,
-  &quot;response&quot;: &quot; Yes, you can do that to help the cloth pick up even more dirt from the screen. Be sure to always use a clean, soft cloth, not a piece of scratchy, roughened, or textured material, and make sure it\u2019s lint-free.&quot;,
-  &quot;chosen&quot;: &quot; Yes, you can do that to help the cloth pick up even more dirt from the screen. Be sure to always use a clean, soft cloth, not a piece of scratchy, roughened, or textured material, and make sure it\u2019s lint-free.&quot;,
-  &quot;rejected&quot;: &quot; Yes, you can spray it directly onto the cloth.&quot;
-}
-</code></pre>
-<h2 id="rewardmodel_1">RewardModel训练<a class="headerlink" href="#rewardmodel_1" title="Permanent link">#</a></h2>
-<p>训练 reward model 使用的脚本是 <code>applications/ChatGPT/examples/train_reward_model.py</code>。目前ColossalAI的最新发布版本是v0.2.5，目前在该脚本中只支持使用BLOOM作为预训练进行 reward model 的训练，做如下修改将GPT2模型和OPT模型都添加上：</p>
-<p>原代码：</p>
-<pre><code class="language-python"># configure model
-tokenizer = BloomTokenizerFast.from_pretrained(args.pretrain)
-tokenizer.pad_token = tokenizer.eos_token
-model = BLOOMRM(pretrained=args.pretrain).cuda()
-max_len = 1024
-</code></pre>
-<p>修改为：</p>
-<pre><code class="language-python"># configure model
-if args.model == 'gpt2':
-    tokenizer = GPT2Tokenizer.from_pretrained(args.pretrain)
-    tokenizer.pad_token = tokenizer.eos_token
-    model = GPTRM(pretrained=args.pretrain).cuda()
-elif args.model == 'bloom':
-    tokenizer = BloomTokenizerFast.from_pretrained(args.pretrain)
-    tokenizer.pad_token = tokenizer.eos_token
-    model = BLOOMRM(pretrained=args.pretrain).cuda()
-elif args.model == 'opt':
-    tokenizer = AutoTokenizer.from_pretrained(args.pretrain)
-    model = OPTRM(pretrained=args.pretrain).cuda()
-else:
-    raise ValueError(f'Unsupported model &quot;{args.model}&quot;')
-max_len = 1024
-</code></pre>
-<blockquote>
-<p>注：一些import可能也要修改，这里没有体现，缺什么补什么即可。</p>
-</blockquote>
-<p>训练的启动命令为：</p>
-<pre><code>cd applications/ChatGPT
-CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python3 examples/train_reward_model.py \
-    --model gpt2 \
-    --pretrain sshleifer/tiny-gpt2 \
-    --dataset Dahoas/rm-static
-</code></pre>
-<p>这里只是简单的设置了几个参数，其他的都是使用的默认值：</p>
+<h3 id="_2">参数详情说明<a class="headerlink" href="#_2" title="Permanent link">#</a></h3>
+<p>链接：<a href="https://platform.openai.com/docs/api-reference/chat/create">https://platform.openai.com/docs/api-reference/chat/create</a></p>
 <ul>
-<li><code>model</code>: 使用哪个模型结构，可以选值有gpt2、bloom、opt；</li>
-<li><code>pretrain</code>: 具体使用哪个预训练好的模型，这个要和上面的模型结构对应起来，这里选用的一个gpt2的tiny模型，模型文件大小只有2.5M；</li>
-<li><code>dataset</code>: 数据集，上一小节已经介绍过这个数据集了；</li>
-</ul>
-<h2 id="rlprompt">RL训练（随机生成prompt）<a class="headerlink" href="#rlprompt" title="Permanent link">#</a></h2>
-<p>关于RL的训练有两个脚本：</p>
-<pre><code>applications/ChatGPT/examples/train_dummy.py
-applications/ChatGPT/examples/train_prompts.py
-</code></pre>
-<p>这两个脚本的区别在于：</p>
-<ul>
-<li>train_prompts.py需要传入一个prompt数据集；</li>
-<li>train_dummy.py则不需要，该脚本中会从tokenizer中随机采样生成随机的prompt；</li>
-</ul>
-<p>这里测试使用的是脚本 <code>train_dummy.py</code>；</p>
-<p>训练的启动命令如下：</p>
-<pre><code>CUDA_VISIBLE_DEVICES=1 PYTHONPATH=. python3 examples/train_dummy.py \
-    --model gpt2 \
-    --pretrain sshleifer/tiny-gpt2
-</code></pre>
-<p>这里仅设置了2个参数，其他参数都是使用的默认值：</p>
-<ul>
-<li><code>model</code>: 使用哪个模型结构，可以选值有gpt2、bloom、opt；</li>
-<li><code>pretrain</code>: 具体使用哪个预训练好的模型，这个要和上面的模型结构对应起来，这里选用的一个gpt2的tiny模型，模型文件大小只有2.5M；</li>
-</ul>
-<p>另外，目前的脚本 <code>applications/ChatGPT/examples/train_dummy.py</code> 没有保存模型的功能，所以要想保存模型可以自己添加上相应的代码。</p>
-<h2 id="rlprompt_1">RL训练（使用prompt数据集训练）<a class="headerlink" href="#rlprompt_1" title="Permanent link">#</a></h2>
-<p>训练RL时使用的prompt数据集为 <code>fka/awesome-chatgpt-prompts</code>，是一个英文数据集；链接为: <a href="https://huggingface.co/datasets/fka/awesome-chatgpt-prompts">https://huggingface.co/datasets/fka/awesome-chatgpt-prompts</a></p>
-<p>这个数据集非常简单，就是一百多个prompt；</p>
-<p>虽然对RL不是太熟，不过从ColossalAI给定这个图中可以知道训练RL要同时载入四个模型到显存中，这个对显存的消耗肯定是非常大的，所以我们还是使用上面已经用过的gpt2的tiny模型。</p>
-<p><img alt="" src="/6qK2faKr/assets/1.jpg" /></p>
-<p>训练的启动命令如下：</p>
-<pre><code>CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python3 examples/train_prompts.py ./prompts.csv \
-    --model gpt2 \
-    --pretrain sshleifer/tiny-gpt2
-</code></pre>
-<p>这里仅设置了3个参数，其他参数都是使用的默认值：</p>
-<ul>
-<li>训练时需要使用的prompt数据集的路径，这个把上一段中提到的数据集下载下来放到相应的路径下即可；</li>
-<li><code>model</code>: 使用哪个模型结构，可以选值有gpt2、bloom、opt；</li>
-<li><code>pretrain</code>: 具体使用哪个预训练好的模型，这个要和上面的模型结构对应起来，这里选用的一个gpt2的tiny模型，模型文件大小只有2.5M；</li>
-</ul>
-<p>另外，目前的脚本 <code>applications/ChatGPT/examples/train_prompts.py</code> 没有保存模型的功能，所以要想保存模型可以自己添加上相应的代码。</p>
-<h2 id="_2">关于显存的消耗<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
-<p>在上述的实验中，reward model和actor model选用的都是一个gpt2的tiny模型，存储到磁盘上只有2.5M，但是在训练RL时显存消耗达到了10G+，这个对显存的要求非常高。</p>
-<p>ColossalAI项目中也有一个图片，如下所示。只看使用PyTorch框架的：</p>
-<ul>
-<li>小于等于10G显存的设备跑不起来；</li>
-<li>40G显存的设备可以跑0.34B的模型；</li>
-<li>80G显存的设备可以跑0.78B的模型；</li>
-</ul>
-<p>GPT-2有1.3B的参数量，按照这张图来看直接在80G的显存上是跑不起来的。</p>
-<p>不知道ColossalAI的实际效果有没有他这张图里这么好，之后可以研究一下。</p>
-<p><img alt="" src="/6qK2faKr/assets/3.jpg" /></p></div>
+<li>
+<p>model：要使用的模型的 ID。 目前，仅支持 gpt-3.5-turbo 和 gpt-3.5-turbo-0301。</p>
+</li>
+<li>
+<p>messages：输入数据；</p>
+</li>
+<li>
+<p>temperature：使用什么采样温度，介于 0 和 2 之间。较高的值（如 0.8）将使输出更加随机，而较低的值（如 0.2）将使输出更加集中和确定。</p>
+</li>
+<li>
+<p>top_p：一种替代温度采样的方法，称为核采样，其中模型考虑具有 top_p 概率质量的标记的结果。 所以 0.1 意味着只考虑构成前 10% 概率质量的标记。</p>
+<p>这个和temperature只设置一个。</p>
+</li>
+<li>
+<p>n：为每个输入消息生成多少个聊天结果。</p>
+</li>
+<li>
+<p>stream：是否流式返回数据；</p>
+</li>
+<li>
+<p>max_tokens：生成的答案允许的最大标记数。 默认情况下，模型可以返回的标记数为（4096 - 提示标记）。</p>
+</li>
+</ul></div>
             </div>
         </div>
 

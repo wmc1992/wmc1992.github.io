@@ -6,9 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/005_%E5%B7%A5%E5%85%B7%E6%A1%86%E6%9E%B6/001_huggingface/accelerate/">
+        <link rel="canonical" href="https://mingchao.wang/005_%E5%B7%A5%E5%85%B7%E6%A1%86%E6%9E%B6/001_huggingface/exp_with_accelerate_and_deepspeed/">
         <link rel="shortcut icon" href="../../../img/favicon.ico">
-        <title>Accelerate - 算法工程师笔记</title>
+        <title>Experiment With Transformers - 算法工程师笔记</title>
         <link href="../../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../../css/base.css" rel="stylesheet">
@@ -71,34 +71,26 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#accelerate" class="nav-link">Accelerate</a>
+            <li class="nav-item" data-level="1"><a href="#experiment-with-transformers" class="nav-link">Experiment With Transformers</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#1-config" class="nav-link">1、生成配置文件: config</a>
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、全量参数微调</a>
               <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、运行（两卡数据并行）</a>
-              <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#21" class="nav-link">2.1 启动命令说明</a>
+            <li class="nav-item" data-level="3"><a href="#11-accelerate" class="nav-link">1.1 Accelerate 单卡</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#22" class="nav-link">2.2 单卡与两卡速度对比</a>
+            <li class="nav-item" data-level="3"><a href="#12-accelerate" class="nav-link">1.2 Accelerate 双卡</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、暂时略过的一些功能</a>
+            <li class="nav-item" data-level="3"><a href="#13-deepspeed" class="nav-link">1.3 DeepSpeed 单卡</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#deepspeed" class="nav-link">DeepSpeed</a>
+            <li class="nav-item" data-level="3"><a href="#14-deepspeed" class="nav-link">1.4 DeepSpeed 双卡</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#_1" class="nav-link">其他</a>
-              <ul class="nav flex-column">
               </ul>
             </li>
               </ul>
@@ -108,18 +100,77 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="accelerate">Accelerate<a class="headerlink" href="#accelerate" title="Permanent link">#</a></h1>
-<h2 id="1-config">1、生成配置文件: <code>config</code><a class="headerlink" href="#1-config" title="Permanent link">#</a></h2>
-<blockquote>
-<p>这部分的参考文档为：</p>
+<h1 id="experiment-with-transformers">Experiment With Transformers<a class="headerlink" href="#experiment-with-transformers" title="Permanent link">#</a></h1>
+<h2 id="1">1、全量参数微调<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>先设计一下要跑哪几个实验：</p>
 <ul>
-<li><a href="https://huggingface.co/docs/accelerate/quicktour#launching-your-distributed-script">Launching your distributed script</a></li>
+<li>使用 accelerate 库在单卡上启动  transformers 库中提供的训练脚本；</li>
+<li>使用 accelerate 库在双卡（数据并行）上启动  transformers 库中提供的训练脚本；</li>
+<li>使用 deepspeed 库在单卡（ZeRO3）上启动  transformers 库中提供的训练脚本；</li>
+<li>使用 deepspeed 库在双卡（ZeRO3）上启动  transformers 库中提供的训练脚本；</li>
 </ul>
-</blockquote>
-<p>生成配置文件命令如下所示，其中 <code>path_to_config.yaml</code> 是生成的配置文件的存储路径：</p>
-<pre><code>accelerate config --config_file path_to_config.yaml
+<h3 id="11-accelerate">1.1 Accelerate 单卡<a class="headerlink" href="#11-accelerate" title="Permanent link">#</a></h3>
+<p>accelerate 的配置：</p>
+<pre><code class="language-yaml">compute_environment: LOCAL_MACHINE
+distributed_type: MULTI_GPU
+downcast_bf16: 'no'
+gpu_ids: all
+machine_rank: 0
+main_training_function: main
+mixed_precision: fp16
+num_machines: 1
+num_processes: 1
+rdzv_backend: static
+same_network: true
+tpu_env: []
+tpu_use_cluster: false
+tpu_use_sudo: false
+use_cpu: false
 </code></pre>
-<p>比如生成的一个配置文件的样例为（单节点，2个GPU）：</p>
+<p>启动命令：</p>
+<pre><code>accelerate launch \
+  --config_file ./myconfig/default_accelerate_config.yaml \
+  examples/pytorch/language-modeling/run_clm.py \
+  --model_name_or_path gpt2-xl \
+  --train_file ./data/data.json \
+  --output_dir ./outputs \
+  --overwrite_output_dir \
+  --do_train \
+  --do_eval \
+  --fp16 \
+  --per_device_train_batch_size 1 \
+  --per_device_eval_batch_size 1
+</code></pre>
+<p>训练日志：</p>
+<pre><code>[INFO|trainer.py:1779] 2023-05-22 00:42:36,114 &gt;&gt; ***** Running training *****
+[INFO|trainer.py:1780] 2023-05-22 00:42:36,114 &gt;&gt;   Num examples = 38,008
+[INFO|trainer.py:1781] 2023-05-22 00:42:36,114 &gt;&gt;   Num Epochs = 3
+[INFO|trainer.py:1782] 2023-05-22 00:42:36,114 &gt;&gt;   Instantaneous batch size per device = 1
+[INFO|trainer.py:1783] 2023-05-22 00:42:36,114 &gt;&gt;   Total train batch size (w. parallel, distributed &amp; accumulation) = 1
+[INFO|trainer.py:1784] 2023-05-22 00:42:36,114 &gt;&gt;   Gradient Accumulation steps = 1
+[INFO|trainer.py:1785] 2023-05-22 00:42:36,114 &gt;&gt;   Total optimization steps = 114,024
+[INFO|trainer.py:1786] 2023-05-22 00:42:36,115 &gt;&gt;   Number of trainable parameters = 1,557,611,200
+  1%|▉                                                                  | 650/114024 [10:06&lt;26:31:56,  1.19it/s]
+</code></pre>
+<p>显存使用情况：</p>
+<pre><code>+-----------------------------------------------------------------------------+
+| NVIDIA-SMI 525.89.02    Driver Version: 525.89.02    CUDA Version: 12.0     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA A40          Off  | 00000000:31:00.0 Off |                    0 |
+|  0%   66C    P0   262W / 300W |  44403MiB / 46068MiB |     99%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+|   1  NVIDIA A40          Off  | 00000000:4B:00.0 Off |                    0 |
+|  0%   32C    P8    15W / 300W |      7MiB / 46068MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+</code></pre>
+<h3 id="12-accelerate">1.2 Accelerate 双卡<a class="headerlink" href="#12-accelerate" title="Permanent link">#</a></h3>
+<p>accelerate 的配置：</p>
 <pre><code class="language-yaml">compute_environment: LOCAL_MACHINE
 distributed_type: MULTI_GPU
 downcast_bf16: 'no'
@@ -136,104 +187,235 @@ tpu_use_cluster: false
 tpu_use_sudo: false
 use_cpu: false
 </code></pre>
-<h2 id="2">2、运行（两卡数据并行）<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
-<blockquote>
-<p>这部分的参考文档为：</p>
-<ul>
-<li>
-<p><a href="https://huggingface.co/docs/accelerate/quicktour#launching-your-distributed-script">Launching your distributed script</a></p>
-</li>
-<li>
-<p><a href="https://huggingface.co/docs/accelerate/basic_tutorials/launch">Launching your 🤗 Accelerate scripts</a></p>
-</li>
-</ul>
-</blockquote>
-<h3 id="21">2.1 启动命令说明<a class="headerlink" href="#21" title="Permanent link">#</a></h3>
-<p>运行的命令模版如下所示，首先指定上一步骤生成的 accelerate 的配置文件，然后指定训练的脚本，最后一部分是训练脚本中所需的参数：</p>
-<pre><code>accelerate launch --config_file path_to_config.yaml \
-  path_to_script.py \
-  --args_for_the_script
-</code></pre>
-<p>下面直接使用 accelerate 执行一下训练流程，一方面熟悉一下如何启动，另一方面看一下两卡时的加速效果。使用的机器是有2张 A40 显卡的机器，模型采用 gpt2，数据是某个开源数据，大概3W+条数据，使用的代码是 transformers 库中的样例代码，链接为：<a href="https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_clm.py">run_clm</a>
-。</p>
-<h3 id="22">2.2 单卡与两卡速度对比<a class="headerlink" href="#22" title="Permanent link">#</a></h3>
-<p>分别测试单卡训练和两卡训练，单卡训练和两卡训练的启动命令如下所示。单卡训练没有使用 accelerate 启动，而是直接使用 python 启动；两卡训练使用 accelerate 启动。</p>
-<pre><code># 单卡训练的启动命令
-CUDA_VISIBLE_DEVICES=1 python3 examples/pytorch/language-modeling/run_clm.py \
-  --model_name_or_path gpt2 \
-  --train_file ./data/data.json \
-  --output_dir ./outputs \
-  --do_train \
-  --do_eval \
-  --fp16 \
-  --per_device_train_batch_size 16 \
-  --per_device_eval_batch_size 16 \
-  --gradient_accumulation_steps 4 \
-  --overwrite_output_dir
-
-# 两卡训练的启动命令
-accelerate launch \
-  --config_file ./accelerate/default_accelerate_config.yaml \
+<p>启动命令：</p>
+<pre><code>accelerate launch \
+  --config_file ./myconfig/default_accelerate_config.yaml \
   examples/pytorch/language-modeling/run_clm.py \
-  --model_name_or_path gpt2 \
+  --model_name_or_path gpt2-xl \
   --train_file ./data/data.json \
   --output_dir ./outputs \
+  --overwrite_output_dir \
   --do_train \
   --do_eval \
   --fp16 \
-  --per_device_train_batch_size 16 \
-  --per_device_eval_batch_size 16 \
-  --gradient_accumulation_steps 4 \
-  --overwrite_output_dir
+  --per_device_train_batch_size 1 \
+  --per_device_eval_batch_size 1
 </code></pre>
-<p>训练过程中的截图如下表所示，可以看出无论是单卡还是双卡，GPU的利用率都是比较高的，单卡和两卡的耗时也比较接近两倍关系，加速效果还是比较可观的。</p>
-<table>
-<thead>
-<tr>
-<th>测试环境</th>
-<th>训练时效果截图</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>单卡</td>
-<td><img alt="" src="/sLWQpZX6/assets/03.png" /><br><img alt="" src="/sLWQpZX6/assets/04.png" /></td>
-</tr>
-<tr>
-<td>两卡</td>
-<td><img alt="" src="/sLWQpZX6/assets/01.png" /><br><img alt="" src="/sLWQpZX6/assets/02.png" /></td>
-</tr>
-</tbody>
-</table>
-<h2 id="3">3、暂时略过的一些功能<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<ul>
-<li>
-<p>如果要在自己的训练代码中使用 accelerate 库，需要修改哪些代码：<a href="https://huggingface.co/docs/accelerate/quicktour#main-use">参考链接1</a>、<a href="https://huggingface.co/docs/accelerate/basic_tutorials/migration">参考链接2</a></p>
-</li>
-<li>
-<p>评估部分如果要做分布式评估，代码需要做哪些修改：<a href="https://huggingface.co/docs/accelerate/quicktour#distributed-evaluation">参考链接</a></p>
-</li>
-<li>
-<p>只在主进程中执行某些代码，比如打印进度条，代码要如何写：<a href="https://huggingface.co/docs/accelerate/quicktour#execute-a-statement-only-on-one-processes">参考链接</a></p>
-</li>
-<li>
-<p>模型的加载和存储：<a href="https://huggingface.co/docs/accelerate/quicktour#savingloading-a-model">参考链接</a></p>
-</li>
-<li>
-<p>训练过程中整个状态的存储和加载：<a href="https://huggingface.co/docs/accelerate/quicktour#savingloading-entire-states">参考链接1</a>、<a href="https://huggingface.co/docs/accelerate/usage_guides/checkpoint">参考链接2</a></p>
-</li>
-<li>
-<p>模型很大而显存不足时如何推理：<a href="https://huggingface.co/docs/accelerate/usage_guides/big_modeling">参考链接</a></p>
-</li>
-<li>
-<p>使用 accelerate 库之后如何实现梯度累积功能：<a href="https://huggingface.co/docs/accelerate/usage_guides/gradient_accumulation">参考链接</a></p>
-</li>
-</ul>
-<h2 id="deepspeed">DeepSpeed<a class="headerlink" href="#deepspeed" title="Permanent link">#</a></h2>
-<p>这个 accelerate 的文档里为什么说对 deepspeed 的支持还在试验中，接口随时会改变，链接: <a href="https://huggingface.co/docs/accelerate/quicktour#deepspeed">https://huggingface.co/docs/accelerate/quicktour#deepspeed</a></p>
-<h2 id="_1">其他<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
-<p>在阅读 accelerate 的文档时，有一个地方很细节，就是在使用混合精度训练时，如果某一次的梯度溢出了，那么会跳过这个 step，在这个 step 中不对权重进行更新。</p>
-<p>到下一个 step 时，根据一定的策略调小参数 <code>loss scaling factor</code>，下一个 step 就可能梯度不再溢出了，然后就继续训练。这个细节的文档为: <a href="https://huggingface.co/docs/accelerate/quicktour#mixed-precision-training">参考链接</a></p></div>
+<p>训练日志：</p>
+<pre><code>[INFO|trainer.py:1779] 2023-05-22 00:56:37,438 &gt;&gt; ***** Running training *****
+[INFO|trainer.py:1780] 2023-05-22 00:56:37,438 &gt;&gt;   Num examples = 38,008
+[INFO|trainer.py:1781] 2023-05-22 00:56:37,438 &gt;&gt;   Num Epochs = 3
+[INFO|trainer.py:1782] 2023-05-22 00:56:37,438 &gt;&gt;   Instantaneous batch size per device = 1
+[INFO|trainer.py:1783] 2023-05-22 00:56:37,438 &gt;&gt;   Total train batch size (w. parallel, distributed &amp; accumulation) = 2
+[INFO|trainer.py:1784] 2023-05-22 00:56:37,438 &gt;&gt;   Gradient Accumulation steps = 1
+[INFO|trainer.py:1785] 2023-05-22 00:56:37,438 &gt;&gt;   Total optimization steps = 57,012
+[INFO|trainer.py:1786] 2023-05-22 00:56:37,440 &gt;&gt;   Number of trainable parameters = 1,557,611,200
+  1%|█▉                                                                 | 673/57012 [10:57&lt;14:01:08,  1.12it/s]
+</code></pre>
+<p>显存使用情况：</p>
+<pre><code>+-----------------------------------------------------------------------------+
+| NVIDIA-SMI 525.89.02    Driver Version: 525.89.02    CUDA Version: 12.0     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA A40          Off  | 00000000:31:00.0 Off |                    0 |
+|  0%   66C    P0   257W / 300W |  44389MiB / 46068MiB |     99%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+|   1  NVIDIA A40          Off  | 00000000:4B:00.0 Off |                    0 |
+|  0%   61C    P0   246W / 300W |  44385MiB / 46068MiB |     99%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+</code></pre>
+<h3 id="13-deepspeed">1.3 DeepSpeed 单卡<a class="headerlink" href="#13-deepspeed" title="Permanent link">#</a></h3>
+<p>deepspeed 的配置：</p>
+<pre><code class="language-json">{
+    &quot;fp16&quot;: {
+        &quot;enabled&quot;: &quot;auto&quot;,
+        &quot;loss_scale&quot;: 0,
+        &quot;loss_scale_window&quot;: 1000,
+        &quot;initial_scale_power&quot;: 16,
+        &quot;hysteresis&quot;: 2,
+        &quot;min_loss_scale&quot;: 1
+    },
+
+    &quot;optimizer&quot;: {
+        &quot;type&quot;: &quot;AdamW&quot;,
+        &quot;params&quot;: {
+            &quot;lr&quot;: &quot;auto&quot;,
+            &quot;betas&quot;: &quot;auto&quot;,
+            &quot;eps&quot;: &quot;auto&quot;,
+            &quot;weight_decay&quot;: &quot;auto&quot;
+        }
+    },
+
+    &quot;scheduler&quot;: {
+        &quot;type&quot;: &quot;WarmupLR&quot;,
+        &quot;params&quot;: {
+            &quot;warmup_min_lr&quot;: &quot;auto&quot;,
+            &quot;warmup_max_lr&quot;: &quot;auto&quot;,
+            &quot;warmup_num_steps&quot;: &quot;auto&quot;
+        }
+    },
+
+    &quot;zero_optimization&quot;: {
+        &quot;stage&quot;: 3,
+        &quot;overlap_comm&quot;: true,
+        &quot;contiguous_gradients&quot;: true,
+        &quot;sub_group_size&quot;: 1e9,
+        &quot;reduce_bucket_size&quot;: &quot;auto&quot;,
+        &quot;stage3_prefetch_bucket_size&quot;: &quot;auto&quot;,
+        &quot;stage3_param_persistence_threshold&quot;: &quot;auto&quot;,
+        &quot;stage3_max_live_parameters&quot;: 1e9,
+        &quot;stage3_max_reuse_distance&quot;: 1e9,
+        &quot;stage3_gather_16bit_weights_on_model_save&quot;: true
+    },
+
+    &quot;gradient_accumulation_steps&quot;: &quot;auto&quot;,
+    &quot;gradient_clipping&quot;: &quot;auto&quot;,
+    &quot;train_batch_size&quot;: &quot;auto&quot;,
+    &quot;train_micro_batch_size_per_gpu&quot;: &quot;auto&quot;
+}
+</code></pre>
+<p>启动命令：</p>
+<pre><code>deepspeed --num_gpus=1 \
+  examples/pytorch/language-modeling/run_clm.py \
+  --deepspeed ./myconfig/ds_config.json \
+  --model_name_or_path gpt2-xl \
+  --train_file ./data/data.json \
+  --output_dir ./outputs \
+  --overwrite_output_dir \
+  --do_train \
+  --do_eval \
+  --fp16 \
+  --per_device_train_batch_size 1 \
+  --per_device_eval_batch_size 1
+</code></pre>
+<p>训练日志：</p>
+<pre><code>[INFO|trainer.py:1779] 2023-05-22 00:26:45,120 &gt;&gt; ***** Running training *****
+[INFO|trainer.py:1780] 2023-05-22 00:26:45,120 &gt;&gt;   Num examples = 38,008
+[INFO|trainer.py:1781] 2023-05-22 00:26:45,120 &gt;&gt;   Num Epochs = 3
+[INFO|trainer.py:1782] 2023-05-22 00:26:45,120 &gt;&gt;   Instantaneous batch size per device = 1
+[INFO|trainer.py:1783] 2023-05-22 00:26:45,120 &gt;&gt;   Total train batch size (w. parallel, distributed &amp; accumulation) = 1
+[INFO|trainer.py:1784] 2023-05-22 00:26:45,120 &gt;&gt;   Gradient Accumulation steps = 1
+[INFO|trainer.py:1785] 2023-05-22 00:26:45,120 &gt;&gt;   Total optimization steps = 114,024
+[INFO|trainer.py:1786] 2023-05-22 00:26:45,121 &gt;&gt;   Number of trainable parameters = 1,557,611,200
+  1%|▊                                                                  | 577/114024 [11:33&lt;38:41:41,  1.23s/it]
+</code></pre>
+<p>显存使用情况：</p>
+<pre><code>+-----------------------------------------------------------------------------+
+| NVIDIA-SMI 525.89.02    Driver Version: 525.89.02    CUDA Version: 12.0     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA A40          Off  | 00000000:31:00.0 Off |                    0 |
+|  0%   56C    P0   164W / 300W |  40397MiB / 46068MiB |     52%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+|   1  NVIDIA A40          Off  | 00000000:4B:00.0 Off |                    0 |
+|  0%   35C    P0    75W / 300W |      4MiB / 46068MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+</code></pre>
+<h3 id="14-deepspeed">1.4 DeepSpeed 双卡<a class="headerlink" href="#14-deepspeed" title="Permanent link">#</a></h3>
+<blockquote>
+<p>优化器分片+梯度分片+参数分片；</p>
+</blockquote>
+<p>deepspeed 的配置：</p>
+<pre><code class="language-json">{
+    &quot;fp16&quot;: {
+        &quot;enabled&quot;: &quot;auto&quot;,
+        &quot;loss_scale&quot;: 0,
+        &quot;loss_scale_window&quot;: 1000,
+        &quot;initial_scale_power&quot;: 16,
+        &quot;hysteresis&quot;: 2,
+        &quot;min_loss_scale&quot;: 1
+    },
+
+    &quot;optimizer&quot;: {
+        &quot;type&quot;: &quot;AdamW&quot;,
+        &quot;params&quot;: {
+            &quot;lr&quot;: &quot;auto&quot;,
+            &quot;betas&quot;: &quot;auto&quot;,
+            &quot;eps&quot;: &quot;auto&quot;,
+            &quot;weight_decay&quot;: &quot;auto&quot;
+        }
+    },
+
+    &quot;scheduler&quot;: {
+        &quot;type&quot;: &quot;WarmupLR&quot;,
+        &quot;params&quot;: {
+            &quot;warmup_min_lr&quot;: &quot;auto&quot;,
+            &quot;warmup_max_lr&quot;: &quot;auto&quot;,
+            &quot;warmup_num_steps&quot;: &quot;auto&quot;
+        }
+    },
+
+    &quot;zero_optimization&quot;: {
+        &quot;stage&quot;: 3,
+        &quot;overlap_comm&quot;: true,
+        &quot;contiguous_gradients&quot;: true,
+        &quot;sub_group_size&quot;: 1e9,
+        &quot;reduce_bucket_size&quot;: &quot;auto&quot;,
+        &quot;stage3_prefetch_bucket_size&quot;: &quot;auto&quot;,
+        &quot;stage3_param_persistence_threshold&quot;: &quot;auto&quot;,
+        &quot;stage3_max_live_parameters&quot;: 1e9,
+        &quot;stage3_max_reuse_distance&quot;: 1e9,
+        &quot;stage3_gather_16bit_weights_on_model_save&quot;: true
+    },
+
+    &quot;gradient_accumulation_steps&quot;: &quot;auto&quot;,
+    &quot;gradient_clipping&quot;: &quot;auto&quot;,
+    &quot;train_batch_size&quot;: &quot;auto&quot;,
+    &quot;train_micro_batch_size_per_gpu&quot;: &quot;auto&quot;
+}
+</code></pre>
+<p>启动命令：</p>
+<pre><code>deepspeed --num_gpus=2 \
+  examples/pytorch/language-modeling/run_clm.py \
+  --deepspeed ./myconfig/ds_config.json \
+  --model_name_or_path gpt2-xl \
+  --train_file ./data/data.json \
+  --output_dir ./outputs \
+  --overwrite_output_dir \
+  --do_train \
+  --do_eval \
+  --fp16 \
+  --per_device_train_batch_size 2 \
+  --per_device_eval_batch_size 2
+</code></pre>
+<p>训练日志：</p>
+<pre><code>[INFO|trainer.py:1779] 2023-05-22 00:13:55,728 &gt;&gt; ***** Running training *****
+[INFO|trainer.py:1780] 2023-05-22 00:13:55,728 &gt;&gt;   Num examples = 38,008
+[INFO|trainer.py:1781] 2023-05-22 00:13:55,728 &gt;&gt;   Num Epochs = 3
+[INFO|trainer.py:1782] 2023-05-22 00:13:55,728 &gt;&gt;   Instantaneous batch size per device = 2
+[INFO|trainer.py:1783] 2023-05-22 00:13:55,728 &gt;&gt;   Total train batch size (w. parallel, distributed &amp; accumulation) = 4
+[INFO|trainer.py:1784] 2023-05-22 00:13:55,728 &gt;&gt;   Gradient Accumulation steps = 1
+[INFO|trainer.py:1785] 2023-05-22 00:13:55,728 &gt;&gt;   Total optimization steps = 28,506
+[INFO|trainer.py:1786] 2023-05-22 00:13:55,730 &gt;&gt;   Number of trainable parameters = 1,557,611,200
+ 2%|██▊                                                                 | 500/28506 [10:14&lt;9:40:02,  1.24s/it]
+</code></pre>
+<p>显存使用情况：</p>
+<pre><code>+-----------------------------------------------------------------------------+
+| NVIDIA-SMI 525.89.02    Driver Version: 525.89.02    CUDA Version: 12.0     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA A40          Off  | 00000000:31:00.0 Off |                    0 |
+|  0%   62C    P0   216W / 300W |  41777MiB / 46068MiB |     75%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+|   1  NVIDIA A40          Off  | 00000000:4B:00.0 Off |                    0 |
+|  0%   58C    P0   219W / 300W |  41773MiB / 46068MiB |     96%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+</code></pre></div>
             </div>
         </div>
 

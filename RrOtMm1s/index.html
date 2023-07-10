@@ -6,17 +6,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/003_%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/998_%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%B6%89%E5%8F%8A%E7%9A%84%E9%9B%B6%E6%95%A3%E7%9F%A5%E8%AF%86%E7%82%B9/">
-        <link rel="shortcut icon" href="../../img/favicon.ico">
-        <title>深度学习涉及的零散知识点 - 算法工程师笔记</title>
-        <link href="../../css/bootstrap.min.css" rel="stylesheet">
-        <link href="../../css/font-awesome.min.css" rel="stylesheet">
-        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="canonical" href="https://mingchao.wang/004_GPT%E4%B8%8EBERT/001_%E5%87%A0%E7%A7%8Dtokenize%E7%AD%96%E7%95%A5/%E6%96%B0%E8%AF%8D%E5%8F%91%E7%8E%B0/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>新词发现 - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
-        <link href="../../css/extra.css" rel="stylesheet">
+        <link href="../../../css/extra.css" rel="stylesheet">
 
-        <script src="../../js/jquery-1.10.2.min.js" defer></script>
-        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
@@ -35,7 +35,7 @@
     <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
                 <!-- Expander button -->
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -71,9 +71,25 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link">深度学习涉及的零散知识点</a>
+            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link">新词发现</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#1loss" class="nav-link">1、在某些节点Loss突然下降</a>
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、基本思路简述</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、点互信息</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、左右熵</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4" class="nav-link">4、代码实现</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -84,18 +100,67 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="_1">深度学习涉及的零散知识点<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
-<h2 id="1loss">1、在某些节点Loss突然下降<a class="headerlink" href="#1loss" title="Permanent link">#</a></h2>
-<p>在训练模型时有时会得到如下图所示的损失函数图像，下面描述一下产生这种图像的原因。</p>
-<div align=center><img src="/BuWz4uEu/assets/001.png" width=50%/></div>
-
-<p><strong>可能的原因1</strong></p>
-<p>一种可能的原因跟代码的实现有关：在一个epoch内，loss一般是计算当前epoch中的滑动平均。到下一个epoch时，loss就清空并重新计算当前epoch的滑动平均。这种实现方式就会出现上图中某个节点中loss突然下降的现象。</p>
-<p><strong>可能的原因2</strong></p>
-<p>如果在计算loss时并不是上述那种方式，也有可能导致出现如上图的现象，这种解释出自 <a href="https://github.com/huggingface/transformers/issues/18730#issuecomment-1229769519">这里</a>。首先有一个假设：模型对某条数据训练之后，对该条数据的loss大幅降低，对其他条数据的loss降低幅度要远小于该条数据（这个假设比较直观，也比较合理）。在每个epoch内的训练过程中，模型对部分数据做训练之后，对另外一部分数据的loss降低并不明显；而当到达下一个epoch之后，由于所有的数据在上一个epoch中已经全部训练过一遍了，于是在这个epoch中对所有数据的loss都明显小于上一个epoch中loss。于是就会产生如上图所示的图像。</p>
-<p><strong>可能的原因3</strong></p>
-<p>如下图所示，第三种原因认为在loss下降缓慢时，其处在局部最优点，即下图红色箭头部分。当其跳出当前局部最优点，进入到另一个更低一些的最优点之后，就会有一段loss快速下降的过程，比如下图中绿色箭头的部分。</p>
-<div align=center><img src="/BuWz4uEu/assets/002.png" width=50%/></div></div>
+<h1 id="_1">新词发现<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<h2 id="1">1、基本思路简述<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<ul>
+<li>词语的内部凝聚程度要足够高，这个是使用点互信息来衡量；</li>
+<li>词语的左右邻词要足够的丰富，这个是使用左右熵来衡量；</li>
+</ul>
+<h2 id="2">2、点互信息<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>下面不考虑互信息的概念，仅使用频率也能够找出一些候选词，但是仅使用频率找出的候选词有着不少的缺陷，下面详细说明。</p>
+<p>仅使用频率获取候选词的算法流程为：遍历整个语料，统计相邻词对的出现频率，选取出现频率最高 topk 作为候选的新词。</p>
+<p>由于在文本中存在着特别高频的字或者词，比如 "的"、"在"、"你"、"我"、"他" 等等，这些字由于出现的频率非常高，那么这部分字和其他的词语成对出现的概率自然也会比较高。举个例子，比如在一批新闻语料中，"的演唱" 出现的概率可能比 "演唱者" 出现的概率还要高，原因就是因为 "的" 这个字出现的概率太高。所以从直观上来看，不仅要关注相邻词对出现的频率，还要关系这个词对中每个词的出现概率，只有当词对中的每个词出现时大概率都是和另一个同时出现，才更有可能是一个新词。由此就引出了互信息的概念。</p>
+<p>互信息（也称平均互信息）的公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}
+I(X, Y) = \sum_{y \in Y} \sum_{x \in X}
+p(x,y) \log{ \left(\frac{p(x,y)}{p(x)\,p(y)}
+\right) }
+\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}
+I(X, Y) = \sum_{y \in Y} \sum_{x \in X}
+p(x,y) \log{ \left(\frac{p(x,y)}{p(x)\,p(y)}
+\right) }
+\end{equation}</script>
+</div>
+<p>在新词发现这个具体的场景中，随机变量 <span class="arithmatex"><span class="MathJax_Preview">X</span><script type="math/tex">X</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">Y</span><script type="math/tex">Y</script></span> 的取值都是唯一的，所以不需要取平均值，可以直接使用点互信息的概念。</p>
+<p>点互信息公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{align}
+I(x, y) = \log\frac{p(x,y)}{p(x)p(y)}
+\end{align}</div>
+<script type="math/tex; mode=display">\begin{align}
+I(x, y) = \log\frac{p(x,y)}{p(x)p(y)}
+\end{align}</script>
+</div>
+<p>可以看出在该公式中，分子是两个词同时出现的概率；分母是衡量两个词分别单独出现的概率。从单调性上来看，两个词同时出现的概率越大，其是一个新词的得分越大；每个词单独出现的概率越大，这两个词组合成一个新词的概率越小。</p>
+<blockquote>
+<p>平均互信息与点互信息的关系类似于熵与自信息的关系。点互信息和自信息都是随机变量取某个具体的值时的信息量，对于一般的离散型随机变量，都会有多个可能的取值，由此就有了衡量随机变量的平均信息量的概念，即互信息和熵。关于自信息与熵的概念详情见：<a href="http://mingchao.wang/YGtSpnQP/">http://mingchao.wang/YGtSpnQP/</a></p>
+</blockquote>
+<p><br></p>
+<blockquote>
+<p>另外点互信息还可以跟条件概率关联上，这个跟本次的新词发现没什么关系，只是记录一下该数学公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{align}I(x, y) = \log\frac{p(x,y)}{p(x)p(y)} = \log\frac{p(x|y)}{p(x)} = \log\frac{p(y|x)}{p(y)}\end{align}</div>
+<script type="math/tex; mode=display">\begin{align}I(x, y) = \log\frac{p(x,y)}{p(x)p(y)} = \log\frac{p(x|y)}{p(x)} = \log\frac{p(y|x)}{p(y)}\end{align}</script>
+</div>
+</blockquote>
+<h2 id="3">3、左右熵<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<p>左右熵主要是为了衡量新词的左右邻字组合的丰富度是否足够高。</p>
+<p>比如两个三个字的候选词 "副总裁" 和 "人工智"，可以很容易直观的想到 "副总裁" 的左右邻字是五花八门，足够丰富的。而 "人工智" 的右边邻字的丰富度不够高的，其大概率是 "能" 这个字。</p>
+<p>左右熵的计算公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\text{Entropy(w)} = -\sum_{w_n \in W_{neighbor}} p(w_n | w) \log p(w_n | w) \end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\text{Entropy(w)} = -\sum_{w_n \in W_{neighbor}} p(w_n | w) \log p(w_n | w) \end{equation}</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">w</span><script type="math/tex">w</script></span> 表示候选词，<span class="arithmatex"><span class="MathJax_Preview">W_{neighbor}</span><script type="math/tex">W_{neighbor}</script></span> 表示候选词的左右邻字的集合。</p>
+<p>左右熵肯定是越大越好，越大说明左右邻字的丰富度越高。</p>
+<h2 id="4">4、代码实现<a class="headerlink" href="#4" title="Permanent link">#</a></h2>
+<p>待补充...</p>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://zhuanlan.zhihu.com/p/80385615">https://zhuanlan.zhihu.com/p/80385615</a></li>
+</ul></div>
             </div>
         </div>
 
@@ -105,13 +170,13 @@
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
         <script>
-            var base_url = "../..",
+            var base_url = "../../..",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="../../js/base.js" defer></script>
-        <script src="../../mathjax-config.js" defer></script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
-        <script src="../../search/main.js" defer></script>
+        <script src="../../../search/main.js" defer></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
