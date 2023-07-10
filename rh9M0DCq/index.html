@@ -125,7 +125,7 @@
 <p>可以看出，使用 Post Norm 时，第0层和第1层的梯度较小，第10层和第11层的梯度较大。也就是靠前的层梯度较小，靠后的层梯度较大。并且有其他研究表明，靠前层的梯度还会随着训练的进行还会迅速减小，导致靠前的层之后就得不到充分的训练。</p>
 <p>使用 Pre Norm 时，第0层和第1层的梯度较大，第10层和第11层的梯度较小。也就是靠前的层梯度较大，靠后的层梯度较小。</p>
 <p>就理想情况来说，无论是"靠前层梯度小靠后层梯度大"，还是"靠前层梯度大靠后层梯度小"，都不是想要的，最想要的是：每一层的梯度是相同的（这里不是说梯度完全相同，而是梯度的统计值相同，比如每层梯度的L1范数值相同）。做这方面的工作有很多，比如 <a href="https://arxiv.org/pdf/2110.09456.pdf">NormFormer</a> 是在 Pre Norm 的基础上做优化，通过缓解 "靠前层梯度大靠后层梯度小" 的问题达到每层梯度相同；<a href="https://arxiv.org/pdf/2203.00555.pdf">DeepNet</a> 是在 Post Norm 的基础上做优化，通过缓解 "靠前层梯度小靠后层梯度大" 的问题达到每层梯度相同；</p>
-<p><img alt="" src="/003_深度学习/005_Normalize/prenorm_vs_postnorm/assets/prenorm_vs_postnorm_01.png" /></p>
+<p><img alt="" src="/rh9M0DCq/prenorm_vs_postnorm_01.png" /></p>
 <p>上述现象出自论文: <a href="https://arxiv.org/pdf/2110.09456.pdf">NormFormer: Improved Transformer Pretraining with Extra Normalization</a></p>
 <p>上面是从实验中观察到的现象，下面从理论方面分析一下产生该现象的原因。</p>
 <h2 id="3-normalize">3、残差连接与 Normalize 的联系<a class="headerlink" href="#3-normalize" title="Permanent link">#</a></h2>

@@ -154,7 +154,7 @@
 <p>一般所说的transformer仅仅指其中的一层结构，这里的描述上有点区别。</p>
 </blockquote>
 <h2 id="1tranformer">1、tranformer的结构是什么样的？<a class="headerlink" href="#1tranformer" title="Permanent link">#</a></h2>
-<div align=center><img src="/004_GPT与BERT/005_Transformer/assets/001.png" width=35% /></div>
+<div align=center><img src="/crmAf7MS/001.png" width=35% /></div>
 
 <h3 id="11-encoderdecoder">1.1 Encoder端和Decoder端总览<a class="headerlink" href="#11-encoderdecoder" title="Permanent link">#</a></h3>
 <p>Encoder端由N（原论文中N=6）个相同的transformer堆叠而成，其中每个transformer又由两个子模块构成，这两个子模块分别为multi-head-attention模块，以及一个前馈神经网络模块。</p>
@@ -169,7 +169,7 @@
 <script type="math/tex; mode=display">\text{Attention}(Q, K, V)=\text{softmax}\big(\frac{QK^{\top}}{\sqrt{d_k}}\big)V</script>
 </div>
 <p>注意，Decoder端的self-attention模块还要再多一个部分，就是要做mask。因为在Decoder端其要预测下一个token，对于每个当前token，其都不能看到未来的序列，所以在预测当前位置的token时，要mask掉之后的所有的token。也因此，在图中Decoder部分的self-attention模块名字为masked multi-head-attention。</p>
-<div align=center><img src="/004_GPT与BERT/005_Transformer/assets/002.png" width=30% /></div>
+<div align=center><img src="/crmAf7MS/002.png" width=30% /></div>
 
 <h3 id="13-multi-head-attention">1.3 multi-head-attention模块<a class="headerlink" href="#13-multi-head-attention" title="Permanent link">#</a></h3>
 <p>multi-head-attention模块如下图所示。multi-head-attention模块则是将"Q、K、V通过参数矩阵之后再过一个self-attention"这个过程重复多次，将多次的结果拼接起来，再经过一个全连接层（即下述公式中的<span class="arithmatex"><span class="MathJax_Preview">W^O</span><script type="math/tex">W^O</script></span>）。其公式形式如下所示：</p>
@@ -184,7 +184,7 @@
 \end{split}</script>
 </div>
 <p>在上述公式中：<span class="arithmatex"><span class="MathJax_Preview">W^Q_i \in R^{d_{\text{model}} \enspace \times d_k}</span><script type="math/tex">W^Q_i \in R^{d_{\text{model}} \enspace \times d_k}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">W^K_i \in R^{d_{\text{model}} \enspace \times d_k}</span><script type="math/tex">W^K_i \in R^{d_{\text{model}} \enspace \times d_k}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">W^V_i \in R^{d_{\text{model}} \enspace \times d_v}</span><script type="math/tex">W^V_i \in R^{d_{\text{model}} \enspace \times d_v}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">W^O \in R^{h d_v \thinspace \times d_{\text{model}}}</span><script type="math/tex">W^O \in R^{h d_v \thinspace \times d_{\text{model}}}</script></span></p>
-<div align=center><img src="/004_GPT与BERT/005_Transformer/assets/003.png" width=30% /></div>
+<div align=center><img src="/crmAf7MS/003.png" width=30% /></div>
 
 <h3 id="14-cross-multi-head-attention">1.4 cross-multi-head-attention模块<a class="headerlink" href="#14-cross-multi-head-attention" title="Permanent link">#</a></h3>
 <p>这个模块是仅在Decoder端有。cross-multi-head-attention模块的形式与multi-head-attention模块一致，唯一不同的是其​输入的来源。其输入的<span class="arithmatex"><span class="MathJax_Preview">K</span><script type="math/tex">K</script></span>和<span class="arithmatex"><span class="MathJax_Preview">V</span><script type="math/tex">V</script></span>来自于整个Encoder端的输出，其输入<span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span>来自于Decode端的前一部分（对应到图中即为masked multi-head attention的输出）。</p>
@@ -250,18 +250,18 @@
 </thead>
 <tbody>
 <tr>
-<td><img alt="" src="/004_GPT与BERT/005_Transformer/assets/004.jpg" /></td>
-<td><img alt="" src="/004_GPT与BERT/005_Transformer/assets/005.jpg" /></td>
-<td><img alt="" src="/004_GPT与BERT/005_Transformer/assets/006.jpg" /></td>
-<td><img alt="" src="/004_GPT与BERT/005_Transformer/assets/007.jpg" /></td>
+<td><img alt="" src="/crmAf7MS/004.jpg" /></td>
+<td><img alt="" src="/crmAf7MS/005.jpg" /></td>
+<td><img alt="" src="/crmAf7MS/006.jpg" /></td>
+<td><img alt="" src="/crmAf7MS/007.jpg" /></td>
 </tr>
 </tbody>
 </table>
 <p>这两个输入输入的文本在整个transformer的模型结构图中的位置如下图所示：</p>
-<div align=center><img src="/004_GPT与BERT/005_Transformer/assets/008.png" width=40% /></div>
+<div align=center><img src="/crmAf7MS/008.png" width=40% /></div>
 
 <h2 id="10self-attention">10、self-attention的运算过程图解？<a class="headerlink" href="#10self-attention" title="Permanent link">#</a></h2>
-<div align=center><img src="/004_GPT与BERT/005_Transformer/assets/009.png" width=80% /></div></div>
+<div align=center><img src="/crmAf7MS/009.png" width=80% /></div></div>
             </div>
         </div>
 

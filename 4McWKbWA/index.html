@@ -175,7 +175,7 @@ J_F(x_1, x_2, ..., x_n) = \begin{bmatrix}
 </div>
 <p>关于这个<code>最优线性逼近</code>，写一下从几何方面对他的理解：</p>
 <p>我们知道，在几何中：矩阵表示的是线性变换，比如平移、旋转、缩放。当给定的矩阵中每个元素都是常数时，该矩阵对应的线性变换就是固定的，比如下图中的变换对应的矩阵为<span class="arithmatex"><span class="MathJax_Preview">\begin{bmatrix}1 &amp; 0 \\ 1 &amp; 1\end{bmatrix}</span><script type="math/tex">\begin{bmatrix}1 & 0 \\ 1 & 1\end{bmatrix}</script></span>：</p>
-<p><img alt="" src="/001_数学基础/线性代数/Jacobi矩阵/assets/01.jpeg" /></p>
+<p><img alt="" src="/551gooOO/01.jpeg" /></p>
 <p>上图中左侧的正方形经过变换矩阵<span class="arithmatex"><span class="MathJax_Preview">\begin{bmatrix}1 &amp; 0 \\ 1 &amp; 1\end{bmatrix}</span><script type="math/tex">\begin{bmatrix}1 & 0 \\ 1 & 1\end{bmatrix}</script></span>之后得到上图右侧的平行四边形；</p>
 <p>与上述这种变换的区别是，Jacobi矩阵中的每个元素并不都是常数，而是与 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 相关的，当给定一个具体的 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 之后，就可求出Jacobi矩阵中每个元素的值，此时在给定的 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 的极小邻域内是一个线性变换。这就是：<strong>Jocabi矩阵体现了一个可微方程与给定点的最优线性逼近</strong>。</p>
 <p>关于Jacobi矩阵在几何方便的理解可以参考bilibili上的视频：<a href="https://www.bilibili.com/video/BV1NJ411r7ja/">《雅可比矩阵是什么东西》</a>；</p>

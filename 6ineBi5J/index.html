@@ -175,7 +175,7 @@
 </thead>
 <tbody>
 <tr>
-<td><div align=center><img src="/004_GPT与BERT/009_ALBERT/assets/01.png" width=50% /></div></td>
+<td><div align=center><img src="/6ineBi5J/01.png" width=50% /></div></td>
 </tr>
 </tbody>
 </table>
@@ -188,7 +188,7 @@
 <p>关于运算速度方面，可以看出在最耗时的 transformer 的计算部分丝毫没有减少，本来需要计算 12 层 transformer 的话，新模型还是需要计算 12 层。论文中所提到的速度提升是因为使用相同的数据量做预训练时，由于模型参数量变少，占用的显存变小，每个 batch 中就可以方更多的数据，由此导致的训练时间减少。但如果要对一天样本进行推理，那么速度上是相同的。</p>
 <h3 id="42">4.2 效果方面<a class="headerlink" href="#42" title="Permanent link">#</a></h3>
 <p>由原论文中提供的下图可以看出：ALBERT-base 相比于 BERT-base 降了 2.2%；ALBERT-large 相比于 BERT-large 降了 2.8%。所以参数量的大幅减少是以损耗一定的模型效果为前提的，具体要选择哪种模型，还要结合具体任务。</p>
-<div align=center><img src="/004_GPT与BERT/009_ALBERT/assets/02.png" width=100% /></div>
+<div align=center><img src="/6ineBi5J/02.png" width=100% /></div>
 
 <h3 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h3>
 <ul>
