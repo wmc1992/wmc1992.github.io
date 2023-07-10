@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/005_%E5%B7%A5%E5%85%B7%E6%A1%86%E6%9E%B6/001_huggingface/deepspeed/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>DeepSpeed Integrated in Transformers - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#deepspeed-integrated-in-transformers" class="nav-link">DeepSpeed Integrated in Transformers</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1trainer" class="nav-link">1、Trainer</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、配置文件</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#21-deepspeedexamples" class="nav-link">2.1 DeepSpeedExamples</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#22" class="nav-link">2.2 配置文件样例</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、共享配置</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4zerozero-redundancy-optimizer" class="nav-link">4、ZeRO（Zero Redundancy Optimizer）</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#42-zero2-config" class="nav-link">4.2 ZeRO2 config</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#43-zero3-config" class="nav-link">4.3 ZeRO3 config</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#44-zero0-zero1" class="nav-link">4.4 ZeRO0 和 ZeRO1</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#5optimizer-and-scheduler" class="nav-link">5、Optimizer and Scheduler</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#51-optimizer" class="nav-link">5.1 Optimizer</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#52-scheduler" class="nav-link">5.2 Scheduler</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="deepspeed-integrated-in-transformers">DeepSpeed Integrated in Transformers<a class="headerlink" href="#deepspeed-integrated-in-transformers" title="Permanent link">#</a></h1>
+<blockquote>
+<p>对于 deepspeed 这个库，不打算直接单独使用这个库，而是将其结合 transformers 或者 accelerate 一起使用。</p>
+<p>该文档就是介绍如何使用集成到 transformers 库中的 deepspeed。</p>
+</blockquote>
+<h2 id="1trainer">1、Trainer<a class="headerlink" href="#1trainer" title="Permanent link">#</a></h2>
+<p>在 transformers 的 Trainer 库中集成了 deepspeed，上层应用只要使用了 Trainer 之后基本上是什么都不用管，直接给定 deepspeed 的配置文件即可，非常方便。</p>
+<p>推荐使用这种方法！</p>
+<p>推荐使用这种方法！</p>
+<h2 id="2">2、配置文件<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>配置文件这一块，有三点：</p>
+<ul>
+<li>本文中会给出一些配置文件的例子；</li>
+<li>如何在项目 <a href="https://github.com/microsoft/DeepSpeedExamples">DeepSpeedExamples</a> 中找相应的配置文件的例子；</li>
+<li>配置文件中各个参数的含义与作用，这个主要见 DeepSpeed 的官方文档：<a href="https://www.deepspeed.ai/docs/config-json/">DeepSpeed Configuration JSON</a></li>
+</ul>
+<h3 id="21-deepspeedexamples">2.1 DeepSpeedExamples<a class="headerlink" href="#21-deepspeedexamples" title="Permanent link">#</a></h3>
+<p>项目 DeepSpeedExamples 中给了不少的使用 deepspeed 的配置文件，可以在该项目中查找符合自己需要的配置文件。这个操作非常简单，就是使用 <code>find</code> 命令在这个repo中寻找相应的配置文件，命令如下：</p>
+<pre><code>git clone https://github.com/microsoft/DeepSpeedExamples
+cd DeepSpeedExamples
+find . -name '*json'
+</code></pre>
+<p>另外还可以结合上 <code>grep</code> 命令，比如查找关键字 <code>Lamb</code> 的样例如下：</p>
+<pre><code>grep -i Lamb $(find . -name '*json')
+</code></pre>
+<h3 id="22">2.2 配置文件样例<a class="headerlink" href="#22" title="Permanent link">#</a></h3>
+<p>配置 ZeRO stage 为 <code>2</code>，开启 <code>cpu offload</code> 功能，使用 <code>AdamW</code> 优化器和 <code>WarmupLR</code> scheduler，并且使用混合精度训练的配置文件如下所示：</p>
+<pre><code class="language-json">{
+    &quot;fp16&quot;: {
+        &quot;enabled&quot;: &quot;auto&quot;,
+        &quot;loss_scale&quot;: 0,
+        &quot;loss_scale_window&quot;: 1000,
+        &quot;initial_scale_power&quot;: 16,
+        &quot;hysteresis&quot;: 2,
+        &quot;min_loss_scale&quot;: 1
+    },
+
+    &quot;optimizer&quot;: {
+        &quot;type&quot;: &quot;AdamW&quot;,
+        &quot;params&quot;: {
+            &quot;lr&quot;: &quot;auto&quot;,
+            &quot;betas&quot;: &quot;auto&quot;,
+            &quot;eps&quot;: &quot;auto&quot;,
+            &quot;weight_decay&quot;: &quot;auto&quot;
+        }
+    },
+
+    &quot;scheduler&quot;: {
+        &quot;type&quot;: &quot;WarmupLR&quot;,
+        &quot;params&quot;: {
+            &quot;warmup_min_lr&quot;: &quot;auto&quot;,
+            &quot;warmup_max_lr&quot;: &quot;auto&quot;,
+            &quot;warmup_num_steps&quot;: &quot;auto&quot;
+        }
+    },
+
+    &quot;zero_optimization&quot;: {
+        &quot;stage&quot;: 2,
+        &quot;offload_optimizer&quot;: {
+            &quot;device&quot;: &quot;cpu&quot;,
+            &quot;pin_memory&quot;: true
+        },
+        &quot;allgather_partitions&quot;: true,
+        &quot;allgather_bucket_size&quot;: 2e8,
+        &quot;overlap_comm&quot;: true,
+        &quot;reduce_scatter&quot;: true,
+        &quot;reduce_bucket_size&quot;: 2e8,
+        &quot;contiguous_gradients&quot;: true
+    },
+
+    &quot;gradient_accumulation_steps&quot;: &quot;auto&quot;,
+    &quot;gradient_clipping&quot;: &quot;auto&quot;,
+    &quot;train_batch_size&quot;: &quot;auto&quot;,
+    &quot;train_micro_batch_size_per_gpu&quot;: &quot;auto&quot;,
+}
+</code></pre>
+<h2 id="3">3、共享配置<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<p>这部分其实是一个注意点，在 transformers 项目中的 Trainer 会接收很多个参数，DeepSpeed 也会接收很多个参数，而且这两个不同的工具在指定同一个参数时，参数名可能还会不一样。这样就有很大的可能出现同一个参数在 DeepSpeed 中配置的值和 Trainer 中配置的值是不同的，如果出现这种情况，可能会发生一些未知错误，并且很难排查。</p>
+<p>在这篇 huggingface 的文档中给出了避免上述问题的解决方案是：在 deepspeed 的配置文件中，可以将部分参数配置为 <code>auto</code>，见上一小节中举的配置文件的例子。当 deepspeed 的配置文件这些参数配置为了 <code>auto</code> 时，那么实际生效的就是 Trainer 中这些参数设置的值，这样就避免了同一个参数给设定了不同值的问题了。</p>
+<h2 id="4zerozero-redundancy-optimizer">4、ZeRO（Zero Redundancy Optimizer）<a class="headerlink" href="#4zerozero-redundancy-optimizer" title="Permanent link">#</a></h2>
+<p>先说一下 ZeRO 这个工具几个不同状态的功能：</p>
+<ul>
+<li>ZeRO stage 0：不使用ZeRO；</li>
+<li>ZeRO stage 1：对优化器进行分片；</li>
+<li>ZeRO stage 2：对优化器进行分片+对梯度进行分片；</li>
+<li>ZeRO stage 3：对优化器进行分片+对梯度进行分片+对模型参数进行分片；</li>
+</ul>
+<p>其中比较常用的是 ZeRO2 和 ZeRO3。</p>
+<h3 id="42-zero2-config">4.2 ZeRO2 config<a class="headerlink" href="#42-zero2-config" title="Permanent link">#</a></h3>
+<blockquote>
+<p>该部分参考的文档为：</p>
+<ul>
+<li><a href="https://huggingface.co/docs/transformers/main_classes/deepspeed#zero2-config">https://huggingface.co/docs/transformers/main_classes/deepspeed#zero2-config</a></li>
+</ul>
+</blockquote>
+<p>配置样例如下：</p>
+<pre><code class="language-json">{
+    &quot;zero_optimization&quot;: {
+        &quot;stage&quot;: 2,
+        &quot;offload_optimizer&quot;: {
+            &quot;device&quot;: &quot;cpu&quot;,
+            &quot;pin_memory&quot;: true
+        },
+        &quot;allgather_partitions&quot;: true,
+        &quot;allgather_bucket_size&quot;: 5e8,
+        &quot;overlap_comm&quot;: true,
+        &quot;reduce_scatter&quot;: true,
+        &quot;reduce_bucket_size&quot;: 5e8,
+        &quot;contiguous_gradients&quot;: true
+    }
+}
+</code></pre>
+<p>其中 <code>allgather_bucket_size</code>、<code>overlap_comm</code>、<code>reduce_bucket_size</code> 这几个参数的作用没有看，如果需要使用可以阅读该部分的参考文档，这几个参数都是用来优化性能的。</p>
+<h3 id="43-zero3-config">4.3 ZeRO3 config<a class="headerlink" href="#43-zero3-config" title="Permanent link">#</a></h3>
+<blockquote>
+<p>该部分参考的文档为：</p>
+<ul>
+<li><a href="https://huggingface.co/docs/transformers/main_classes/deepspeed#zero3-config">https://huggingface.co/docs/transformers/main_classes/deepspeed#zero3-config</a></li>
+</ul>
+</blockquote>
+<pre><code class="language-json">{
+    &quot;zero_optimization&quot;: {
+        &quot;stage&quot;: 3,
+        &quot;offload_optimizer&quot;: {
+            &quot;device&quot;: &quot;cpu&quot;,
+            &quot;pin_memory&quot;: true
+        },
+        &quot;offload_param&quot;: {
+            &quot;device&quot;: &quot;cpu&quot;,
+            &quot;pin_memory&quot;: true
+        },
+        &quot;overlap_comm&quot;: true,
+        &quot;contiguous_gradients&quot;: true,
+        &quot;sub_group_size&quot;: 1e9,
+        &quot;reduce_bucket_size&quot;: &quot;auto&quot;,
+        &quot;stage3_prefetch_bucket_size&quot;: &quot;auto&quot;,
+        &quot;stage3_param_persistence_threshold&quot;: &quot;auto&quot;,
+        &quot;stage3_max_live_parameters&quot;: 1e9,
+        &quot;stage3_max_reuse_distance&quot;: 1e9,
+        &quot;stage3_gather_16bit_weights_on_model_save&quot;: true
+    }
+}
+</code></pre>
+<p>同样的，其中的参数 <code>stage3_prefetch_bucket_size</code>、<code>stage3_param_persistence_threshold</code>、<code>stage3_max_live_parameters</code>、<code>stage3_max_reuse_distance</code> 都没有看，都是优化性能的参数，现在的阶段是先跑起来，之后再来看这些参数的作用。</p>
+<h3 id="44-zero0-zero1">4.4 ZeRO0 和 ZeRO1<a class="headerlink" href="#44-zero0-zero1" title="Permanent link">#</a></h3>
+<p>应该不怎么使用这两个配置，略。</p>
+<h2 id="5optimizer-and-scheduler">5、Optimizer and Scheduler<a class="headerlink" href="#5optimizer-and-scheduler" title="Permanent link">#</a></h2>
+<blockquote>
+<p>该部分参考的文档为：</p>
+<ul>
+<li><a href="https://huggingface.co/docs/transformers/main_classes/deepspeed#optimizer-and-scheduler">https://huggingface.co/docs/transformers/main_classes/deepspeed#optimizer-and-scheduler</a></li>
+</ul>
+</blockquote>
+<p>关于 optimizer 和 scheduler 部分，这里还有一个能否混用的问题，就是 deepspeed 库中实现了部分的 optimizer 和 scheduler，然后 transformers 库中也实现了部分的 optimizer 和 scheduler，那么他们能不能混合使用？能否混合使用的具体情况如下表所示，但是这里感觉上没必要混着使用，全部使用 deepspeed 的就可以了。</p>
+<table>
+<thead>
+<tr>
+<th>Combos</th>
+<th align="center">HF Scheduler</th>
+<th align="center">DS Scheduler</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HF Optimizer</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>DS Optimizer</td>
+<td align="center">No</td>
+<td align="center">Yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="51-optimizer">5.1 Optimizer<a class="headerlink" href="#51-optimizer" title="Permanent link">#</a></h3>
+<p>deepspeed 支持的优化器有 <code>Adam</code>、<code>AdamW</code>、<code>OneBitAdam</code>、<code>Lamb</code> 这几个。当然了，一般情况下，目前主要使用的优化器还是 <code>Adam</code>。</p>
+<p>下面是优化器 <code>Adam</code> 的配置：</p>
+<pre><code class="language-json">{
+   &quot;optimizer&quot;: {
+       &quot;type&quot;: &quot;AdamW&quot;,
+       &quot;params&quot;: {
+         &quot;lr&quot;: &quot;auto&quot;,
+         &quot;betas&quot;: &quot;auto&quot;,
+         &quot;eps&quot;: &quot;auto&quot;,
+         &quot;weight_decay&quot;: &quot;auto&quot;
+       }
+   }
+}
+</code></pre>
+<p>除了将各个参数配置为 <code>auto</code> 以外，还可以指定具体的值，如下所示：</p>
+<pre><code class="language-json">{
+   &quot;optimizer&quot;: {
+       &quot;type&quot;: &quot;AdamW&quot;,
+       &quot;params&quot;: {
+         &quot;lr&quot;: 0.001,
+         &quot;betas&quot;: [0.8, 0.999],
+         &quot;eps&quot;: 1e-8,
+         &quot;weight_decay&quot;: 3e-7
+       }
+   }
+}
+</code></pre>
+<h3 id="52-scheduler">5.2 Scheduler<a class="headerlink" href="#52-scheduler" title="Permanent link">#</a></h3>
+<p>deepspeed 支持的 scheduler 有 <code>LRRangeTest</code>、<code>OneCycle</code>、<code>WarmupLR</code>、<code>WarmupDecayLR</code> 这几个。当然了，一般情况下，目前主要使用的 scheduler 还是 <code>WarmupLR</code>。</p>
+<p>配置举例如下：</p>
+<pre><code class="language-json">{
+   &quot;scheduler&quot;: {
+         &quot;type&quot;: &quot;WarmupLR&quot;,
+         &quot;params&quot;: {
+             &quot;warmup_min_lr&quot;: &quot;auto&quot;,
+             &quot;warmup_max_lr&quot;: &quot;auto&quot;,
+             &quot;warmup_num_steps&quot;: &quot;auto&quot;
+         }
+     }
+}
+</code></pre>
+<p>如果指定具体的值的话，配置如下：</p>
+<pre><code class="language-json">{
+   &quot;scheduler&quot;: {
+         &quot;type&quot;: &quot;WarmupLR&quot;,
+         &quot;params&quot;: {
+             &quot;warmup_min_lr&quot;: 0,
+             &quot;warmup_max_lr&quot;: 0.001,
+             &quot;warmup_num_steps&quot;: 1000
+         }
+     }
+}
+</code></pre>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://huggingface.co/docs/transformers/main_classes/deepspeed">https://huggingface.co/docs/transformers/main_classes/deepspeed</a></p>
+</li>
+<li>
+<p><a href="https://huggingface.co/docs/accelerate/usage_guides/deepspeed">https://huggingface.co/docs/accelerate/usage_guides/deepspeed</a></p>
+</li>
+</ul>
+<p><br></p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

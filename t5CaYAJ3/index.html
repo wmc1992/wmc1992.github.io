@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/004_PaLM-E/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>PaLM-E: 具身多模态语言模型 - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#palm-e" class="nav-link">PaLM-E: 具身多模态语言模型</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、本文贡献</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、模型结构</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#21" class="nav-link">2.1 整体结构说明</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#22-" class="nav-link">2.2 模型结构-公式版</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、传感器观测到的信息的编码策略</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#31" class="nav-link">3.1 状态值</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#32-vit" class="nav-link">3.2 图像数据编码-ViT</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#33-" class="nav-link">3.3 图像数据编码-高级版</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#34-projector" class="nav-link">3.4 Projector</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#35-entity-referrals" class="nav-link">3.5 Entity Referrals</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4" class="nav-link">4、训练策略</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#41" class="nav-link">4.1 训练数据说明</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#42" class="nav-link">4.2 模型冻结</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#43" class="nav-link">4.3 跨任务联合训练</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#5" class="nav-link">5、测评任务</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#51" class="nav-link">5.1 三个机器人任务</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#52-visual-languagenlp" class="nav-link">5.2 Visual-Language任务与NLP任务</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#6" class="nav-link">6、实验</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#61-tamp" class="nav-link">6.1 任务和运动规划（TAMP）实验</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#62" class="nav-link">6.2 桌面操作环境实验</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#63" class="nav-link">6.3 移动操作环境实验</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#64-visual-language-tasks" class="nav-link">6.4 图像语言任务（Visual-Language Tasks）测评结果</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#65-nlp" class="nav-link">6.5 NLP任务测评结果</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_1" class="nav-link">总结</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="palm-e">PaLM-E: 具身多模态语言模型<a class="headerlink" href="#palm-e" title="Permanent link">#</a></h1>
+<blockquote>
+<p>原论文链接: <a href="https://arxiv.org/pdf/2303.03378.pdf">https://arxiv.org/pdf/2303.03378.pdf</a></p>
+<p>官方视频演示链接: <a href="https://palm-e.github.io/">https://palm-e.github.io/</a></p>
+</blockquote>
+<p>最近看到张俊林大佬在回答问题 <a href="https://www.zhihu.com/question/589640227/answer/2937925226">OpenAI 发布多模态 GPT-4 模型，会开创哪些新的研究方向？</a> 时，在谈未来可能的技术方向里面提到了"具身智能"。于是找了一篇具身智能方向的，Google最近放出来的 PaLM-E 的论文看了一看，记录如下。</p>
+<p>这篇论文的名字是 "具身多模态语言模型"（Embodied Multimodal Language Model），先来分析一下这个特别长的名字各部分分别是啥意思：</p>
+<ul>
+<li>具身（Embodied）：表示该模型接入了机器人，具有了身体。</li>
+<li>多模态（Multimodal）：表示该模型的输入是多模态的，包括文本（text）、图像（visual）、连续状态（continuous state estimation）。（至于什么是连续状态后面会说明）</li>
+<li>语言（Language）：表示该模型的输出只有文本。当然了虽然说输出只能是文本，但是这个输出已经不再限制于自然语言了，已经被玩出花来了。因为代码本身也是文本，所以模型的输出可以是一段代码，代码执行完之后可以是一段机器人可识别的指令；也可以模型直接输出机器人可识别的指令；这样模型的输出结果就可以操作机器人。</li>
+</ul>
+<p>最近OpenAI发布的大火的GPT-4也是输入是多模态，输出为纯文本。</p>
+<blockquote>
+<p>之前基本只从事NLP领域，而本文除了NLP领域以外，还涉及到了图像领域、机器人领域的一些背景知识，读的时候有点费力。</p>
+</blockquote>
+<h2 id="1">1、本文贡献<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>提出并验证了可以通过将具身数据混合到多模态大语言模型的输入中来训练出一个通用的、可迁移的、多决策的 agent。</p>
+</li>
+<li>
+<p>证实了虽然现有的 zero-shot 图像语言模型不能很好的解决具身推理问题，但是训练一个具有通用能力的、能够解决具身推理问题的图像语言模型是可行的。</p>
+</li>
+<li>
+<p>关于如何训练上述具身多模态语言模型，本文提出了新颖的模型架构和训练策略。</p>
+</li>
+<li>
+<p>本文提出的 PaML-E 除了能解决具身推理问题外，在常规的图像和文本任务领域效果也很好。</p>
+</li>
+<li>
+<p>最后，本文证明了随着模型规模的增大，可以有效缓解模型在多模态微调时的灾难性遗忘问题。</p>
+</li>
+</ul>
+<h2 id="2">2、模型结构<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<h3 id="21">2.1 整体结构说明<a class="headerlink" href="#21" title="Permanent link">#</a></h3>
+<p>该模型的基座是之前 google 发布的预训练模型 PaLM，然后接上机器人，也就是具身（Embodied），所以该模型的名字为 PaLM-E（PaLM + Embodied）。既然基座是 PaLM 模型，那么该模型就是 Decoder 模型。</p>
+<p>模型 PaLM-E 的输入有三种类型：文本、图像、连续状态（来自于机器人的各种传感器的观测结果）。输入中的连续状态和输入中的文本一样，映射到相同维度的向量空间中之后输入到模型中，至于如何映射在后面进行说明。在输入模型时文本、图像、连续状态这三部分的顺序是不固定的，有可能交替出现，比如以如下这种方式：</p>
+<pre><code>Q: What happened between &lt;img 1&gt; and &lt;img 2&gt;? 
+</code></pre>
+<p>该模型的输出是仅有文本输出，这些文本输出除了可以是之前的经典的图像语言模型的任务的输出，还可以表示机器人的底层决策/计划，然后用于控制机器人的底层行为。在本文中重点研究的就是用模型的输出控制机器人的决策。</p>
+<h3 id="22-">2.2 模型结构-公式版<a class="headerlink" href="#22-" title="Permanent link">#</a></h3>
+<p><strong>Decoder语言模型：</strong></p>
+<p>这个就是最经典的GPT结构，没什么新颖的。就是给定前面序列的token，预测联合概率最大的下一个token。公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}p(w_{1:L})=\prod_{l=1}^L p_{LM}(w_l|w_{1:l-1})\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}p(w_{1:L})=\prod_{l=1}^L p_{LM}(w_l|w_{1:l-1})\end{equation}</script>
+</div>
+<p>该公式中 <span class="arithmatex"><span class="MathJax_Preview">p(w_{1:L})</span><script type="math/tex">p(w_{1:L})</script></span> 是总共 <span class="arithmatex"><span class="MathJax_Preview">L</span><script type="math/tex">L</script></span> 个token的联合概率，<span class="arithmatex"><span class="MathJax_Preview">p_{LM}</span><script type="math/tex">p_{LM}</script></span> 是语言模型。</p>
+<p><strong>带有Prefix的Decoder语言模型：</strong></p>
+<p>这个是在经典的GPT模型的基础上，在每条文本数据前面添加上一段prefix prompt。这个prefix prompt 可以是离散的，也可以是连续的。公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}p(w_{n+1:L}|w_{1:n}) = \prod_{l=n+1}^L p_{LM}(w_l|w_{1:l-1})\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}p(w_{n+1:L}|w_{1:n}) = \prod_{l=n+1}^L p_{LM}(w_l|w_{1:l-1})\end{equation}</script>
+</div>
+<p>在上述公式中，位置 <span class="arithmatex"><span class="MathJax_Preview">1</span><script type="math/tex">1</script></span> 到位置 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 是prefix prompt，从位置 <span class="arithmatex"><span class="MathJax_Preview">n+1</span><script type="math/tex">n+1</script></span> 往后才是输入的文本数据。在训练时，prefix prompt部分不参与计算loss。</p>
+<p><strong>文本 Token 的嵌入空间：</strong></p>
+<p>这个也是很老的概念了，这里主要是为了定义一下符号，因为下一部分会需要将从机器人的传感器获取到的连续状态也映射到这个同维度的向量空间中。这里先将这个向量空间的符号定义明确，下一部分说明连续状态的映射时会更清晰。</p>
+<p>使用 <span class="arithmatex"><span class="MathJax_Preview">W</span><script type="math/tex">W</script></span> 表示所有的token集合，使用 <span class="arithmatex"><span class="MathJax_Preview">w</span><script type="math/tex">w</script></span> 表示某一个token，使用 <span class="arithmatex"><span class="MathJax_Preview">\mathcal{X} \in R^k</span><script type="math/tex">\mathcal{X} \in R^k</script></span> 表示整个嵌入空间，使用 <span class="arithmatex"><span class="MathJax_Preview">\gamma</span><script type="math/tex">\gamma</script></span> 表示词嵌入的映射，使用 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 表示某个token的词嵌入向量。定义了这些之后那么词嵌入的过程可以表示为：<span class="arithmatex"><span class="MathJax_Preview">x_i = \gamma(w_i) \in R^k</span><script type="math/tex">x_i = \gamma(w_i) \in R^k</script></span></p>
+<p><strong>连续状态映射到嵌入空间：</strong></p>
+<p>机器人的传感器会观测到很多的连续状态，这些如果想要输入到模型中，也需要将其转换为向量，在本文中是将其转为与文本的token嵌入相同的向量空间中。</p>
+<p>使用 <span class="arithmatex"><span class="MathJax_Preview">\mathcal{O}</span><script type="math/tex">\mathcal{O}</script></span> 表示观测到的所有连续状态的集合，使用 <span class="arithmatex"><span class="MathJax_Preview">O_j</span><script type="math/tex">O_j</script></span> 表示某个观测到的具体的连续状态，使用 <span class="arithmatex"><span class="MathJax_Preview">\phi</span><script type="math/tex">\phi</script></span> 将连续状态编码成向量的映射，编码后的向量空间还是 <span class="arithmatex"><span class="MathJax_Preview">\mathcal{X}</span><script type="math/tex">\mathcal{X}</script></span> 与文本token的嵌入是相同的。</p>
+<p>连续状态的映射过程与文本token的映射过程的不同之处在于：一个token只映射为一个向量，一个连续状态可能需要映射为多个向量。比如观测到的一个连续状态可能是一段声音，只用一个向量不能很好的表示这段声音，就需要多个向量来表示。</p>
+<p>定义了这些之后那么文本和观测到的连续状态到嵌入向量的过程可以表示为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}x_i = \begin{cases}
+\gamma (w_i) &amp;\text{if } i \text{ is a text token}\\
+\phi_j (O_j)_i &amp;\text{if } i \text{ is a vector from } O_j
+\end{cases}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}x_i = \begin{cases}
+\gamma (w_i) &\text{if } i \text{ is a text token}\\
+\phi_j (O_j)_i &\text{if } i \text{ is a vector from } O_j
+\end{cases}\end{equation}</script>
+</div>
+<p>举个例子更好理解，比如原始数据为如下例子（本文中的传感器都是图像数据，没有音频数据，这里只是举个例子）：</p>
+<pre><code>请提取录音中的内容&lt;这里是一段录音内容&gt;。
+</code></pre>
+<p>经过编码后的嵌入向量序列为：<span class="arithmatex"><span class="MathJax_Preview">(x_1, x_2, ..., x_9, x_{10}, x_{11}, x_{12}, x_{13})</span><script type="math/tex">(x_1, x_2, ..., x_9, x_{10}, x_{11}, x_{12}, x_{13})</script></span>，这个向量序列中各个向量的来源如下（假设这段录音内容被编码为了三个向量）：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">x_1</span><script type="math/tex">x_1</script></span>: 来自于"请"</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">x_2</span><script type="math/tex">x_2</script></span>: 来自于"提"</li>
+<li>...</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">x_9</span><script type="math/tex">x_9</script></span>: 来自于"容"</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">x_{10}</span><script type="math/tex">x_{10}</script></span>: 来自于 &lt;录音内容&gt;</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">x_{11}</span><script type="math/tex">x_{11}</script></span>: 来自于 &lt;录音内容&gt;</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">x_{12}</span><script type="math/tex">x_{12}</script></span>: 来自于 &lt;录音内容&gt;</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">x_{13}</span><script type="math/tex">x_{13}</script></span>: 来自于"。" </li>
+</ul>
+<p>说明白了如何对连续状态进行编码，应该可以很容易的想到：虽然文本token和连续状态都被映射到了相同的向量空间中，但是做这个映射操作的模型肯定是不同的模型。关于token如何编码应该都很熟悉，关于如何对传感器观测到的信息做编码在下一章节介绍。</p>
+<h2 id="3">3、传感器观测到的信息的编码策略<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<blockquote>
+<p>该章节的 <strong>3.2</strong> 和 <strong>3.3</strong> 两个小节都是图像领域的内容，本人并不擅长，如有错漏，欢迎指正。</p>
+</blockquote>
+<h3 id="31">3.1 状态值<a class="headerlink" href="#31" title="Permanent link">#</a></h3>
+<p>当传感器的观测结果直接就是状态值，应该算是最简单的情况了，状态值举例可能会有：坐标、位置、颜色等等。这种输入数据可以直接转为向量，然后做一些归一化、对齐之类的操作就可以了。至于维度方面，只要经过一层MLP那么想要什么维度都可以转换成什么维度。</p>
+<h3 id="32-vit">3.2 图像数据编码-ViT<a class="headerlink" href="#32-vit" title="Permanent link">#</a></h3>
+<p>如果传感器的观测结果是图像类数据，一般来说图像类数据也是最常见的，直接使用比较成熟的 ViT 模型进行编码，在本文中 ViT 模型的尺寸选取 4B 和 22B 这两个模型。另外，在ViT的基础上，又有人提出了 TokenLearner 结构，加上该结构之后，既降低了计算复杂度，又提升了指标，所以在本文中也会尝试这种结构。综上，本文在对图像类的输入进行编码时会尝试以下几种方案：</p>
+<ul>
+<li>ViT-4B</li>
+<li>ViT-22B</li>
+<li>ViT + TL（TokenLearner）</li>
+</ul>
+<blockquote>
+<p>TokenLearner简介：由于图像类数据维度是2维的，如果直接使用像素点进行编码的话一张512*512的图片编码之后形成的token序列就变得非常长，而transformer架构对长序列的运算速度非常慢。针对这个问题，Google提出了TokenLearner方法，该方法能够自适应的学习输入图片或视频中的重要区域，然后主要对这些重要区域进行tokenize，以达到只需要少量的token就足以
+这篇论文的名字是
+表征所有的视觉特征的目的。</p>
+</blockquote>
+<p>备注：</p>
+<blockquote>
+<p>对于模型 ViT 和 TokenLearner 的原理，由于一直做NLP，对图像方面的这个模型不是很了解，之后可以看一下补充上，这里埋个坑。</p>
+</blockquote>
+<h3 id="33-">3.3 图像数据编码-高级版<a class="headerlink" href="#33-" title="Permanent link">#</a></h3>
+<p>在图像领域对于如何更好的编码图像数据，有不少的研究，本文中会使用以下两种技术：</p>
+<ul>
+<li>Object Centric Representations</li>
+<li>Object Scene Representation Transformer (OSRT)</li>
+</ul>
+<p>这两种技术对数据的基本假设是相同的，他们都认为把一张图片按照网格均匀的划分开，然后对每个网格使用一个向量进行表示，这种方式是不太合理的。因为一张图片中可能会有多个物体（或者称为多个对象），直接对所有的图片都是用相同的网格划分，大概率可能把图片中的一个对象划分成了多个部分。而如果能够在划分时以图片中的每个对象为中心进行划分，编码出来的向量应该是更合理的。正是基于这个原因，提出了上述两种编码技术。至于这两种技术的细节，这里不做讨论，只需知道这两种技术可以将图像数据编码为向量。</p>
+<h3 id="34-projector">3.4 Projector<a class="headerlink" href="#34-projector" title="Permanent link">#</a></h3>
+<p>需要注意的是，在 <strong>3.2</strong> 小节中提到的会使用 ViT 模型做图像数据的编码器，这里的 ViT 模型是之前已经预训练好的，那么没有办法保证 ViT 模型输出的向量维度与文本token的嵌入向量维度是相同的。类似的，使用在 <strong>3.3</strong> 小节中提到的两种技术对图像数据做编码时，也有同样的问题。</p>
+<p>为了解决上述问题，就需要在编码器的后面有一个维度转换的模块，该模块的作用是将原始编码器输出的各种不同的维度都映射到相同的维度上。将该模块称为 Projector，使用符号 <span class="arithmatex"><span class="MathJax_Preview">\psi</span><script type="math/tex">\psi</script></span> 表示。为了方便后续描述，对编码器（Encoder）也给一个符号，使用符号 <span class="arithmatex"><span class="MathJax_Preview">\phi</span><script type="math/tex">\phi</script></span> 表示。有了这些符号之后，整个编码部分的公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}x_i = \begin{cases}
+\text{embedding}(w_i) &amp;\text{ if position } i \text{ is a text token} \\
+\psi(\phi(O_j))_i &amp;\text{ if position } i \text{ is observation from sensor}
+\end{cases}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}x_i = \begin{cases}
+\text{embedding}(w_i) &\text{ if position } i \text{ is a text token} \\
+\psi(\phi(O_j))_i &\text{ if position } i \text{ is observation from sensor}
+\end{cases}\end{equation}</script>
+</div>
+<p>前面说的花里胡哨，所谓的 Projector 其实就是个全连接层，只要经过一个全连接，无论原来的向量维度是啥，都可以转换成自己想要的维度了。最后，自己画了一下把上述几个部分都组合到一起的模型结构图，大致如下图所示（下图中并不包含输出部分）：</p>
+<table>
+<thead>
+<tr>
+<th align="center">图1: 模型输入大致结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><div align="center"><img src="/t5CaYAJ3/assets/Figure_self_04.png" width="40%"/></div></td>
+</tr>
+</tbody>
+</table>
+<h3 id="35-entity-referrals">3.5 Entity Referrals<a class="headerlink" href="#35-entity-referrals" title="Permanent link">#</a></h3>
+<p>有些时候可以使用很简短的语言准确指向某一个物体，而有的时候则不能使用很简短的语言准确的指向某一个物体。举个例子来说明这个问题。比如当前桌面上有10个乐高模块，这10个模块的颜色各不相同，那么可以使用："红色的块"、"蓝色的块"、"黄色的块"这种比较简洁的描述指明某一个具体的物体。但如果当前桌面上有10个颜色、形状都完全相同的10个乐高模块，那么如果想要指明某一个具体的块可能需要描述成："最靠近左上角的那个块"、"从左往右数第3个，从上往下数第6个那个块"，这时描述起来就非常的长。</p>
+<p>Entity Referrals 方法就是设计在描述非常长的时候如何进行编码。该方法的思路是：在数据的最前面部分添加上对每个具体物体的描述，这部分的模版为如下格式。在这个模版里面 <code>Object_1</code> 和 <code>Object_j</code> 分别指代一个具体的物品，<code>&lt;obj_1&gt;</code> 和 <code>&lt;obj_j&gt;</code> 分别是对这两个物品的详细描述。添加了这个模版之后，后面的文本中再需要使用某个物品时就直接使用 <code>Object_j</code> 来代指。</p>
+<pre><code>Object_1 is &lt;obj_1&gt;. ... Object_j is &lt;obj_j&gt;.
+</code></pre>
+<p>具体的例子如下（中文版）：</p>
+<pre><code>物体1是位于桌面左上角的块。物体2是从左往右数第3个，从上往下数第6个那个块。请将物体1和物体2都移动到桌面右下角。
+</code></pre>
+<h2 id="4">4、训练策略<a class="headerlink" href="#4" title="Permanent link">#</a></h2>
+<h3 id="41">4.1 训练数据说明<a class="headerlink" href="#41" title="Permanent link">#</a></h3>
+<p>使用 <span class="arithmatex"><span class="MathJax_Preview">D</span><script type="math/tex">D</script></span> 表示整个训练数据集，使用 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 表示第几条数据，使用 <span class="arithmatex"><span class="MathJax_Preview">L</span><script type="math/tex">L</script></span> 表示一条数据的长度，使用 <span class="arithmatex"><span class="MathJax_Preview">u</span><script type="math/tex">u</script></span> 表示一条数据中有多少个通过传感器观测到的连续状态，使用 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 表示一条数据中 prefix prompt 部分的长度。</p>
+<p>定义了上述这些符号之后，整个数据集就可以表示为：<span class="arithmatex"><span class="MathJax_Preview">D = \{ (I_{1:u_i}^i, w_{1:L_i}^i, n_i) \}_{i=1}^N</span><script type="math/tex">D = \{ (I_{1:u_i}^i, w_{1:L_i}^i, n_i) \}_{i=1}^N</script></span>，其中 <span class="arithmatex"><span class="MathJax_Preview">I_{1:u_i}^i</span><script type="math/tex">I_{1:u_i}^i</script></span> 表示第 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 条数据的总共 <span class="arithmatex"><span class="MathJax_Preview">u_i</span><script type="math/tex">u_i</script></span> 个通过传感器观测到的连续状态，<span class="arithmatex"><span class="MathJax_Preview">w_{1:L_i}^i</span><script type="math/tex">w_{1:L_i}^i</script></span> 表示第 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 条数据的 <span class="arithmatex"><span class="MathJax_Preview">L_i</span><script type="math/tex">L_i</script></span> 个token，<span class="arithmatex"><span class="MathJax_Preview">n_i</span><script type="math/tex">n_i</script></span> 表示第 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 条数据的prerix prompt的长度。</p>
+<p>有一个需要注意的点是这里的 <span class="arithmatex"><span class="MathJax_Preview">L_i</span><script type="math/tex">L_i</script></span> 是一条数据的总长度，包含着连续状态编码成的向量。为了说明这一点，这里简述一下数据的构造过程。</p>
+<p>每条数据以文本为主体，把图像、连续状态都串成一条数据，如下这种方式所示：</p>
+<pre><code>Q: What happened between &lt;img 1&gt; and &lt;img 2&gt;? 
+</code></pre>
+<p>然后每个图像经过嵌入层之后会被转化为多少个向量是固定的，所以像上述数据只要给每个图像预留上对应个数的位置即可，会形成如下这种形式（这里假设每个图像都被编码为3个向量）：</p>
+<pre><code>Q: What happened between &lt;img1_vec1&gt; &lt;img1_vec2&gt; &lt;img1_vec3&gt; and &lt;img2_vec1&gt; &lt;img2_vec2&gt; &lt;img2_vec2&gt; ? 
+</code></pre>
+<p>输入模型时会使用对图像编码后的向量替换上述样例中预留的位置。</p>
+<p>损失函数部分就是对从位置 <span class="arithmatex"><span class="MathJax_Preview">n_i+1</span><script type="math/tex">n_i+1</script></span> 开始到 <span class="arithmatex"><span class="MathJax_Preview">L_i</span><script type="math/tex">L_i</script></span> 的这些位置使用交叉熵损失。每条数据的前 <span class="arithmatex"><span class="MathJax_Preview">n_i</span><script type="math/tex">n_i</script></span> 个位置是prefix prompt，不计算损失。</p>
+<h3 id="42">4.2 模型冻结<a class="headerlink" href="#42" title="Permanent link">#</a></h3>
+<p>本文中的整个模型系统可以分为三部分：</p>
+<ul>
+<li>Encoder 部分，用 <span class="arithmatex"><span class="MathJax_Preview">\phi</span><script type="math/tex">\phi</script></span> 表示；</li>
+<li>Projector 部分，用 <span class="arithmatex"><span class="MathJax_Preview">\psi</span><script type="math/tex">\psi</script></span> 表示；</li>
+<li>LLM 部分，用 <span class="arithmatex"><span class="MathJax_Preview">p_{LM}</span><script type="math/tex">p_{LM}</script></span> 表示；</li>
+</ul>
+<p>在训练时不一定要这三部分的权重都同时更新，可以冻结其中的一部分，只训练另外部分的权重。本文中实际采用的三个策略为：</p>
+<ul>
+<li>三个部分都同时进行训练；</li>
+<li>冻结 LLM 部分，训练 Encoder 部分和 Projector 部分；</li>
+<li>冻结 LLM 部分和 Encoder 部分，只训练 Projector 部分；</li>
+</ul>
+<p>采用上述后两种策略的理由：LLM部分采用PaLM作为基座，是已经在大量数据上做过预训练的，其本身可能就已经有着非常强的能力；Encoder部分也是类似的，比如采用ViT模型，那么该模型也是在大量图像数据上预训练过的；在上述三部分中只有 <span class="arithmatex"><span class="MathJax_Preview">\psi</span><script type="math/tex">\psi</script></span> 是随机初始化的，这部分模型必须要重新训练。</p>
+<h3 id="43">4.3 跨任务联合训练<a class="headerlink" href="#43" title="Permanent link">#</a></h3>
+<p>待补充</p>
+<h2 id="5">5、测评任务<a class="headerlink" href="#5" title="Permanent link">#</a></h2>
+<h3 id="51">5.1 三个机器人任务<a class="headerlink" href="#51" title="Permanent link">#</a></h3>
+<blockquote>
+<p>这一段主要是介绍机器人相关任务的一些背景，之前从来没做过相关的内容，所以这一部分仔细读了下论文。</p>
+</blockquote>
+<p>在本文中使用到的机器人环境有三个：</p>
+<ul>
+<li>桌面操作环境（Tabletop Manipulation Environments）</li>
+<li>移动操作环境（Mobile Manipulation Environments）</li>
+<li>任务和运动规划（Task and Motion Planning, TAMP）</li>
+</ul>
+<p>关于这三种试验环境，官方有演示视频，链接：<a href="https://palm-e.github.io/">https://palm-e.github.io/</a></p>
+<h4 id="511">5.1.1 桌面操作环境<a class="headerlink" href="#511" title="Permanent link">#</a></h4>
+<p>所谓的桌面操作环境就是在桌面上摆一些不同颜色、不同形状的物体，机器人按照输入的命令用机械臂移动这些物体。输入的命令比如为："将全部红色块移动到左下角"，"将所有的块摆成一排"，"将所有的块按颜色分组"，等等。从演示视频中截了个图如下所示：</p>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src="/t5CaYAJ3/assets/Figure_self_01.png" width="100%"/></td>
+</tr>
+</tbody>
+</table>
+<p>上图是人类旁观者的角度看桌面操作环境，在该环境下机器人自身的传感器看到的内容如下图所示。换言之，下面这张图片就是PaLM-E模型的输入的一部分。</p>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src="/t5CaYAJ3/assets/Figure_self_02.png" width="100%"/></td>
+</tr>
+</tbody>
+</table>
+<h4 id="512">5.1.2 移动操作环境<a class="headerlink" href="#512" title="Permanent link">#</a></h4>
+<p>移动操作环境就是机器人是可移动的，不再固定在桌面上。这个可以看官方提供的视频样例，链接为：<a href="https://palm-e.github.io/">https://palm-e.github.io/</a>，该视频中的命令是："帮我把抽屉里的薯片拿过来"，然后机器人会在厨房中自己去"找到抽屉"、"拉开抽屉"、"拿出薯片"、"合上抽屉"、"把薯片送回到人类手中"，这一系列工作都能够顺利完成。放一个视频截图如下：</p>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src="/t5CaYAJ3/assets/Figure_self_03.png" width="100%"/></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>我当时看官方视频时，有一点小惊讶的是机器人会在拿出薯片之后把抽屉合上，因为它的最终目的是"帮我把抽屉里的薯片拿过来"，所以它把薯片拿出抽屉之后直接送到人类手中就满足这个最终目标。不过它还会把抽屉合上，还是有点意思的。</p>
+<p>可能在训练数据中涉及到抽屉/柜子时，操作步骤都是：打开抽屉/柜子 -&gt; 取出/放入物品 -&gt; 合上抽屉/柜子，所以机器人学习之后也按照这种步骤执行。</p>
+</blockquote>
+<h4 id="513-task-and-motion-planning-tamp">5.1.3 任务和运动规划（Task and Motion Planning, TAMP）<a class="headerlink" href="#513-task-and-motion-planning-tamp" title="Permanent link">#</a></h4>
+<p>任务和运动规划是由四种 VQA（Visual Question Answering）问题和两种plan问题组成的。</p>
+<p>所谓的 VQA 就是看图回答问题。比如在下图2这个样例中，左侧的图片是模型的输入，右侧上方灰色的第一行也是模型的输入，右侧橙色背景的是模型的输出。翻译为中文即为：问: 哪个块现在不在组内？答: 红色的块。</p>
+<table>
+<thead>
+<tr>
+<th align="center">图2: VQA 举例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src="/t5CaYAJ3/assets/Figure_self_05.png" width="100%"/></td>
+</tr>
+</tbody>
+</table>
+<p>知道了什么是 VQA 问题之后，下面详细列一下4种 VQA 问题的类型，并且给每个问题类型一个例子，可以方便理解：</p>
+<ul>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">q_1</span><script type="math/tex">q_1</script></span>: <strong>物品颜色问题</strong>。举例：给定一张图片。问：桌面上的物体是什么颜色？答：桌面上的物体是黄色。</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">q_2</span><script type="math/tex">q_2</script></span>: <strong>物品-桌面位置关系问题</strong>。举例：给定一张图片。问：红色的物体在桌面的上方？左方？还是中心？答：红色的物体在桌面的中心。</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">q_3</span><script type="math/tex">q_3</script></span>: <strong>物品-物品位置关系问题</strong>。举例：给定一张图片。问：黄色的物体是在蓝色的物体的下方吗？答：黄色的物体不在蓝色的物体的下方。</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">q_4</span><script type="math/tex">q_4</script></span>: <strong>计划的可行性问题</strong>。举例：给定一张图片。问：先把蓝色的物体拿起来，然后把它堆放到黄色的物体上，然后能直接拿起黄色的物体吗？答：不能。</p>
+</li>
+</ul>
+<p>下面详细列一下2种 plan 问题的类型，也是给每个问题类型一个例子，可以方便理解：</p>
+<ul>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">p_1</span><script type="math/tex">p_1</script></span>: <strong>抓取问题</strong>。举例：给定一张图片。问：如何抓取绿色的物体？答：首先抓取黄色的物体并将其放到桌面上，然后抓取绿色的物体。</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">p_2</span><script type="math/tex">p_2</script></span>: <strong>堆叠问题</strong>。举例：给定一张图片。问：如何将白色的物体堆放到红色的物体上方？答：首先抓取绿色的物体并将其放到桌面上，然后抓取白色的物体并将其堆放到红色的物体上方。</p>
+</li>
+</ul>
+<h3 id="52-visual-languagenlp">5.2 Visual-Language任务与NLP任务<a class="headerlink" href="#52-visual-languagenlp" title="Permanent link">#</a></h3>
+<p>都是经典的任务，这里不再对任务进行详细说明。在说明实验效果的第 <strong>6.4</strong> 小节和第 <strong>6.5</strong> 小节有对任务的简单说明。</p>
+<h2 id="6">6、实验<a class="headerlink" href="#6" title="Permanent link">#</a></h2>
+<h3 id="61-tamp">6.1 任务和运动规划（TAMP）实验<a class="headerlink" href="#61-tamp" title="Permanent link">#</a></h3>
+<h4 id="611">6.1.1 对比对象<a class="headerlink" href="#611" title="Permanent link">#</a></h4>
+<ul>
+<li>SayCan 和 PaLI: 这是之前的两项工作（既然在本论文中出现了，肯定是效果不如本论文好）</li>
+</ul>
+<p>除上述两项前人的工作以外以外，表1和表7中的其他对比对象在本文的前面部分基本都已经提到过了，不过表格中可能使用了缩写，这里简单的说明一下表格中各缩写的含义：</p>
+<ul>
+<li>表1中的 "Object-centric" 列表示是否使用前文第 <strong>3.3</strong> 小节提到的技术。对号表示使用，叉号表示不使用。</li>
+<li>表1中的 "LLM pre-train" 列表示是否使用预训练模型。对号表示使用，叉号表示不使用。</li>
+<li>表1和表7比较的主要都是不同的编码器之间的效果；</li>
+<li>state: 表示采用第 <strong>3.1</strong> 小节描述的编码器；</li>
+<li>state(w/o entity referrals): 表示采用第 <strong>3.1</strong> 小节描述的编码器，但是不使用第 <strong>3.5</strong> 小节描述的技术；</li>
+<li>ViT + TL: 表示采用第 <strong>3.2</strong> 小节描述的编码器；</li>
+<li>ViT-4B single robot: 表示使用大小为4B的 ViT 模型作为编码器，训练数据是仅采用 TAMP 的数据；</li>
+<li>ViT-4B full mixture: 表示使用大小为4B的 ViT 模型作为编码器，训练数据是将本文中提到的三种机器人环境的数据、经典的图像任务数据、经典的NLP任务数据混合到一起的数据；</li>
+<li>OSRT（no VQA）: 表示采用第 <strong>3.3</strong> 小节描述的编码器，不过只训练 TAMP 中的2个plan任务，不训练4个 VQA 任务；</li>
+<li>OSRT: 表示采用第 <strong>3.3</strong> 小节描述的编码器；</li>
+</ul>
+<h4 id="612">6.1.2 效果分析<a class="headerlink" href="#612" title="Permanent link">#</a></h4>
+<p>表1中的实验结果是仅采用原始训练数据集中的1%的数据做训练得到的结果。为了便于说明，在表1的每一行最右侧都给添加了红色的行号。分析表1，可以看出：</p>
+<ul>
+<li>对比第3行和第4行可得：在训练比较少的情况下，使用预训练模型能够有较大的收益。</li>
+<li>看第5行和第6行可知，无论是 ViT+TL 还是 ViT-4B 都不能够很好的处理2个plan任务；而加上跨任务的数据做训练之后，也就是第7行，在2个plan任务上的效果有了较大幅度的提升。说明跨任务联合训练是有效的。</li>
+<li>使用了 OSRT 作为编码器之后，效果整体来看都是比较好的，说明这个编码器确实很优秀。</li>
+<li>之前的两个工作 SayCan 和 PaLI 在仅使用1%的训练数据做训练的场景下，几乎没有能力解决相应的问题。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">表1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src="/t5CaYAJ3/assets/Table1.png" width="100%"/></td>
+</tr>
+</tbody>
+</table>
+<p>表7中的实验都是在全量 TAMP 的训练数据上做的训练，但是都没有使用除了 TAMP 以外的任务数据。任务 TAMP 的每条训练数据中都是有3~5个物体，在测试时会尝试将每条数据中的物体数量增加到6个、甚至8个，以及还会增加训练数据中不存在的物体（out-of-distribution, OOD），比如：水杯、玩具青蛙。分析表7，可以看出：</p>
+<ul>
+<li>当每条测试数据中的物体数量为3~5个时，大家的表现还是比较接近的。</li>
+<li>将每条测试数据中的物体数量增加到6个、甚至8个时，使用了预训练的 LLM 之后效果有着明显的提升。</li>
+<li>在出现了训练数据中不存在的物体（OOD）时，不使用预训练 LLM 的模型完全无法处理该任务；使用了预训练 LLM 之后效果明显提升；并且将模型的尺寸由8B增大到62B之后也会有明显的提升。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">表7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src="/t5CaYAJ3/assets/Table7.png" width="100%"/></td>
+</tr>
+</tbody>
+</table>
+<h3 id="62">6.2 桌面操作环境实验<a class="headerlink" href="#62" title="Permanent link">#</a></h3>
+<h4 id="621">6.2.1 数据集说明<a class="headerlink" href="#621" title="Permanent link">#</a></h4>
+<p>该数据集是由 Lynch 等人在论文 <a href="https://arxiv.org/pdf/2210.06407.pdf">Interactive language: Talking to robots in real time</a> 中提出来的，称为 Language-Table 数据集。该数据集中的3个任务类型都是长期任务，所谓长期任务含义是：模型无法通过一步完成该任务，而是需要每次自己生成策略、执行相应的action，然后观察外界环境，再次自己生成策略、执行相应的action，直到观察外界环境满足了任务要求。整个过程如下图所示：</p>
+<table>
+<thead>
+<tr>
+<th align="center">图3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src="/t5CaYAJ3/assets/Figure_self_06.png" width="80%"/></td>
+</tr>
+</tbody>
+</table>
+<p>图中 "sort the blocks by color" 是一个长期任务：</p>
+<ul>
+<li>模型 PaLM-E 每次的输入都是文本 "sort the blocks by color" 加上传感器拍摄的当前桌面的一张照片。</li>
+<li>然后模型自己生成一个需要执行的策略，即上图中的 "language commands"，比如：将红色块移动到左侧。</li>
+<li>机器人根据模型生成的策略执行相应的action。</li>
+<li>机器人执行完action之后再次使用传感器拍摄当前桌面的照片，然后模型 PaLM-E 再次根据输入的文本 "sort the blocks by color" 加上新的照片生成要执行的策略，直到任务完成。</li>
+</ul>
+<p>下面是该 Language-Table 数据集中的3个任务类型：</p>
+<ul>
+<li>
+<p><strong>Task1</strong> 问：将最靠近{某个方位，比如：右上角}的块，推到与它颜色相同的另一个块那里。</p>
+</li>
+<li>
+<p><strong>Task2</strong> 问：将所有的块按照颜色分组，并将每组推到桌面的四个角上。</p>
+</li>
+<li>
+<p><strong>Task3</strong> 问：将 {左侧/右侧} 的块推到一起，不要移动任何 {右侧/左侧} 的块。</p>
+</li>
+</ul>
+<h4 id="622">6.2.2 效果分析<a class="headerlink" href="#622" title="Permanent link">#</a></h4>
+<p>为了便于说明，在下表2的每一行最右侧都给添加了红色的行号。分析下表2可以得出：</p>
+<ul>
+<li>下表中第3行不使用预训练模型，第6行使用预训练模型，这两行其他配置相同。对比这两行可以看出使用了预训练模型之后效果有着大幅提升。</li>
+<li>下表中第5行是12B大小的模型，第7行是84B大小的模型，这两行其他配置相同。对比这两行可以看出增大模型之后，在Task1和Task3这两个任务上有明显的提升，但是在Task2这个任务上有一些降低。</li>
+<li>之前的两个工作 SayCan 和 PaLI 依然不具有解决该问题的能力。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">表2: 桌面操作环境实验结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src="/t5CaYAJ3/assets/Table2.png" width="100%"/></td>
+</tr>
+</tbody>
+</table>
+<h4 id="623">6.2.3 真实机器人的效果<a class="headerlink" href="#623" title="Permanent link">#</a></h4>
+<p>使用 Language-Table 数据集还只是停留在研究阶段，接下来是直接把 PaLM-E 模型接入到机器人中，看一下真实环境中的效果。这一部分就没有了明确的指标了，这里最直观的是直接去看官方的视频，能看出其效果，链接：<a href="https://palm-e.github.io/">https://palm-e.github.io/</a></p>
+<p>下面以图7.a为例，说明一下真实机器人的效果。这个任务是 "sort blocks by colors into corners(把所有的块按照颜色分组并推到桌面的四个角上)"，可以看到模型自己生成的一步一步的操作为：</p>
+<ul>
+<li>"push the red star to the top left corner(将红色星状的块移动到左上角)"</li>
+<li>"push the red circle to the red star(将红色圆形的块移动到红色星状的块那里)"</li>
+<li>"push the blue triangle to the blue cube(将蓝色三角形的块移动到蓝色立方体的块那里)"</li>
+<li>...</li>
+<li>"push the green star to the bottom left corner(将绿色星状到块移动到左下角)"</li>
+</ul>
+<p>在机器人执行上述任务的过程中，还掺杂着部分人类对其的打扰。可以看到在图7.a最右侧的图中，机器人能够分别把4种颜色（蓝色、绿色、红色、黄色）的块放到桌面的四个角上。</p>
+<table>
+<thead>
+<tr>
+<th align="center">图7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src="/t5CaYAJ3/assets/Figure7.png" width="100%"/></td>
+</tr>
+</tbody>
+</table>
+<h3 id="63">6.3 移动操作环境实验<a class="headerlink" href="#63" title="Permanent link">#</a></h3>
+<h4 id="631">6.3.1 任务说明<a class="headerlink" href="#631" title="Permanent link">#</a></h4>
+<ul>
+<li>
+<p>Affordance Prediction: 这里的 affordance 是一个机器人领域的概念，可以简单的解释为 "物体/环境为人所提供的功能"，比如一个水杯具有盛水的功能，水杯的柄具有能够让人或机器人抓取的功能。Affordance Prediction 就是给定一个物体/环境，以及一个操作，让模型预测该操作是否可在给定的物体/环境上执行。比如当环境中是红色块堆放在绿色块上方时，让模型预测能否抓取绿色块。模型预测结果应该是不能，因为必须先将红色块从绿色块上拿下来放到桌面上之后才能够抓取绿色块。</p>
+</li>
+<li>
+<p>Failure Detection: 对于机器人来说，当它执行完某一个操作之后，检测该操作是否执行成功也是很重要的。该任务就是检测执行的操作是否成功。</p>
+</li>
+<li>
+<p>Long-horizon Planning: 长任务规划，这个在 <strong>6.2</strong> 小节桌面操作环境里面已经说过了，就是模型需要结合环境多次预测行动策略，以达到最终目标，如图3所示。</p>
+</li>
+</ul>
+<h4 id="632">6.3.2 效果说明<a class="headerlink" href="#632" title="Permanent link">#</a></h4>
+<ul>
+<li>对于任务 Affordance Prediction，在使用了12B的 PaLM 预训练模型之后，效果比之前的 PaLI 和 QT-OPT 效果都要好。</li>
+<li>对于任务 Failure Detection，在使用了12B的 PaLM 预训练模型之后，效果明显的超过了 PaLI 和 CLIP-FT。即使是使用了额外的数据做了优化的 CLIP-FT-hindsight 的效果也比 PaLM-E-12B 要略差一些。</li>
+<li>然后对于任务 Long-horizon Planning 并没有使用数据集，而是使用了一个真实的机器人，让它在厨房中把薯片拿过了，这个可以看官方视频的演示。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">表4: 移动操作环境下的Affordance Prediction和Failure Detection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src="/t5CaYAJ3/assets/Table4.png" width="70%"/></td>
+</tr>
+</tbody>
+</table>
+<h3 id="64-visual-language-tasks">6.4 图像语言任务（Visual-Language Tasks）测评结果<a class="headerlink" href="#64-visual-language-tasks" title="Permanent link">#</a></h3>
+<p>总共3个任务，两个VQA任务：OK-VQA 任务和 VQAv2 任务，一个字幕任务：COCO captioning 任务。最终结果如下表5所示，对比对象和指标效果都比较清晰，不再分析。</p>
+<table>
+<thead>
+<tr>
+<th align="center">表5: 图像语言任务测评结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src="/t5CaYAJ3/assets/Table5.png" width="80%"/></td>
+</tr>
+</tbody>
+</table>
+<h3 id="65-nlp">6.5 NLP任务测评结果<a class="headerlink" href="#65-nlp" title="Permanent link">#</a></h3>
+<p>对于NLP任务具体的指标，这里不做分析，因为 PaLM-E 的效果肯定是比 PaLM 的效果要差一些的。这里主要看一下随着模型规模的增大，灾难性遗忘问题会被大幅缓解。</p>
+<p>表8中的各个模型说明：</p>
+<ul>
+<li>PaLM-E-12B 是使用 PaLM-8B 作为基座，加上 ViT-4B 得到的模型；</li>
+<li>PaLM-E-84B 是使用 PaLM-62B 作为基座，加上 ViT-22B 得到的模型；</li>
+<li>PaLM-E-562B 是使用 PaLM-540B 作为基座，加上 ViT-22B 得到的模型；</li>
+</ul>
+<p>所有的 PaLM-E 模型都是在本文中提出的机器人任务上做了微调，现在比较每个 PaLM-E 模型与其基座模型在NLP任务上的效果，看经过微调之后的模型在NLP任务上的效果下降了多少。</p>
+<p>从表8中的最后两行可以看出：</p>
+<ul>
+<li>PaLM-E-12B 相比于 PaLM-8B 在NLU和NLG任务上分别下降了 15.0% 和 87.3%；</li>
+<li>PaLM-E-84B 相比于 PaLM-62B 在NLU和NLG任务上分别下降了 4.3% 和 61.6%；</li>
+<li>PaLM-E-562B 相比于 PaLM-540B 在NLU任务上上升了 0.4%，在NLG任务上下降了 3.8%；</li>
+</ul>
+<p>可以明显看出随着模型的增大，灾难性遗忘问题被大幅缓解了。至于为什么会有这个现象，个人理解是当模型特别大时，其所能储备信息的能力大幅增大，这样在新任务上做训练之后，就对之前的任务损耗较小。</p>
+<table>
+<thead>
+<tr>
+<th align="center">表8: NLP任务测评结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src="/t5CaYAJ3/assets/Table8.png" width="100%"/></td>
+</tr>
+</tbody>
+</table>
+<h2 id="_1">总结<a class="headerlink" href="#_1" title="Permanent link">#</a></h2></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
