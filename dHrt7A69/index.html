@@ -232,7 +232,7 @@ applications/ChatGPT/examples/train_prompts.py
 <p>训练RL时使用的prompt数据集为 <code>fka/awesome-chatgpt-prompts</code>，是一个英文数据集；链接为: <a href="https://huggingface.co/datasets/fka/awesome-chatgpt-prompts">https://huggingface.co/datasets/fka/awesome-chatgpt-prompts</a></p>
 <p>这个数据集非常简单，就是一百多个prompt；</p>
 <p>虽然对RL不是太熟，不过从ColossalAI给定这个图中可以知道训练RL要同时载入四个模型到显存中，这个对显存的消耗肯定是非常大的，所以我们还是使用上面已经用过的gpt2的tiny模型。</p>
-<p><img alt="" src="/6qK2faKr/1.jpg" /></p>
+<p><img alt="" src="/6qK2faKr/assets/1.jpg" /></p>
 <p>训练的启动命令如下：</p>
 <pre><code>CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. python3 examples/train_prompts.py ./prompts.csv \
     --model gpt2 \
@@ -255,7 +255,7 @@ applications/ChatGPT/examples/train_prompts.py
 </ul>
 <p>GPT-2有1.3B的参数量，按照这张图来看直接在80G的显存上是跑不起来的。</p>
 <p>不知道ColossalAI的实际效果有没有他这张图里这么好，之后可以研究一下。</p>
-<p><img alt="" src="/6qK2faKr/3.jpg" /></p></div>
+<p><img alt="" src="/6qK2faKr/assets/3.jpg" /></p></div>
             </div>
         </div>
 

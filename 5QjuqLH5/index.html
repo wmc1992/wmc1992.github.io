@@ -132,7 +132,7 @@
 <p>... 略 ...</p>
 <h2 id="2">2、有监督微调<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
 <p>先放上原论文中经典的图：</p>
-<p><img alt="" src="/5QjuqLH5/01.png" /></p>
+<p><img alt="" src="/5QjuqLH5/assets/01.png" /></p>
 <p><strong>分类任务</strong>：Bert模型如果要做 sequence classification 任务，其需要给每条样本专门增加 [CLS] 这个token，使用该token对应的向量做分类。而GPT则不需要新增一个特殊的token，它是直接使用整个输入token序列的下一个位置预测的向量做分类。</p>
 <p><strong>自然语言推理</strong>：将前提（premise）和假设（hypothesis）通过分隔符（Delimiter）隔开，两端加上起始和终止token。再依次通过transformer和全连接得到预测结果；</p>
 <p><strong>语义相似度</strong>：输入的两个句子，正向和反向各拼接一次，然后分别输入给transformer，得到的特征向量拼接后再送给全连接得到预测结果；</p>

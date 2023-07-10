@@ -266,7 +266,7 @@
 </div>
 <p>其中 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 表示正则化的力度，<span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 越小，正则化力度越大，也对应原目标函数中的 <span class="arithmatex"><span class="MathJax_Preview">\lambda</span><script type="math/tex">\lambda</script></span> 越大。</p>
 <p>下面通过画图来理解。</p>
-<p><img alt="" src="/mV11YR9l/01.png" /></p>
+<p><img alt="" src="/mV11YR9l/assets/01.png" /></p>
 <p>如上图所示，Lasso回归（即公式<span class="arithmatex"><span class="MathJax_Preview">(13)</span><script type="math/tex">(13)</script></span>）的约束条件为左图中灰色的方形区域；岭回归（即公式<span class="arithmatex"><span class="MathJax_Preview">(14)</span><script type="math/tex">(14)</script></span>）的约束条件为右图中灰色的圆形区域；两图中右上方的椭圆线为损失函数 <span class="arithmatex"><span class="MathJax_Preview">L(\theta)</span><script type="math/tex">L(\theta)</script></span> 的等高线，损失函数 <span class="arithmatex"><span class="MathJax_Preview">L(\theta)</span><script type="math/tex">L(\theta)</script></span> 在椭圆的中心处取得最小值。</p>
 <p>既要满足方形/圆形的灰色区域的约束，又要尽量取最小值，可知上述两个带约束的最优化问题的最优解都在：等高线与约束区域边界的交点处；即两个红色箭头所指的交点处。</p>
 <p>由于 <span class="arithmatex"><span class="MathJax_Preview">L_1</span><script type="math/tex">L_1</script></span> 正则对应的约束区域是方形的，椭圆形的等高线与方形区域边界的交点更容易出现在该方形区域的顶点上，也就是坐标轴上。而这些坐标轴上的点仅当前坐标轴对应的维度非0，其他维度取值都为0。所以相比于 <span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span>，<span class="arithmatex"><span class="MathJax_Preview">L_1</span><script type="math/tex">L_1</script></span>更适合做特征选择。</p>
