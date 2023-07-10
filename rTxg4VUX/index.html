@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/002_%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0/06_%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>朴素贝叶斯 - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link">朴素贝叶斯</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#_2" class="nav-link">一、由二分类问题到生成模型的训练内容</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#pxypxy" class="nav-link">二、训练模型<span class="arithmatex"><span class="MathJax_Preview">p(x|y)</span><script type="math/tex">p(x|y)</script></span></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_3" class="nav-link">三、整体思路概览</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#gda" class="nav-link">四、最后简单提一下另一个生成模型——高斯判别分析GDA</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2018-10-16" class="nav-link">2018-10-16添加：</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="_1">朴素贝叶斯<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<p>以下内容主要来自CS229课程的讲义，放上链接http://cs229.stanford.edu/syllabus.html</p>
+<h2 id="_2">一、由二分类问题到生成模型的训练内容<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
+<p>我们基于二分类问题进行讨论，<span class="arithmatex"><span class="MathJax_Preview">y</span><script type="math/tex">y</script></span>的取值为<span class="arithmatex"><span class="MathJax_Preview">\{0, 1\}</span><script type="math/tex">\{0, 1\}</script></span>。</p>
+<p>先提一下判别模型和生成模型的概念。在使用一个模型对一条新数据进行预测的过程实际是求解<span class="arithmatex"><span class="MathJax_Preview">p(y=0|x)</span><script type="math/tex">p(y=0|x)</script></span>和<span class="arithmatex"><span class="MathJax_Preview">p(y=1|x)</span><script type="math/tex">p(y=1|x)</script></span>，然后比大小的过程。想要求得<span class="arithmatex"><span class="MathJax_Preview">p(y|x)</span><script type="math/tex">p(y|x)</script></span>在训练模型时有两种方式：</p>
+<p>训练<span class="arithmatex"><span class="MathJax_Preview">p(y|x)</span><script type="math/tex">p(y|x)</script></span>模型（判别模型）</p>
+<p>训练<span class="arithmatex"><span class="MathJax_Preview">p(x|y)</span><script type="math/tex">p(x|y)</script></span>模型（生成模型）</p>
+<p><strong>判别模型</strong>：逻辑回归模型就是判别模型，看一下它模型的表达式：<span class="arithmatex"><span class="MathJax_Preview">h_\theta (x) = \frac{1}{1 + e^{-\theta^Tx}}</span><script type="math/tex">h_\theta (x) = \frac{1}{1 + e^{-\theta^Tx}}</script></span>，这个表达式求出的概率就是<span class="arithmatex"><span class="MathJax_Preview">y=1</span><script type="math/tex">y=1</script></span>的概率，即<span class="arithmatex"><span class="MathJax_Preview">p(y=1|x) = h_\theta(x)</span><script type="math/tex">p(y=1|x) = h_\theta(x)</script></span>，<span class="arithmatex"><span class="MathJax_Preview">p(y=0|x) = 1 - h_\theta(x)</span><script type="math/tex">p(y=0|x) = 1 - h_\theta(x)</script></span>。可见判别模型是直接对<span class="arithmatex"><span class="MathJax_Preview">p(y|x)</span><script type="math/tex">p(y|x)</script></span>进行训练。</p>
+<p><strong>生成模型</strong>：朴素贝叶斯就是生成模型，下面来看详细步骤。</p>
+<p>条件概率公式：<span class="arithmatex"><span class="MathJax_Preview">p(A|B) = \frac{p(A,B)}{p(B)}</span><script type="math/tex">p(A|B) = \frac{p(A,B)}{p(B)}</script></span>，<span class="arithmatex"><span class="MathJax_Preview">p(B|A) = \frac{p(A,B)}{p(A)}</span><script type="math/tex">p(B|A) = \frac{p(A,B)}{p(A)}</script></span></p>
+<p>可得出贝叶斯公式：<span class="arithmatex"><span class="MathJax_Preview">p(A|B) = \frac{p(B|A)p(A)}{\sum_{A_i}p(A_i)p(B|A_i)}</span><script type="math/tex">p(A|B) = \frac{p(B|A)p(A)}{\sum_{A_i}p(A_i)p(B|A_i)}</script></span></p>
+<p>把A和B换成更习惯的X和Y：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(y|x) = \frac{p(x|y)p(y)}{\sum_{y_i} p(y_i)p(x|y_i)}</div>
+<script type="math/tex; mode=display">p(y|x) = \frac{p(x|y)p(y)}{\sum_{y_i} p(y_i)p(x|y_i)}</script>
+</div>
+<p>分析这个表达式，在机器学习中我们最终要求得的是<span class="arithmatex"><span class="MathJax_Preview">p(y|x)</span><script type="math/tex">p(y|x)</script></span>，使用该等式转化为求解等式右侧的值，等式右侧里包含两个未知的内容：<span class="arithmatex"><span class="MathJax_Preview">p(x|y)</span><script type="math/tex">p(x|y)</script></span>和<span class="arithmatex"><span class="MathJax_Preview">p(y)</span><script type="math/tex">p(y)</script></span>。其中<span class="arithmatex"><span class="MathJax_Preview">p(y)</span><script type="math/tex">p(y)</script></span>很容易求得，直接使用训练集中<span class="arithmatex"><span class="MathJax_Preview">y=1</span><script type="math/tex">y=1</script></span>和<span class="arithmatex"><span class="MathJax_Preview">y=0</span><script type="math/tex">y=0</script></span>各自的频率作为概率就可以了。</p>
+<p>现在对问题做了第一步转化：</p>
+<p>原始问题：求解<span class="arithmatex"><span class="MathJax_Preview">p(y|x)</span><script type="math/tex">p(y|x)</script></span></p>
+<p>转化后的问题：求解<span class="arithmatex"><span class="MathJax_Preview">p(x|y)</span><script type="math/tex">p(x|y)</script></span>（还有一部分是求解<span class="arithmatex"><span class="MathJax_Preview">p(y)</span><script type="math/tex">p(y)</script></span>，比较简单，不再赘述）</p>
+<h2 id="pxypxy">二、训练模型<span class="arithmatex"><span class="MathJax_Preview">p(x|y)</span><script type="math/tex">p(x|y)</script></span><a class="headerlink" href="#pxypxy" title="Permanent link">#</a></h2>
+<p>描述一下数据集：有<span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span>条数据，<span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span>个特征。并且满足如下假设：数据集的各个特征在给定<span class="arithmatex"><span class="MathJax_Preview">y</span><script type="math/tex">y</script></span>后条件独立。</p>
+<p>把<span class="arithmatex"><span class="MathJax_Preview">p(x|y)</span><script type="math/tex">p(x|y)</script></span>里的向量<span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span>按照<span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span>个特征展开：<span class="arithmatex"><span class="MathJax_Preview">p(x|y) = p(x_1,x_2,x_3,... ...,x_n|y)</span><script type="math/tex">p(x|y) = p(x_1,x_2,x_3,... ...,x_n|y)</script></span>。</p>
+<p>由于数据集里各个特征条件独立，可以得出如下公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{split} p(x|y) &amp;= p(x_1,x_2,x_3,... ...,x_n|y) \\ &amp;= p(x_1|y)p(x_2|y)p(x_3|y) ... ... p(x_n|y) \\ &amp;= \prod_{i=1}^n p(x_i|y) \end{split}</div>
+<script type="math/tex; mode=display">\begin{split} p(x|y) &= p(x_1,x_2,x_3,... ...,x_n|y) \\ &= p(x_1|y)p(x_2|y)p(x_3|y) ... ... p(x_n|y) \\ &= \prod_{i=1}^n p(x_i|y) \end{split}</script>
+</div>
+<p>PS：这里的符号有点混乱，<span class="arithmatex"><span class="MathJax_Preview">p(x|y)</span><script type="math/tex">p(x|y)</script></span>里的<span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span>是一个向量，而公式后面的<span class="arithmatex"><span class="MathJax_Preview">x_1,x_2,x_3,... ...,x_n</span><script type="math/tex">x_1,x_2,x_3,... ...,x_n</script></span>就不是向量了，而是每个具体特征的取值。</p>
+<p>接下来是求解<span class="arithmatex"><span class="MathJax_Preview">p(x_i|y)</span><script type="math/tex">p(x_i|y)</script></span>，在CS229的讲义里朴素贝叶斯是以垃圾邮件分类器为例进行讲解的，针对这个具体的情景，<span class="arithmatex"><span class="MathJax_Preview">x_i</span><script type="math/tex">x_i</script></span>的取值只有0和1，我们也以只有0、1两种取值进行说明。</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(x_j=0|y=0) = \frac{\sum_{i=1}^m I\{x_j=0 \land y=0\}}{\sum_{i=1}^m I\{y=0\}}</div>
+<script type="math/tex; mode=display">p(x_j=0|y=0) = \frac{\sum_{i=1}^m I\{x_j=0 \land y=0\}}{\sum_{i=1}^m I\{y=0\}}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(x_j=0|y=1) = \frac{\sum_{i=1}^m I\{x_j=0 \land y=1\}}{\sum_{i=1}^m I\{y=1\}}</div>
+<script type="math/tex; mode=display">p(x_j=0|y=1) = \frac{\sum_{i=1}^m I\{x_j=0 \land y=1\}}{\sum_{i=1}^m I\{y=1\}}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(x_j=1|y=0) = \frac{\sum_{i=1}^m I\{x_j=1 \land y=0\}}{\sum_{i=1}^m I\{y=0\}}</div>
+<script type="math/tex; mode=display">p(x_j=1|y=0) = \frac{\sum_{i=1}^m I\{x_j=1 \land y=0\}}{\sum_{i=1}^m I\{y=0\}}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(x_j=1|y=1) = \frac{\sum_{i=1}^m I\{x_j=1 \land y=1\}}{\sum_{i=1}^m I\{y=1\}}</div>
+<script type="math/tex; mode=display">p(x_j=1|y=1) = \frac{\sum_{i=1}^m I\{x_j=1 \land y=1\}}{\sum_{i=1}^m I\{y=1\}}</script>
+</div>
+<p>为了完整性，把<span class="arithmatex"><span class="MathJax_Preview">p(y)</span><script type="math/tex">p(y)</script></span>也写出来：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(y=0) = \frac{\sum_{i=1}^m I\{y=0\}}{m}</div>
+<script type="math/tex; mode=display">p(y=0) = \frac{\sum_{i=1}^m I\{y=0\}}{m}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(y=1) = \frac{\sum_{i=1}^m I\{y=1\}}{m}</div>
+<script type="math/tex; mode=display">p(y=1) = \frac{\sum_{i=1}^m I\{y=1\}}{m}</script>
+</div>
+<p>这样<span class="arithmatex"><span class="MathJax_Preview">p(x|y)</span><script type="math/tex">p(x|y)</script></span>就可以求出来了。</p>
+<h2 id="_3">三、整体思路概览<a class="headerlink" href="#_3" title="Permanent link">#</a></h2>
+<p>使用模型预测时是求解<span class="arithmatex"><span class="MathJax_Preview">p(y|x)</span><script type="math/tex">p(y|x)</script></span>；通过贝叶斯公式，将求解<span class="arithmatex"><span class="MathJax_Preview">p(y|x)</span><script type="math/tex">p(y|x)</script></span>转化为求解<span class="arithmatex"><span class="MathJax_Preview">p(x|y)</span><script type="math/tex">p(x|y)</script></span>和<span class="arithmatex"><span class="MathJax_Preview">p(y)</span><script type="math/tex">p(y)</script></span>；对数据集添加一个假设——特征之间条件独立，将<span class="arithmatex"><span class="MathJax_Preview">p(x|y)</span><script type="math/tex">p(x|y)</script></span>转化为各个特征条件概率的乘积。</p>
+<h2 id="gda">四、最后简单提一下另一个生成模型——高斯判别分析GDA<a class="headerlink" href="#gda" title="Permanent link">#</a></h2>
+<p>贝叶斯公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(y|x) = \frac{p(x|y) p(y)}{p(x)}</div>
+<script type="math/tex; mode=display">p(y|x) = \frac{p(x|y) p(y)}{p(x)}</script>
+</div>
+<p>给出一条新数据，预测最可能的y：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{align} arg \; \displaystyle max_y p(y|x)  &amp;= arg \; max_y \frac{p(x|y) p(y)}{p(x)} \\ &amp;= arg \; max_y p(x|y)p(y) \\ \end{align}</div>
+<script type="math/tex; mode=display">\begin{align} arg \; \displaystyle max_y p(y|x)  &= arg \; max_y \frac{p(x|y) p(y)}{p(x)} \\ &= arg \; max_y p(x|y)p(y) \\ \end{align}</script>
+</div>
+<p>对于二分类，需要求得<span class="arithmatex"><span class="MathJax_Preview">p(x|y=0)</span><script type="math/tex">p(x|y=0)</script></span>、<span class="arithmatex"><span class="MathJax_Preview">p(x|y=1)</span><script type="math/tex">p(x|y=1)</script></span>、<span class="arithmatex"><span class="MathJax_Preview">p(y)</span><script type="math/tex">p(y)</script></span>这三个即可，接下来的思路是我们假设<span class="arithmatex"><span class="MathJax_Preview">p(x|y)</span><script type="math/tex">p(x|y)</script></span>符合某种概率分布（高斯分布、多项式分布等），然后使用数据集训练出该概率分布中的参数。</p>
+<p>GDA就假设<span class="arithmatex"><span class="MathJax_Preview">p(x|y=0)</span><script type="math/tex">p(x|y=0)</script></span>和<span class="arithmatex"><span class="MathJax_Preview">p(x|y=1)</span><script type="math/tex">p(x|y=1)</script></span>符合高斯分布，<span class="arithmatex"><span class="MathJax_Preview">p(y)</span><script type="math/tex">p(y)</script></span>符合伯努利分布：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">y \;～\; Bernoulli(\phi)</div>
+<script type="math/tex; mode=display">y \;～\; Bernoulli(\phi)</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">x|y=0 \;～\; \mathcal{N}(\mu_0, \Sigma)</div>
+<script type="math/tex; mode=display">x|y=0 \;～\; \mathcal{N}(\mu_0, \Sigma)</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">x|y=1 \;～\; \mathcal{N}(\mu_1, \Sigma)</div>
+<script type="math/tex; mode=display">x|y=1 \;～\; \mathcal{N}(\mu_1, \Sigma)</script>
+</div>
+<p>然后就是拟合<span class="arithmatex"><span class="MathJax_Preview">\phi</span><script type="math/tex">\phi</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\mu_0</span><script type="math/tex">\mu_0</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\mu_1</span><script type="math/tex">\mu_1</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\Sigma</span><script type="math/tex">\Sigma</script></span>这几个参数，模型就训练完成了。</p>
+<p>这种训练模型的方法，最重要的地方就是我们假设原始数据集符合什么样的概率分布，这个只能靠一些先验知识。</p>
+<h2 id="2018-10-16">2018-10-16添加：<a class="headerlink" href="#2018-10-16" title="Permanent link">#</a></h2>
+<p>朴素贝叶斯和高斯判别分析这两种生成模型都对原始数据集做了一定的假设：</p>
+<p>朴素贝叶斯：假设给定<span class="arithmatex"><span class="MathJax_Preview">y</span><script type="math/tex">y</script></span>后所有的特征之间条件独立；</p>
+<p>高斯判别分析：假设<span class="arithmatex"><span class="MathJax_Preview">p(x|y)</span><script type="math/tex">p(x|y)</script></span>符合某种分布。</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

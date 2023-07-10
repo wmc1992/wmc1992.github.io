@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/001_%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>微分方程 - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link">微分方程</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、举例求解微分方程</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#11" class="nav-link">1.1 雨滴下落问题</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#12" class="nav-link">1.2 雨滴下落问题中速度与时间的分析</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#13" class="nav-link">1.3 关于微分方程</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="_1">微分方程<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<h2 id="1">1、举例求解微分方程<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<h3 id="11">1.1 雨滴下落问题<a class="headerlink" href="#11" title="Permanent link">#</a></h3>
+<p>问题：设雨滴下落受到的空气阻力与速度成正比，求初速度为零的雨滴下落速度与时间的函数关系；</p>
+<p>分析：根据题目可得出，雨滴受到的重力为：<span class="arithmatex"><span class="MathJax_Preview">mg</span><script type="math/tex">mg</script></span>，雨滴受到的空气阻力为：<span class="arithmatex"><span class="MathJax_Preview">f=kv</span><script type="math/tex">f=kv</script></span>，雨滴的加速度为：<span class="arithmatex"><span class="MathJax_Preview">a=\frac{mg-f}{m}</span><script type="math/tex">a=\frac{mg-f}{m}</script></span>；</p>
+<p>参数说明：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 为雨滴的质量；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">g</span><script type="math/tex">g</script></span> 为重力加速度；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">f</span><script type="math/tex">f</script></span> 为雨滴受到的空气阻力；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">v</span><script type="math/tex">v</script></span> 为雨滴的速度；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 为雨滴的加速度；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span> 为常数；</li>
+</ul>
+<p>同时雨滴的初始速度为零，所以雨滴的速度是关于时间和加速度的函数，只不过在每个时刻，加速度都是不同的（最后的匀速阶段除外，此时加速度恒为零），即 <span class="arithmatex"><span class="MathJax_Preview">v=\int_t a \; \text{dt}</span><script type="math/tex">v=\int_t a \; \text{dt}</script></span>，转换成微分形式就是 <span class="arithmatex"><span class="MathJax_Preview">a=\frac{dv}{dt}</span><script type="math/tex">a=\frac{dv}{dt}</script></span></p>
+<p>解：将分析过程中的 <span class="arithmatex"><span class="MathJax_Preview">a=\frac{dv}{dt}</span><script type="math/tex">a=\frac{dv}{dt}</script></span> 代入 <span class="arithmatex"><span class="MathJax_Preview">a=\frac{mg-f}{m}</span><script type="math/tex">a=\frac{mg-f}{m}</script></span> 就能够得到：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}mg - f = m \frac{dv}{dt}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}mg - f = m \frac{dv}{dt}\end{equation}</script>
+</div>
+<p>该式就是<strong>微分方程</strong>；</p>
+<p>对该微分方程进行变换：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{equation}
+\begin{split}
+mg - f = m \frac{dv}{dt} &amp; \qquad \text{将}dt\text{乘到左侧} \\
+(mg - f) \cdot dt = m \cdot dv &amp;\qquad \text{等式两边同时除以}m(mg-f) \\
+\frac{1}{m} dt = \frac{1}{mg - f} dv &amp;\qquad \text{将}f=kv\text{代入该式}\\
+\frac{1}{m} dt = \frac{1}{mg - kv} dv &amp;\qquad \text{对两边同时求积分}\\
+\int \frac{1}{m} dt = \int \frac{1}{mg - kv} dv
+\end{split}
+\end{equation}
+</div>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{split}
+mg - f = m \frac{dv}{dt} & \qquad \text{将}dt\text{乘到左侧} \\
+(mg - f) \cdot dt = m \cdot dv &\qquad \text{等式两边同时除以}m(mg-f) \\
+\frac{1}{m} dt = \frac{1}{mg - f} dv &\qquad \text{将}f=kv\text{代入该式}\\
+\frac{1}{m} dt = \frac{1}{mg - kv} dv &\qquad \text{对两边同时求积分}\\
+\int \frac{1}{m} dt = \int \frac{1}{mg - kv} dv
+\end{split}
+\end{equation}
+</script>
+</div>
+<p>上式的等号左侧求积分是容易的，<span class="arithmatex"><span class="MathJax_Preview">\frac{1}{m}</span><script type="math/tex">\frac{1}{m}</script></span> 是与 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 无关的常数，所以左侧的值为 <span class="arithmatex"><span class="MathJax_Preview">\frac{t}{m}</span><script type="math/tex">\frac{t}{m}</script></span>；而等式右侧则需要凑微分，变形如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{equation}
+\begin{split}
+\int \frac{1}{m} dt &amp;= \int \frac{1}{mg - kv} dv\\
+\int \frac{1}{m} dt &amp;= -\frac{1}{k}\int \frac{1}{mg - kv} d(mg-kv)\\
+\frac{t}{m} + C &amp;= -\frac{1}{k} \cdot \ln(mg-kv) \\
+\end{split}
+\end{equation}
+</div>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{split}
+\int \frac{1}{m} dt &= \int \frac{1}{mg - kv} dv\\
+\int \frac{1}{m} dt &= -\frac{1}{k}\int \frac{1}{mg - kv} d(mg-kv)\\
+\frac{t}{m} + C &= -\frac{1}{k} \cdot \ln(mg-kv) \\
+\end{split}
+\end{equation}
+</script>
+</div>
+<blockquote>
+<p>注：对数的微分公式：<span class="arithmatex"><span class="MathJax_Preview">\frac{d}{dx}(\ln x)=\frac{1}{x}</span><script type="math/tex">\frac{d}{dx}(\ln x)=\frac{1}{x}</script></span></p>
+</blockquote>
+<p>由于题目中是要求速度 <span class="arithmatex"><span class="MathJax_Preview">v</span><script type="math/tex">v</script></span> 与时间 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 的函数关系，所以对上述公式对一下变形整理：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{equation}
+\begin{split}
+\frac{t}{m} + C &amp;= -\frac{1}{k} \cdot \ln(mg-kv) \\
+-k (\frac{t}{m} + C) &amp;= \ln(mg-kv) \\
+e^{-k (\frac{t}{m} + C)} &amp;= mg-kv \\
+v &amp;= \frac{mg}{k} - \frac{1}{k}e^{-k (\frac{t}{m} + C)} \\
+v &amp;= \frac{mg}{k} - \frac{1}{k} e^{-kC} e^{-k \frac{t}{m}} \\
+v &amp;= \frac{mg}{k} - C_1 \cdot e^{-k \frac{t}{m}} \\
+\end{split}
+\end{equation}
+</div>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{split}
+\frac{t}{m} + C &= -\frac{1}{k} \cdot \ln(mg-kv) \\
+-k (\frac{t}{m} + C) &= \ln(mg-kv) \\
+e^{-k (\frac{t}{m} + C)} &= mg-kv \\
+v &= \frac{mg}{k} - \frac{1}{k}e^{-k (\frac{t}{m} + C)} \\
+v &= \frac{mg}{k} - \frac{1}{k} e^{-kC} e^{-k \frac{t}{m}} \\
+v &= \frac{mg}{k} - C_1 \cdot e^{-k \frac{t}{m}} \\
+\end{split}
+\end{equation}
+</script>
+</div>
+<p>至此，已经将公式（1）这个微分方程的通解解出来了，在该题目中当<span class="arithmatex"><span class="MathJax_Preview">t=0</span><script type="math/tex">t=0</script></span>时：<span class="arithmatex"><span class="MathJax_Preview">v=0</span><script type="math/tex">v=0</script></span>；可以利用这个初始条件将常数项 <span class="arithmatex"><span class="MathJax_Preview">C_1</span><script type="math/tex">C_1</script></span> 也解出来，这样就得到了相应的特解，这一步比较简单，这里省略了；</p>
+<h3 id="12">1.2 雨滴下落问题中速度与时间的分析<a class="headerlink" href="#12" title="Permanent link">#</a></h3>
+<p>下面结合上述题目中的物理场景，对上述最终解出来的通解进行一下分析；</p>
+<p>首先最终求得的通解为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}v = \frac{mg}{k} - C_1 \cdot e^{-k \frac{t}{m}} \end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}v = \frac{mg}{k} - C_1 \cdot e^{-k \frac{t}{m}} \end{equation}</script>
+</div>
+<p>其中：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">\frac{mg}{k}</span><script type="math/tex">\frac{mg}{k}</script></span> 是与时间无关的常数，且大于0；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">C_1 = \frac{1}{k} e^{-kC}</span><script type="math/tex">C_1 = \frac{1}{k} e^{-kC}</script></span> 是与时间无关的常数，由于 <span class="arithmatex"><span class="MathJax_Preview">e^{-kC}</span><script type="math/tex">e^{-kC}</script></span> 大于零，所以 <span class="arithmatex"><span class="MathJax_Preview">C_1</span><script type="math/tex">C_1</script></span> 也大于零；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">-\frac{k}{m}</span><script type="math/tex">-\frac{k}{m}</script></span> 是与时间无关的常数，且小于零；</li>
+</ul>
+<p>另外，容易知道随着 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 的增大，<span class="arithmatex"><span class="MathJax_Preview">e^{-\frac{k}{m}t}</span><script type="math/tex">e^{-\frac{k}{m}t}</script></span> 是逐渐趋于零的；所以随着 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 的增大，<span class="arithmatex"><span class="MathJax_Preview">C_1 \cdot e^{-k \frac{t}{m}}</span><script type="math/tex">C_1 \cdot e^{-k \frac{t}{m}}</script></span> 是逐渐趋于零的；<span class="arithmatex"><span class="MathJax_Preview">v</span><script type="math/tex">v</script></span> 是趋于常数项 <span class="arithmatex"><span class="MathJax_Preview">\frac{mg}{k}</span><script type="math/tex">\frac{mg}{k}</script></span> 的；该常数项就是最终匀速运动阶段的速度；</p>
+<h3 id="13">1.3 关于微分方程<a class="headerlink" href="#13" title="Permanent link">#</a></h3>
+<p>之前的方程，要求解的变量是一个数；</p>
+<p>微分方程，比如上例中，要求解的变量是一个函数；</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

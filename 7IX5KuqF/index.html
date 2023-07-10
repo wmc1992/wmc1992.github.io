@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/003_SelfInstruct/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Self-Instruct: Aligning Language Model with Self Generated Instructions - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#self-instruct-aligning-language-model-with-self-generated-instructions" class="nav-link">Self-Instruct: Aligning Language Model with Self Generated Instructions</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、本文的主要贡献</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、相关工作</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3approach" class="nav-link">3、Approach</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#31" class="nav-link">3.1 指令数据集的定义</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#32-self-instruct" class="nav-link">3.2 Self-Instruct</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4" class="nav-link">4、生成的数据集质量分析</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#41" class="nav-link">4.1 数据量</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#42" class="nav-link">4.2 丰富程度</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#43" class="nav-link">4.3 数据质量</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#5" class="nav-link">5、实验结果</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#51-superni" class="nav-link">5.1 第一组实验：在测评数据 SUPERNI 上的效果</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#52" class="nav-link">5.2 第二组实验：在面向用户的新任务上的效果</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#6" class="nav-link">6、讨论分析</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_1" class="nav-link">临时记录</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="self-instruct-aligning-language-model-with-self-generated-instructions">Self-Instruct: Aligning Language Model with Self Generated Instructions<a class="headerlink" href="#self-instruct-aligning-language-model-with-self-generated-instructions" title="Permanent link">#</a></h1>
+<blockquote>
+<p>论文链接: <a href="https://arxiv.org/abs/2212.10560">https://arxiv.org/abs/2212.10560</a></p>
+<p>github链接: <a href="https://github.com/yizhongw/self-instruct">https://github.com/yizhongw/self-instruct</a></p>
+</blockquote>
+<h2 id="1">1、本文的主要贡献<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<ol>
+<li>提出了一种框架：Self-Instruct，该框架可以使用最少的人工标注，生成大量的用于 instruct-tuning 的数据；</li>
+<li>本文中通过多个实验验证了上述方法的有效性；</li>
+<li>本文发布了52K的使用上述方法获取的用于 instruct-tuning 的数据集，以及一份人工手动编写的新任务的数据集；</li>
+</ol>
+<h2 id="2">2、相关工作<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>原论文中介绍了相当多的相关工作，这里只捡感兴趣的一项记录在这里：</p>
+<ul>
+<li><strong>指令生成（Instruction generation）</strong> 相关的研究：<ul>
+<li><a href="https://arxiv.org/abs/2211.01910">Large Language Models Are Human-Level Prompt Engineers</a></li>
+<li><a href="https://arxiv.org/abs/2210.02969">Guess the Instruction! Flipped Learning Makes Language Models Stronger Zero-Shot Learners</a></li>
+<li><a href="https://arxiv.org/abs/2210.01848">Explaining Patterns in Data with Language Models via Interpretable Autoprompting</a></li>
+<li><a href="https://arxiv.org/abs/2205.10782">Instruction Induction: From Few Examples to Natural Language Task Descriptions</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="3approach">3、Approach<a class="headerlink" href="#3approach" title="Permanent link">#</a></h2>
+<p>人工标注指令数据集一般有两个步骤：</p>
+<ul>
+<li>
+<p>创造各种新颖的任务，即 instruct；</p>
+</li>
+<li>
+<p>对上述每个任务编写正确的答案，即 complement；</p>
+</li>
+</ul>
+<p>这种人工标注数据的方式成本很高，下面详细介绍本文提出的 self-instruct 框架。</p>
+<table>
+<thead>
+<tr>
+<th align="center">图1: Self-Instruct流程图</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src=/7IX5KuqF/assets/Figure1.png width=100% /></td>
+</tr>
+</tbody>
+</table>
+<h3 id="31">3.1 指令数据集的定义<a class="headerlink" href="#31" title="Permanent link">#</a></h3>
+<p>一般的，指令数据集中的一条数据包含（指令, 输入, 输出）这三部分，举个例子如下所示：</p>
+<pre><code>指令：写一篇关于以下主题的文章
+输入：校园安全
+输出：校园安全是学校必须高度重视的问题，涉及到师生的生命财产安全。建立安全意识，制定严格的规章制度，加强安全巡查和应急预案，是确保校园安全的关键。
+</code></pre>
+<p>不过很多时候对于上述三部分中的"指令"和"输入"划分的不是那么清晰，比如下面这条数据基本可以认为和上述例子是相同的：</p>
+<pre><code>指令：写一篇以校园安全为主题的文章
+输出：校园安全是学校必须高度重视的问题，涉及到师生的生命财产安全。建立安全意识，制定严格的规章制度，加强安全巡查和应急预案，是确保校园安全的关键。
+</code></pre>
+<p>所以在本文的后续部分，指令数据集中的一条数据可能包含三部分（指令, 输入, 输出），也可能只有两部分（指令, 输出）。</p>
+<p>再举个例子感受一下：</p>
+<pre><code>指令：将下述中文翻译为英文
+输入：中国的首都是北京。
+输出：China's capital city is Beijing.
+</code></pre>
+<h3 id="32-self-instruct">3.2 Self-Instruct<a class="headerlink" href="#32-self-instruct" title="Permanent link">#</a></h3>
+<p>首先整体说明一下该方法的流程，大致有如下几个步骤：</p>
+<ol>
+<li>人工设计了175个表示不同任务的指令，并且给每条数据都编写了（指令, 输入, 输出）/（指令, 输出），将这175条数据作为种子池。</li>
+<li>使用模型生成新的指令；</li>
+<li>对该模型生成的指令判断是否分类任务；</li>
+<li>使用模型生成实例；</li>
+<li>对上述模型生成的数据进行过滤和后处理；</li>
+<li>将经过过滤和后处理的数据添加到种子池中；</li>
+<li>一直重复上述2到6步直到种子池有足够多的数据；</li>
+</ol>
+<p>在上述步骤中有的比较简单，不再详述，下面对第2步到第5步分别详细描述。</p>
+<h4 id="321">3.2.1 生成指令<a class="headerlink" href="#321" title="Permanent link">#</a></h4>
+<p>生成指令时，先从种子池中随机抽取6个人工编写的指令，再随机抽取2个之前步骤中模型生成的指令，总共8个指令。以如下表6的模版格式组织之后，输入给模型，让模型输出一个新的指令。</p>
+<table>
+<thead>
+<tr>
+<th align="center">表6: 生成指令时使用的prompt模版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src=/7IX5KuqF/assets/Table6.png width=100% /></td>
+</tr>
+</tbody>
+</table>
+<h4 id="322">3.2.2 判断指令是否属于分类任务<a class="headerlink" href="#322" title="Permanent link">#</a></h4>
+<p>这里之所以需要判断指令是否属于分类任务，主要是因为在给该指令生成实例时，分类任务与非分类任务使用的prompt模版是不同的，这个在下一部分 <strong>3.2.3 生成实例</strong> 里面会详细说明。</p>
+<p>判断指令是否属于分类任务的操作如下：在种子池中随机挑选12条分类指令和19条非分类指令，然后加上新生成的指令，以下表7的模版格式组织之后，输入给模型，让模型输出新生成的指令是否分类任务。</p>
+<table>
+<thead>
+<tr>
+<th align="center">表7: 判断指令是否分类任务的prompt模版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src=/7IX5KuqF/assets/Table7.png width=100% /></td>
+</tr>
+</tbody>
+</table>
+<h4 id="323">3.2.3 生成实例<a class="headerlink" href="#323" title="Permanent link">#</a></h4>
+<p>在给定了指令之后，生成实例的过程对 LLM 模型的效果要求是比较高的，所以最好选取效果比较好的 LLM。</p>
+<p>然后在给定指令之后，生成（输入, 输出）这个实例对时还有两种策略。一种是先生成输入，后生成输出，即输入优先策略；另一种是先生成输出，后生成输入，即输出优先策略。</p>
+<p>之所以会有输出优先的方式，是因为输入优先的方式在生成输入时，偏向于只生成一个标签，尤其是指令对应着分类任务时，其输入里面偏向于只生成一个类别。输出优先就是为了一定程度上缓解该问题。</p>
+<p><strong>输入优先</strong></p>
+<p>前面已经说过一条数据的样式可能是（指令, 输入, 输出），也可能是（指令, 输出）。另外，指令数据集的丰富度我们是希望越丰富越好，所以还允许出现一个指令，多个输入的数据，举例如下。在这个例子中，<code>Task</code> 对应的就是指令，然后这个指令有2对（输入, 输出）:</p>
+<pre><code>Task: Sort the given list ascendingly.
+Example 1
+Input 1 - List: [10, 92, 2, 5, -4, 92, 5, 101]
+Output: [-4, 2, 5, 5, 10, 92, 92, 101]
+Example 2
+Input 2 - List: [9.99, 10, -5, -1000, 5e6, 999]
+Output: [-1000, -5, 9.99, 10, 999, 5e6]
+</code></pre>
+<p>然后具体生成实例的操作步骤为：在种子池中随机抽取 k 条数据，以如下的prompt模版的形式组合之后，输入给模型，让模型为最后的指令生成相应的实例。如下表8所示。</p>
+<table>
+<thead>
+<tr>
+<th align="center">表8: 输入优先生成实例的prompt模版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src=/7IX5KuqF/assets/Table8.png width=100% /></td>
+</tr>
+</tbody>
+</table>
+<p><strong>输出优先</strong></p>
+<p>对于分类任务，如果先生成文本，后生成标签，模型会偏向于生成比较单一的结果。所以对于分类任务，是先生成随机的标签，然后再生成该标签对应的文本。</p>
+<p>具体的步骤和输入优先基本相同：在种子池中随机抽取 k 条在之前的步骤中已经标记为分类的数据，以如下的prompt模版的形式组合之后，输入给模型，让模型为最后的指令生成相应的实例。如下表9所示。可以看出都是先生成分类标签，再生成待分类的文本。</p>
+<table>
+<thead>
+<tr>
+<th align="center">表9: 输出优先生成实例的prompt模版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src=/7IX5KuqF/assets/Table9.png width=100% /></td>
+</tr>
+</tbody>
+</table>
+<h4 id="324">3.2.4 过滤以及后处理<a class="headerlink" href="#324" title="Permanent link">#</a></h4>
+<ul>
+<li>为了数据的多样性，新生成的指令只有与种子池中的指令的 ROUGE-L 小于0.7时才会添加进入种子池；</li>
+<li>排除一些无法被语言模型处理的指令，比如涉及图像、图片、图形的指令；</li>
+<li>在给指令生成实例时，会过滤掉输入相同但是输出不同的实例；</li>
+</ul>
+<h2 id="4">4、生成的数据集质量分析<a class="headerlink" href="#4" title="Permanent link">#</a></h2>
+<p>使用指令数据集对模型做微调之后模型效果的好坏，很大程度上取决于这份指令数据集的质量如何，所以对于使用Self-Instruct方法生成的数据集作一下分析是很有必要的。在这部分从三个方面对生成的数据进行分析，这三个方面分别是：数据量、丰富程度、数据质量。</p>
+<h3 id="41">4.1 数据量<a class="headerlink" href="#41" title="Permanent link">#</a></h3>
+<p>总共是52K的指令，和82K的实例；</p>
+<h3 id="42">4.2 丰富程度<a class="headerlink" href="#42" title="Permanent link">#</a></h3>
+<h3 id="43">4.3 数据质量<a class="headerlink" href="#43" title="Permanent link">#</a></h3>
+<p>数据质量的评估方式：随机抽取200条指令，并给每个指令随机抽取一个实例，然后人工对该指令和实例进行标注评估，评估结果如下表2所示。</p>
+<p>可以看出：</p>
+<ul>
+<li>生成的指令有含义，能表示一个任务的占比为92%；</li>
+<li>给每个指令生成合适的输入的占比为79%；</li>
+<li>生成的输出是指令和输入的正确结果的占比为58%；</li>
+<li>指令、输入、输出，这三个字段全对的占比为54%；</li>
+</ul>
+<p>可以看出使用Self-Instruct生成的数据集还是有一些噪音的。</p>
+<table>
+<thead>
+<tr>
+<th align="center">表2: 对生成的指令数据集的人工评估结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src=/7IX5KuqF/assets/Table2.png width=60% /></td>
+</tr>
+</tbody>
+</table>
+<h2 id="5">5、实验结果<a class="headerlink" href="#5" title="Permanent link">#</a></h2>
+<p>本文是使用openai提供的接口对GPT3模型做的微调。关于使用 openai 做微调的教程和价格链接：</p>
+<ul>
+<li>微调教程: <a href="https://platform.openai.com/docs/guides/fine-tuning">https://platform.openai.com/docs/guides/fine-tuning</a></li>
+<li>定价: <a href="https://openai.com/pricing">https://openai.com/pricing</a></li>
+</ul>
+<h3 id="51-superni">5.1 第一组实验：在测评数据 SUPERNI 上的效果<a class="headerlink" href="#51-superni" title="Permanent link">#</a></h3>
+<h4 id="511">5.1.1 对比对象<a class="headerlink" href="#511" title="Permanent link">#</a></h4>
+<ul>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{T5}</span><script type="math/tex">\text{T5}</script></span>: 原始的 T5 模型，参数量为11B；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{T0}</span><script type="math/tex">\text{T0}</script></span>: 基于11B参数量的T5模型，在指令数据集 PROMPTSOURCE 上做了微调之后得到的模型；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{T𝑘-INSTRUCT}</span><script type="math/tex">\text{T𝑘-INSTRUCT}</script></span>: 基于11B参数量的T5模型，在指令数据集 SUPERNI 上做了微调之后得到的模型；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{GPT3}</span><script type="math/tex">\text{GPT3}</script></span>: 原始的 GPT3 模型，参数量为175B；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{GPT3}_{SELF-INST}</span><script type="math/tex">\text{GPT3}_{SELF-INST}</script></span>: 基于 175B 的GPT3模型，采用本文的 Self-Instruct 方法进行了指令微调得到的模型；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{GPT3 + T0 training}</span><script type="math/tex">\text{GPT3 + T0 training}</script></span>: 基于 175B 的GPT3模型，在指令数据集 PROMPTSOURCE 上做了微调之后得到的模型；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{GPT3 + SUPERNI training}</span><script type="math/tex">\text{GPT3 + SUPERNI training}</script></span>: 基于 175B 的GPT3模型，在指令数据集 SUPERNI 上做了微调之后得到的模型；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{InstructGPT}_{001}</span><script type="math/tex">\text{InstructGPT}_{001}</script></span>: openai发布的模型 text-davinci-001；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{GPT3}_{SELF-INST} + \text{SUPERNI Training}</span><script type="math/tex">\text{GPT3}_{SELF-INST} + \text{SUPERNI Training}</script></span>: 基于 175B 的GPT3模型，采用本文的 Self-Instruct 方法获取指令数据集，在加上 SUPERNI 这个指令数据集，在合并这两份数据集之后的总的数据集上微调之后的模型。</p>
+</li>
+</ul>
+<h4 id="512">5.1.2 效果分析<a class="headerlink" href="#512" title="Permanent link">#</a></h4>
+<p>对比结果如下表3所示，总的来说：</p>
+<ul>
+<li>Self-Instruct能够给GPT3模型带来巨大的提升，大概33.1%；</li>
+<li>经过Self-Instruct之后的GPT3的效果接近<span class="arithmatex"><span class="MathJax_Preview">\text{InstructGPT}_{001}</span><script type="math/tex">\text{InstructGPT}_{001}</script></span>；</li>
+<li>从下表3的最后两行的对比来看，即使已经在同源的测评数据集 SUPERNI 上经过了微调之后，再使用 Self-Instruct 依然能够有提升；</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">表3: 在数据集SUPERNI上的效果对比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src=/7IX5KuqF/assets/Table3.png width=100% /></td>
+</tr>
+</tbody>
+</table>
+<h3 id="52">5.2 第二组实验：在面向用户的新任务上的效果<a class="headerlink" href="#52" title="Permanent link">#</a></h3>
+<h4 id="521">5.2.1 新测评数据集<a class="headerlink" href="#521" title="Permanent link">#</a></h4>
+<p>测评数据 SUPERNI 还是有点偏向于研究性质，为了更好的测试本文中提出的方法训练出的模型在给用户使用时的效果。本文设计了一份新的更贴近普通用户的数据集，在该数据集上测试Self-Instruct的效果。</p>
+<p>在设计这个数据集时考虑到的有：</p>
+<ul>
+<li>不同的领域：邮件写作、社交媒体、生产力工具、娱乐、编程等；</li>
+<li>形式上：可以是（指令, 输入, 输出），也可以是（指令, 输出）；</li>
+<li>指令有的长、有的短，输入/输出中包含项目符号、表格、代码、方程等；</li>
+</ul>
+<p>该数据集总共252条指令，每个指令一个实例。该数据集中的一些例子如下表4所示：</p>
+<table>
+<thead>
+<tr>
+<th align="center">表4: 新设计的测试数据集的一些例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src=/7IX5KuqF/assets/Table4.png width=100% /></td>
+</tr>
+</tbody>
+</table>
+<h4 id="522">5.2.2 对比对象<a class="headerlink" href="#522" title="Permanent link">#</a></h4>
+<p>基本上和第 <strong>5.1.1</strong> 节中提到的是一致的。另外还增加了 <span class="arithmatex"><span class="MathJax_Preview">\text{InstructGPT}_{002}</span><script type="math/tex">\text{InstructGPT}_{002}</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">\text{InstructGPT}_{003}</span><script type="math/tex">\text{InstructGPT}_{003}</script></span>；</p>
+<h4 id="523">5.2.3 效果分析<a class="headerlink" href="#523" title="Permanent link">#</a></h4>
+<p>对比结果如下图5所示。评估方式是人工对模型的输出结果做打分，评分A最好，评分D最差。在下图5中的颜色对应着绿色最好，红色最差。</p>
+<p>可以看出：</p>
+<ul>
+<li>原始的GPT3几乎无法响应用户的指令，所有微调过之后的模型都有明显的提升；</li>
+<li>即使策略Self-Instruct生成的数据在第 <strong>4.3</strong> 节中分析是有噪音的，但是模型 <span class="arithmatex"><span class="MathJax_Preview">\text{GPT3}_{SelfInstruct}</span><script type="math/tex">\text{GPT3}_{SelfInstruct}</script></span> 的效果明显优于模型 GPT3+T0 Training 和模型 GPT3 + SuperNI Training ；</li>
+<li>模型 <span class="arithmatex"><span class="MathJax_Preview">\text{GPT3}_{SelfInstruct}</span><script type="math/tex">\text{GPT3}_{SelfInstruct}</script></span> 的效果与模型 <span class="arithmatex"><span class="MathJax_Preview">\text{InstructGPT}_{001}</span><script type="math/tex">\text{InstructGPT}_{001}</script></span> 的效果已经非常接近了；</li>
+<li>最后，模型 <span class="arithmatex"><span class="MathJax_Preview">\text{InstructGPT}_{002}</span><script type="math/tex">\text{InstructGPT}_{002}</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">\text{InstructGPT}_{003}</span><script type="math/tex">\text{InstructGPT}_{003}</script></span> 效果确实很牛逼；</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">图5: 在面向用户的测试集上的效果对比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img src=/7IX5KuqF/assets/Figure5.png width=100% /></td>
+</tr>
+</tbody>
+</table>
+<h2 id="6">6、讨论分析<a class="headerlink" href="#6" title="Permanent link">#</a></h2>
+<p>待补充</p>
+<h2 id="_1">临时记录<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
+<p>对于 instruct-tuning 来说，instruct 和 complement 数据集的大小和多样性至关重要。</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
