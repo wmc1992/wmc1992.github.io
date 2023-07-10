@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/003_%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/011_LSTM/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>LSTM原理 - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#lstm" class="nav-link">LSTM原理</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、输入和输出</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、图中的两种颜色</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、公式详情</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4" class="nav-link">4、实现代码</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="lstm">LSTM原理<a class="headerlink" href="#lstm" title="Permanent link">#</a></h1>
+<table>
+<thead>
+<tr>
+<th align="center"><img alt="" src="/BRZohm5J/assets/1.jpg" /></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">图1</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1">1、输入和输出<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>先把整个LSTMCell当成一个黑盒，只看其输出和输入。</p>
+<p>输出：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">h_t</span><script type="math/tex">h_t</script></span>：表示当前t时刻的细胞的输出；如果使用LSTM做nlp中的序列标注任务，每个token的输出就是该值；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">C_t</span><script type="math/tex">C_t</script></span>：表示当前t时刻的细胞状态，字母 <span class="arithmatex"><span class="MathJax_Preview">C</span><script type="math/tex">C</script></span> 就是细胞cell的首字母，LSTM能够将之前时刻的信息传递到后面的时刻，就是使用该值做的信息传递；</li>
+</ul>
+<p>输入：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">h_{t-1}</span><script type="math/tex">h_{t-1}</script></span>：表示上一时刻（<span class="arithmatex"><span class="MathJax_Preview">t-1</span><script type="math/tex">t-1</script></span>时刻）的细胞的输出；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">C_{t-1}</span><script type="math/tex">C_{t-1}</script></span>：表示上一时刻（<span class="arithmatex"><span class="MathJax_Preview">t-1</span><script type="math/tex">t-1</script></span>时刻）的细胞状态；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">x_t</span><script type="math/tex">x_t</script></span>：表示当前t时刻的输入；如果使用LSTM做nlp中的序列标注任务，每个token经过embedding之后就是这里的输入；</li>
+</ul>
+<h2 id="2">2、图中的两种颜色<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>之前在学习LSTM的原理时，看过的所有LSTM资料，基本都会提到遗忘门、输入门、输出门这几个门控单元。这些门控单元的作用是控制多少信息通过，它们会输出一个0到1之间的概率，将这个概率乘到相应的信息路径上，就能控制该路径上的信息能够通过多少。如果门控单元输出的概率是1.0，就表示允许所有的信息通过；如果输出的是0.6，就表示仅允许60%的信息通过。</p>
+<p>这样在LSTM的细胞中就有些路径是传递信息的，而另外一些则是门控单元。当时最费解的就是：哪些路径是用来传递信息的？哪些路径属于门控单元？在图1中使用颜色区分这两者：绿色的线表示用来传递信息的，橘色的线表示各种门控单元。比如 <span class="arithmatex"><span class="MathJax_Preview">f_t</span><script type="math/tex">f_t</script></span> 表示遗忘门， <span class="arithmatex"><span class="MathJax_Preview">i_t</span><script type="math/tex">i_t</script></span> 表示输入门， <span class="arithmatex"><span class="MathJax_Preview">o_t</span><script type="math/tex">o_t</script></span> 表示输出门。每一条橘色的线都会输出一个0到1之间的概率，将该概率乘到其对应的绿色的路径上，就能实现控制绿色路径上的信息通过多少的目的。</p>
+<h2 id="3">3、公式详情<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<p>关于LSTM细胞内部的结构，依照图1，下面从右往左逐步分析。需要说明一下，图1只是简图，并不是所有的运算都在图上有体现，比如各种激活函数在图上就没有体现。</p>
+<p>LSTM细胞中各部分的详细计算公式说明如下：</p>
+<ul>
+<li>
+<p>当前t时刻细胞的输出 <span class="arithmatex"><span class="MathJax_Preview">h_t</span><script type="math/tex">h_t</script></span> ，它是由当前t时刻细胞的状态乘上遗忘门得到的，公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}h_t = o_t * \text{tanh}(C_t)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}h_t = o_t * \text{tanh}(C_t)\end{equation}</script>
+</div>
+</li>
+<li>
+<p>当前t时刻的细胞状态 <span class="arithmatex"><span class="MathJax_Preview">C_t</span><script type="math/tex">C_t</script></span> 是由两部分组成的：前一时刻（<span class="arithmatex"><span class="MathJax_Preview">t-1</span><script type="math/tex">t-1</script></span>时刻）的细胞状态、当前t时刻的输入。公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}C_t = f_t * C_{t-1} + i_t * \tilde{C}_t\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}C_t = f_t * C_{t-1} + i_t * \tilde{C}_t\end{equation}</script>
+</div>
+<p>在上述公式中：</p>
+<ul>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">C_{t-1}</span><script type="math/tex">C_{t-1}</script></span> 表示前一时刻的细胞状态；<span class="arithmatex"><span class="MathJax_Preview">f_t</span><script type="math/tex">f_t</script></span> 是遗忘门，用于控制前一时刻的状态有多大比例能够通过；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">\tilde{C}_t</span><script type="math/tex">\tilde{C}_t</script></span> 表示仅由当前t时刻的输入计算出来的（该值中仅含有当前t时刻的输入信息，不包含任何之前时刻的历史信息）；<span class="arithmatex"><span class="MathJax_Preview">i_t</span><script type="math/tex">i_t</script></span> 是输入门，用于控制当前t时刻的输入信息有多大比例能够通过；</p>
+</li>
+</ul>
+</li>
+<li>
+<p>前一时刻（<span class="arithmatex"><span class="MathJax_Preview">t-1</span><script type="math/tex">t-1</script></span>时刻）的细胞状态 <span class="arithmatex"><span class="MathJax_Preview">C_{t-1}</span><script type="math/tex">C_{t-1}</script></span> 是由前一时刻传递过来的。</p>
+</li>
+<li>
+<p>当前t时刻的输入 <span class="arithmatex"><span class="MathJax_Preview">\tilde{C}_t</span><script type="math/tex">\tilde{C}_t</script></span> 是根据输入信息计算出来的，公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\tilde{C}_t=\text{tanh}(W_c \cdot [h_{t-1}, x_t] + b_c)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\tilde{C}_t=\text{tanh}(W_c \cdot [h_{t-1}, x_t] + b_c)\end{equation}</script>
+</div>
+<p>在上述公式中：</p>
+<ul>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">[h_{t-1}, x_t]</span><script type="math/tex">[h_{t-1}, x_t]</script></span> 表示将向量 <span class="arithmatex"><span class="MathJax_Preview">h_{t-1}</span><script type="math/tex">h_{t-1}</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">x_t</span><script type="math/tex">x_t</script></span> 拼接起来；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">W_c \cdot [h_{t-1}, x_t] + b_c</span><script type="math/tex">W_c \cdot [h_{t-1}, x_t] + b_c</script></span> 表示对向量 <span class="arithmatex"><span class="MathJax_Preview">[h_{t-1}, x_t]</span><script type="math/tex">[h_{t-1}, x_t]</script></span> 做一个线性变换；在模型上来说就是经过一个linear layer，其中 <span class="arithmatex"><span class="MathJax_Preview">W_c</span><script type="math/tex">W_c</script></span>、<span class="arithmatex"><span class="MathJax_Preview">b_c</span><script type="math/tex">b_c</script></span> 是可学习的参数；</p>
+</li>
+</ul>
+</li>
+<li>
+<p>三个门（遗忘门<span class="arithmatex"><span class="MathJax_Preview">f_t</span><script type="math/tex">f_t</script></span>、输入门<span class="arithmatex"><span class="MathJax_Preview">i_t</span><script type="math/tex">i_t</script></span>、输出门<span class="arithmatex"><span class="MathJax_Preview">o_t</span><script type="math/tex">o_t</script></span>）所对应的概率的计算公式都是相似的，如下所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}f_t = \text{sigmoid}(W_f \cdot [h_{t-1}, x_t] + b_f)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}f_t = \text{sigmoid}(W_f \cdot [h_{t-1}, x_t] + b_f)\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}i_t = \text{sigmoid}(W_i \cdot [h_{t-1}, x_t] + b_i)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}i_t = \text{sigmoid}(W_i \cdot [h_{t-1}, x_t] + b_i)\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}o_t = \text{sigmoid}(W_o \cdot [h_{t-1}, x_t] + b_o)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}o_t = \text{sigmoid}(W_o \cdot [h_{t-1}, x_t] + b_o)\end{equation}</script>
+</div>
+<p>在上述公式中：</p>
+<ul>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">[h_{t-1}, x_t]</span><script type="math/tex">[h_{t-1}, x_t]</script></span> 表示将向量 <span class="arithmatex"><span class="MathJax_Preview">h_{t-1}</span><script type="math/tex">h_{t-1}</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">x_t</span><script type="math/tex">x_t</script></span> 拼接起来；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">W \cdot [h_{t-1}, x_t] + b</span><script type="math/tex">W \cdot [h_{t-1}, x_t] + b</script></span> 表示对向量 <span class="arithmatex"><span class="MathJax_Preview">[h_{t-1}, x_t]</span><script type="math/tex">[h_{t-1}, x_t]</script></span> 做一个线性变换；在模型上来说就是经过一个linear layer，其中 <span class="arithmatex"><span class="MathJax_Preview">W_f</span><script type="math/tex">W_f</script></span>、<span class="arithmatex"><span class="MathJax_Preview">W_i</span><script type="math/tex">W_i</script></span>、<span class="arithmatex"><span class="MathJax_Preview">W_o</span><script type="math/tex">W_o</script></span>、<span class="arithmatex"><span class="MathJax_Preview">b_f</span><script type="math/tex">b_f</script></span>、<span class="arithmatex"><span class="MathJax_Preview">b_i</span><script type="math/tex">b_i</script></span>、<span class="arithmatex"><span class="MathJax_Preview">b_o</span><script type="math/tex">b_o</script></span> 都是可学习的参数；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{sigmoid}(\cdot)</span><script type="math/tex">\text{sigmoid}(\cdot)</script></span> 是激活函数，目的是将其范围压缩到 <span class="arithmatex"><span class="MathJax_Preview">[0,1]</span><script type="math/tex">[0,1]</script></span> 之间；</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>以上就是一个LSTM细胞内所有部分的计算公式。</p>
+<h2 id="4">4、实现代码<a class="headerlink" href="#4" title="Permanent link">#</a></h2>
+<pre><code class="language-python">import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class LSTMCell(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+
+        self.linear_f = nn.Linear()  # 遗忘门
+        self.linear_i = nn.Linear()  # 输入门
+        self.linear_c = nn.Linear()  # 当前输入对应的准内部状态
+        self.linear_o = nn.Linear()  # 输出门
+
+    def forward(self, inputs, h_t_1, c_t_1):
+        f_t = F.sigmoid(self.linear_f(torch.cat([inputs, h_t_1], dim=-1)))
+        i_t = F.sigmoid(self.linear_i(torch.cat([inputs, h_t_1], dim=-1)))
+        _c_t = F.tanh(self.linear_c(torch.cat([inputs, h_t_1], dim=-1)))
+
+        c_t = f_t * c_t_1 + i_t * _c_t
+
+        o_t = F.sigmoid(self.linear_o(torch.cat([inputs, h_t_1], dim=-1)))
+        h_t = o_t * F.tanh(c_t)
+
+        return h_t, c_t
+
+class LSTM(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+
+</code></pre></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
