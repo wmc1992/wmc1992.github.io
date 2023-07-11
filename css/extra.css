@@ -148,3 +148,7 @@ ul, ul ul, ul ul ul {
 .col-md-9 img {
     margin: auto auto 10px auto;
 }
+
+details {
+    margin: auto auto 20px auto;
+}

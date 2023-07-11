@@ -153,6 +153,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#c-eval" class="nav-link">七、C-EVAL</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -696,305 +700,405 @@
 <p>Austin et al., 2021</p>
 </blockquote>
 <h2 id="_7">六、大规模多任务语言理解<a class="headerlink" href="#_7" title="Permanent link">#</a></h2>
-<p>专指数据集：MMLU（Massive Multitask Language Understanding）</p>
+<p>即数据集：MMLU（Massive Multitask Language Understanding）</p>
 <blockquote>
 <p>论文链接: <a href="https://arxiv.org/pdf/2009.03300.pdf">https://arxiv.org/pdf/2009.03300.pdf</a></p>
 <p>Hendrycks et al., 2020</p>
 </blockquote>
 <p>该数据集包含四个大类，57个任务类型。四个大类为：STEM（science, technology, engineering, and mathematics）、人文（Humanities）、社会科学（Social Sciences）、Other；57个任务类型如下表所示（与其说是57个任务类型，不如说是57个领域更恰当）。具体的每个任务的样例可以见论文的附录B，太长了，这里不逐个列举。不过该数据集中所有的任务都是选择题类型，所以在使用时可以做到统一的任务格式。</p>
-<table align=center style="width:70%">
-    <thead>
-        <tr>
-            <th>Supercategory</th>
-            <th>Task</th>
-            <th>Task（中文）</th>
-        </tr>
-    </thead>
+<details>
+    <summary>点击展开57个任务类型的详情</summary>
+    <table align=center style="width:70%">
+        <thead>
+            <tr>
+                <th>Supercategory</th>
+                <th>Task</th>
+                <th>Task（中文）</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>STEM</td>
+                <td>Abstract Algebra</td>
+                <td>抽象代数</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>Anatomy</td>
+                <td>解剖学</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>Astronomy</td>
+                <td>天文学</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>Business Ethics</td>
+                <td>商业伦理学</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>Clinical Knowledge</td>
+                <td>临床学</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>College Biology</td>
+                <td>大学生物学</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>College Chemistry</td>
+                <td>大学化学</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>College Computer Science</td>
+                <td>大学计算机科学</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>College Mathematics</td>
+                <td>大学数学</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>College Medicine</td>
+                <td>大学医学</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>College Physics</td>
+                <td>大学物理学</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>Computer Security</td>
+                <td>网络安全</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>Conceptual Physics</td>
+                <td>概念物理</td>
+            </tr>
+            <tr>
+                <td>Social Sciences</td>
+                <td>Econometrics</td>
+                <td>经济计量学</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>Electrical Engineering</td>
+                <td>电气工程</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>Elementary Mathematics</td>
+                <td>初等数学</td>
+            </tr>
+            <tr>
+                <td>Humanities</td>
+                <td>Formal Logic</td>
+                <td>形式逻辑</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>Global Facts</td>
+                <td>全球事实</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>High School Biology</td>
+                <td>高中生物学</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>High School Chemistry</td>
+                <td>高中化学</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>High School Computer Science</td>
+                <td>高中计算机科学</td>
+            </tr>
+            <tr>
+                <td>Humanities</td>
+                <td>High School European History</td>
+                <td>高中欧洲历史学</td>
+            </tr>
+            <tr>
+                <td>Social Sciences</td>
+                <td>High School Geography</td>
+                <td>高中地理学</td>
+            </tr>
+            <tr>
+                <td>Social Sciences</td>
+                <td>High School Gov’t and Politics</td>
+                <td>高中政府与政治学</td>
+            </tr>
+            <tr>
+                <td>Social Sciences</td>
+                <td>High School Macroeconomics</td>
+                <td>高中宏观经济学</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>High School Mathematics</td>
+                <td>高中数学</td>
+            </tr>
+            <tr>
+                <td>Social Sciences</td>
+                <td>High School Microeconomics</td>
+                <td>高中微观经济学</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>High School Physics</td>
+                <td>高中物理</td>
+            </tr>
+            <tr>
+                <td>Social Sciences</td>
+                <td>High School Psychology</td>
+                <td>高中心理学</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>High School Statistics</td>
+                <td>高中统计学</td>
+            </tr>
+            <tr>
+                <td>Humanities</td>
+                <td>High School US History</td>
+                <td>高中美国历史学</td>
+            </tr>
+            <tr>
+                <td>Humanities</td>
+                <td>High School World History</td>
+                <td>高中世界历史学</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>Human Aging</td>
+                <td>人类衰老</td>
+            </tr>
+            <tr>
+                <td>Social Sciences</td>
+                <td>Human Sexuality</td>
+                <td>人类性行为</td>
+            </tr>
+            <tr>
+                <td>Humanities</td>
+                <td>International Law</td>
+                <td>国际法</td>
+            </tr>
+            <tr>
+                <td>Humanities</td>
+                <td>Jurisprudence</td>
+                <td>法学</td>
+            </tr>
+            <tr>
+                <td>Humanities</td>
+                <td>Logical Fallacies</td>
+                <td>谬误论证</td>
+            </tr>
+            <tr>
+                <td>STEM</td>
+                <td>Machine Learning</td>
+                <td>机器学习</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>Management</td>
+                <td>管理学</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>Marketing</td>
+                <td>市场营销</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>Medical Genetics</td>
+                <td>医学遗传学</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>Miscellaneous</td>
+                <td>其他</td>
+            </tr>
+            <tr>
+                <td>Humanities</td>
+                <td>Moral Disputes</td>
+                <td>道德纠纷</td>
+            </tr>
+            <tr>
+                <td>Humanities</td>
+                <td>Moral Scenarios</td>
+                <td>道德情境</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>Nutrition</td>
+                <td>营养学</td>
+            </tr>
+            <tr>
+                <td>Humanities</td>
+                <td>Philosophy</td>
+                <td>哲学</td>
+            </tr>
+            <tr>
+                <td>Humanities</td>
+                <td>Prehistory</td>
+                <td>史前学</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>Professional Accounting</td>
+                <td>专业会计</td>
+            </tr>
+            <tr>
+                <td>Humanities</td>
+                <td>Professional Law</td>
+                <td>专业法律</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>Professional Medicine</td>
+                <td>专业医学</td>
+            </tr>
+            <tr>
+                <td>Social Sciences</td>
+                <td>Professional Psychology</td>
+                <td>专业心理学</td>
+            </tr>
+            <tr>
+                <td>Social Sciences</td>
+                <td>Public Relations</td>
+                <td>公共关系</td>
+            </tr>
+            <tr>
+                <td>Social Sciences</td>
+                <td>Security Studies</td>
+                <td>安全研究</td>
+            </tr>
+            <tr>
+                <td>Social Sciences</td>
+                <td>Sociology</td>
+                <td>社会学</td>
+            </tr>
+            <tr>
+                <td>Social Sciences</td>
+                <td>US Foreign Policy</td>
+                <td>美国外交政策</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>Virology</td>
+                <td>病毒学</td>
+            </tr>
+            <tr>
+                <td>Humanities</td>
+                <td>World Religions</td>
+                <td>世界宗教学</td>
+            </tr>
+        </tbody>
+    </table>
+</details>
+
+<h2 id="c-eval">七、C-EVAL<a class="headerlink" href="#c-eval" title="Permanent link">#</a></h2>
+<blockquote>
+<p>论文链接: <a href="https://arxiv.org/pdf/2305.08322.pdf">https://arxiv.org/pdf/2305.08322.pdf</a></p>
+<p>Huang et al., 2023</p>
+</blockquote>
+<p>该数据集是一个中文的多层次多学科评估数据集。多层次指该数据集中问题包含：初中（middle school）、高中（high school）、大学（college）、以及更具专业性（professional）的问题。多学科指包含四个大类：STEM、社会科学（social science）、人文（humanity）、其他（other），对应52个具体的学科。</p>
+<p>该数据集总共包含13948道选择题。C-EVAL HARD 是该数据集的子集，主要是该数据集中更困难的数据。</p>
+<p>该数据集的数据样例如下所示：</p>
+<table align=center style="width:40%">
     <tbody>
         <tr>
+            <td>洛伦兹曲线越是向横轴凸出____<br>A. 基尼系数就越大，收入就越不平等<br>B. 基尼系数就越大，收入就越平等<br>C. 基尼系数就越小，收入就越不平等<br>D. 基尼系数就越小，收入就越平等<br><br>答案:A</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>同时为了能够应用COT的能力，该数据集中也会生成答案解析，该解析并不是完全由人工编写，而是先通过目前的SOTA模型（比如GPT-4）生成解析，再加上人工校验得到，例子如下：</p>
+<table align=center style="width:80%">
+    <tbody>
+        <tr>
+            <td>25°C时，将pH=2的强酸溶液与pH=13的强碱溶液混合，所得混合液的pH=11，则强酸溶液与强碱溶液 的体积比是(忽略混合后溶液的体积变化)____<br>A. 11:1 B. 9:1 C. 1:11 D. 1:9<br><br>答案:B<br><br>答案解析：<br>1. PH=13的强碱性溶液中<span><script type="math/tex" id="MathJax-Element-2">c(OH^-)=0.1mol/L</script></span>，PH=2的强酸性溶液中<span><script type="math/tex" id="MathJax-Element-2">c(H^+)=0.01mol/L</script></span>，酸碱混合后PH=11，即<span><script type="math/tex" id="MathJax-Element-2">c(OH^-)=0.001mol/L</script></span>。<br>2. 设强酸和强碱溶液的体积分别为x和y，则<span><script type="math/tex" id="MathJax-Element-2">c(OH^-)=(0.1y-0.01x)/(x+y)=0.001</script></span>，解得<span><script type="math/tex" id="MathJax-Element-2">x:y=9:1</script></span>。</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>最后，下表是该数据集的一些统计信息：</p>
+<table align=center style="width:60%">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Category</th>
+            <th>Subjects</th>
+            <th>Questions</th>
+        </tr>
+    </thead>
+    <tbody style="font-size: 1.0rem">
+        <tr>
+            <td rowspan="4">In terms of topic</td>
             <td>STEM</td>
-            <td>Abstract Algebra</td>
-            <td>抽象代数</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>Anatomy</td>
-            <td>解剖学</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>Astronomy</td>
-            <td>天文学</td>
-        </tr>
-        <tr>
-            <td>Other</td>
-            <td>Business Ethics</td>
-            <td>商业伦理学</td>
-        </tr>
-        <tr>
-            <td>Other</td>
-            <td>Clinical Knowledge</td>
-            <td>临床学</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>College Biology</td>
-            <td>大学生物学</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>College Chemistry</td>
-            <td>大学化学</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>College Computer Science</td>
-            <td>大学计算机科学</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>College Mathematics</td>
-            <td>大学数学</td>
-        </tr>
-        <tr>
-            <td>Other</td>
-            <td>College Medicine</td>
-            <td>大学医学</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>College Physics</td>
-            <td>大学物理学</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>Computer Security</td>
-            <td>网络安全</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>Conceptual Physics</td>
-            <td>概念物理</td>
-        </tr>
-        <tr>
-            <td>Social Sciences</td>
-            <td>Econometrics</td>
-            <td>经济计量学</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>Electrical Engineering</td>
-            <td>电气工程</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>Elementary Mathematics</td>
-            <td>初等数学</td>
+            <td>20</td>
+            <td>4495</td>
         </tr>
         <tr>
             <td>Humanities</td>
-            <td>Formal Logic</td>
-            <td>形式逻辑</td>
+            <td>11</td>
+            <td>2676</td>
+        </tr>
+        <tr>
+            <td>Social Science</td>
+            <td>10</td>
+            <td>2845</td>
         </tr>
         <tr>
             <td>Other</td>
-            <td>Global Facts</td>
-            <td>全球事实</td>
+            <td>11</td>
+            <td>3932</td>
         </tr>
         <tr>
-            <td>STEM</td>
-            <td>High School Biology</td>
-            <td>高中生物学</td>
+            <td rowspan="4">In terms of difficulty level</td>
+            <td>Middle School</td>
+            <td>7</td>
+            <td>1409</td>
         </tr>
         <tr>
-            <td>STEM</td>
-            <td>High School Chemistry</td>
-            <td>高中化学</td>
+            <td>High School</td>
+            <td>8</td>
+            <td>1594</td>
         </tr>
         <tr>
-            <td>STEM</td>
-            <td>High School Computer Science</td>
-            <td>高中计算机科学</td>
+            <td>College</td>
+            <td>25</td>
+            <td>6249</td>
         </tr>
         <tr>
-            <td>Humanities</td>
-            <td>High School European History</td>
-            <td>高中欧洲历史学</td>
+            <td>Professional</td>
+            <td>12</td>
+            <td>4696</td>
         </tr>
         <tr>
-            <td>Social Sciences</td>
-            <td>High School Geography</td>
-            <td>高中地理学</td>
+            <td rowspan="3">In terms of split</td>
+            <td>Dev</td>
+            <td>52</td>
+            <td>260</td>
         </tr>
         <tr>
-            <td>Social Sciences</td>
-            <td>High School Gov’t and Politics</td>
-            <td>高中政府与政治学</td>
+            <td>Valid</td>
+            <td>52</td>
+            <td>1346</td>
         </tr>
         <tr>
-            <td>Social Sciences</td>
-            <td>High School Macroeconomics</td>
-            <td>高中宏观经济学</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>High School Mathematics</td>
-            <td>高中数学</td>
-        </tr>
-        <tr>
-            <td>Social Sciences</td>
-            <td>High School Microeconomics</td>
-            <td>高中微观经济学</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>High School Physics</td>
-            <td>高中物理</td>
-        </tr>
-        <tr>
-            <td>Social Sciences</td>
-            <td>High School Psychology</td>
-            <td>高中心理学</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>High School Statistics</td>
-            <td>高中统计学</td>
-        </tr>
-        <tr>
-            <td>Humanities</td>
-            <td>High School US History</td>
-            <td>高中美国历史学</td>
-        </tr>
-        <tr>
-            <td>Humanities</td>
-            <td>High School World History</td>
-            <td>高中世界历史学</td>
-        </tr>
-        <tr>
-            <td>Other</td>
-            <td>Human Aging</td>
-            <td>人类衰老</td>
-        </tr>
-        <tr>
-            <td>Social Sciences</td>
-            <td>Human Sexuality</td>
-            <td>人类性行为</td>
-        </tr>
-        <tr>
-            <td>Humanities</td>
-            <td>International Law</td>
-            <td>国际法</td>
-        </tr>
-        <tr>
-            <td>Humanities</td>
-            <td>Jurisprudence</td>
-            <td>法学</td>
-        </tr>
-        <tr>
-            <td>Humanities</td>
-            <td>Logical Fallacies</td>
-            <td>谬误论证</td>
-        </tr>
-        <tr>
-            <td>STEM</td>
-            <td>Machine Learning</td>
-            <td>机器学习</td>
-        </tr>
-        <tr>
-            <td>Other</td>
-            <td>Management</td>
-            <td>管理学</td>
-        </tr>
-        <tr>
-            <td>Other</td>
-            <td>Marketing</td>
-            <td>市场营销</td>
-        </tr>
-        <tr>
-            <td>Other</td>
-            <td>Medical Genetics</td>
-            <td>医学遗传学</td>
-        </tr>
-        <tr>
-            <td>Other</td>
-            <td>Miscellaneous</td>
-            <td>其他</td>
-        </tr>
-        <tr>
-            <td>Humanities</td>
-            <td>Moral Disputes</td>
-            <td>道德纠纷</td>
-        </tr>
-        <tr>
-            <td>Humanities</td>
-            <td>Moral Scenarios</td>
-            <td>道德情境</td>
-        </tr>
-        <tr>
-            <td>Other</td>
-            <td>Nutrition</td>
-            <td>营养学</td>
-        </tr>
-        <tr>
-            <td>Humanities</td>
-            <td>Philosophy</td>
-            <td>哲学</td>
-        </tr>
-        <tr>
-            <td>Humanities</td>
-            <td>Prehistory</td>
-            <td>史前学</td>
-        </tr>
-        <tr>
-            <td>Other</td>
-            <td>Professional Accounting</td>
-            <td>专业会计</td>
-        </tr>
-        <tr>
-            <td>Humanities</td>
-            <td>Professional Law</td>
-            <td>专业法律</td>
-        </tr>
-        <tr>
-            <td>Other</td>
-            <td>Professional Medicine</td>
-            <td>专业医学</td>
-        </tr>
-        <tr>
-            <td>Social Sciences</td>
-            <td>Professional Psychology</td>
-            <td>专业心理学</td>
-        </tr>
-        <tr>
-            <td>Social Sciences</td>
-            <td>Public Relations</td>
-            <td>公共关系</td>
-        </tr>
-        <tr>
-            <td>Social Sciences</td>
-            <td>Security Studies</td>
-            <td>安全研究</td>
-        </tr>
-        <tr>
-            <td>Social Sciences</td>
-            <td>Sociology</td>
-            <td>社会学</td>
-        </tr>
-        <tr>
-            <td>Social Sciences</td>
-            <td>US Foreign Policy</td>
-            <td>美国外交政策</td>
-        </tr>
-        <tr>
-            <td>Other</td>
-            <td>Virology</td>
-            <td>病毒学</td>
-        </tr>
-        <tr>
-            <td>Humanities</td>
-            <td>World Religions</td>
-            <td>世界宗教学</td>
+            <td>Test</td>
+            <td>52</td>
+            <td>12342</td>
         </tr>
     </tbody>
 </table></div>
