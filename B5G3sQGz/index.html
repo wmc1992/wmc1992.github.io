@@ -132,6 +132,44 @@
 <p>Local Imitation 的数据集是根据评估集 Natural Questions 构建的，是关于维基百科中各种实体的知识问答。人工构建10条种子数据，然后由ChatGPT生成了大概6000条数据作为训练集。该数据集命名为 NQ-synthetic。</p>
 <p>Broad Imitation 的数据集结合了：ShareGPT、HC3、Discord ChatGPT Bots 这三个开源的数据集，并且对这三个数据集做了一些清洗工作，将最终得到的数据集命名为 ShareGPT-Mix。</p>
 <p>所以有两份数据集：NQ-synthetic 和 ShareGPT-Mix，使用数据集 NQ-synthetic 微调得到的是 local imitation model，使用数据集 ShareGPT-Mix 微调得到的是 broad imitation model。</p>
+<p>下面是 ShareGPT-Mix 中的两条数据样例（第二列的中文是google翻译的结果）：</p>
+<table align=center style="width:100%">
+    <tbody style="font-size: 0.6rem">
+        <tr>
+            <td>
+                <p style="color:green;"><b>User:</b> Return to the Identity and Access Management Commercial Due Diligence. We now want to model the market size for the IAM market. What are the levers and inputs we need to accurately estimate the size and growth of the U.S. market. For example, these may include the number of companies, current saturation, and specific market headwinds and tailwinds you identify. Provide suggestions where you would look for data for each of the levers.</p>
+                <p style="color:blue;"><b>GPT:</b> To accurately estimate the size and growth of the U.S. Identity and Access Management (IAM) market, there are several key levers and inputs to consider:</p>
+                <p style="color:blue;">1. Number of companies: The number of companies operating in the U.S. IAM market is an important lever to consider when estimating market size. This includes both large, established vendors and smaller, niche players. Data on the number of companies can be found through market research reports and industry databases, such as Gartner, IDC, and MarketsandMarkets.</p>
+                <p style="color:blue;">2. Current saturation: ....</p>
+            </td>
+            <td>
+                <p style="color:green;"><b>User:</b> 返回身份和访问管理商业尽职调查。 我们现在想要为 IAM 市场的市场规模建模。 我们需要哪些杠杆和投入来准确估计美国市场的规模和增长。 例如，这些可能包括公司数量、当前饱和度以及您确定的特定市场逆风和顺风。 提供您在何处查找每个杠杆的数据的建议。</p>
+                <p style="color:blue;"><b>GPT:</b> 为了准确估计美国身份和访问管理 (IAM) 市场的规模和增长，需要考虑几个关键杠杆和投入：</p>
+                <p style="color:blue;">1. 公司数量：在美国 IAM 市场运营的公司数量是估计市场规模时需要考虑的重要杠杆。 这既包括大型、成熟的供应商，也包括规模较小、利基市场的参与者。 公司数量的数据可以通过市场研究报告和行业数据库找到，例如Gartner、IDC和MarketsandMarkets。</p>
+                <p style="color:blue;">2. 当前饱和情况：....</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p style="color:green;"><b>User:</b> I am building an Elven Capital with all of it's history, religion, politics, trade routes, people, traditions, laws, general rules, and more. It is called Oniver. Your job is to ask me questions to learn more about the town and help me fill in the blanks to make it a rich and thriving town with lots of history. Ask detailed questions that will make me think. Say I understand if this makes sense. Then ask me the first question.</p>
+                <p style="color:blue;"><b>GPT:</b> I understand.</p>
+                <p style="color:blue;">What is the history behind Oniver's founding? How did it come to be and what was the context in which it was established?</p>
+                <p style="color:green;"><b>User:</b> Magic is widely used in Oniver. Better magic is a path to improvement in life and status in the capital. It is also the ticket into getting into the Magic University. There is a high importance between magical ability within the noble families of Oniver. Magic is used as a tool by the wealthy to oppress the lower classes. Commoners practicing magic is not forbidden but is looked down upon by the nobles because they see themselves as better than the commoners.</p>
+                <p style="color:blue;"><b>GPT:</b> I understand.</p>
+                <p style="color:blue;">What kind of economy does Oniver have? Is it based on trade, agriculture, manufacturing or a combination of these things? Are there any restrictions or laws surrounding trade and commerce? ....</p>
+            </td>
+            <td>
+                <p style="color:green;"><b>User:</b> 我正在建设一个精灵首都，其中包括所有的历史、宗教、政治、贸易路线、人民、传统、法律、一般规则等等。 它被称为奥尼维尔。 你的工作是向我提问，以更多地了解这个小镇，并帮助我填补空白，使其成为一个富有、繁荣、历史悠久的小镇。 问一些详细的问题，让我思考。 说我明白这是否有道理。 然后问我第一个问题。</p>
+                <p style="color:blue;"><b>GPT:</b> 我了解了。</p>
+                <p style="color:blue;">Oniver 的创立背后有哪些历史？ 它是如何产生的以及它是在什么背景下建立的？</p>
+                <p style="color:green;"><b>User:</b> 魔法在奥尼维尔被广泛使用。 更好的魔法是改善首都生活和地位的途径。 这也是进入魔法大学的门票。 在奥尼维尔的贵族家族中，魔法能力之间有着高度的重要性。 魔法是富人用来压迫下层阶级的工具。 平民练习魔法并没有被禁止，但却被贵族看不起，因为他们认为自己比平民更好。</p>
+                <p style="color:blue;"><b>GPT:</b> 我了解了。</p>
+                <p style="color:blue;">Oniver有什么样的经济？ 它是基于贸易、农业、制造业还是这些因素的组合？ 是否有任何围绕贸易和商业的限制或法律？ ....</p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
 <h2 id="3">3、训练配置<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
 <p>为了测试模型大小对最终效果的影响，本文使用了三种大小的模型：1.5B的gpt2、7B的llama、13B的llama。</p>
 <p>为了测试数据量对最终效果的影响，本文使用的训练数据从 0.3M tokens 到 150M tokens 不等。</p>
