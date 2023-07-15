@@ -143,7 +143,7 @@
 <div class="MathJax_Preview">p(y) ∝ \psi_1(y_1, y_2)\psi_2(y_2, y_3)\psi_3(y_3, y_1)</div>
 <script type="math/tex; mode=display">p(y) ∝ \psi_1(y_1, y_2)\psi_2(y_2, y_3)\psi_3(y_3, y_1)</script>
 </div>
-<p><img alt="" src="assets/%E6%A6%82%E7%8E%87%E5%9B%BE%E6%A8%A1%E5%9E%8B.png" /></p>
+<p><img alt="" src="/3RS2434p/assets/概率图模型.png" /></p>
 <h2 id="_2">二、条件随机场<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
 <p>条件随机场：在给定随机变量<span class="arithmatex"><span class="MathJax_Preview">X</span><script type="math/tex">X</script></span>的条件下，随机变量<span class="arithmatex"><span class="MathJax_Preview">Y</span><script type="math/tex">Y</script></span>的马尔科夫随机场。</p>
 <h3 id="21">2.1 形式化定义<a class="headerlink" href="#21" title="Permanent link">#</a></h3>
@@ -154,7 +154,7 @@
 <script type="math/tex; mode=display">p(Y_i|X, Y_1, Y_2, ..., Y_{i-1}, Y_{i+1}, ..., Y_n) = p(Y_i|X, Y_{i-1},Y_{i+1}) , i=1,2,...,n</script>
 </div>
 <p>理解该性质可以参考如下图：</p>
-<p><img alt="" src="assets/linear_crf.png" /></p>
+<p><img alt="" src="/3RS2434p/assets/linear_crf.png" /></p>
 <h3 id="22">2.2 参数化形式<a class="headerlink" href="#22" title="Permanent link">#</a></h3>
 <div class="arithmatex">
 <div class="MathJax_Preview">p(y|x) = \frac{1}{Z(x)} \text{exp} \big(\sum_{i,k} \lambda_k t_k (y_{i-1}, y_i, x, i) + \sum_{i,l} \mu_l s_l(y_i, x, i) \big) </div>
