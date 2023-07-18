@@ -131,6 +131,12 @@ print(encoded_input)
 #                            [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]])}
 </code></pre>
 <p>另外，在使用 tokenizer 时可传的参数还有：<code>max_length</code>、<code>return_attention_mask</code>、<code>return_token_type_ids</code> 等等，可以具体用到时再了解。</p>
+<p>查看tokenizer中所有的vocab，可以调用<code>get_vocab()</code>函数获取，返回值是一个字典，该字典的key是token，value是该token对应的id，而函数<code>get_vocab()</code>对应的实现也很简单，如下述几行代码：</p>
+<pre><code class="language-python">def get_vocab(self):
+    vocab = {self.convert_ids_to_tokens(i): i for i in range(self.vocab_size)}
+    vocab.update(self.added_tokens_encoder)
+    return vocab
+</code></pre>
 <h2 id="2-tokenizer">2、从头训练一个 tokenizer<a class="headerlink" href="#2-tokenizer" title="Permanent link">#</a></h2>
 <blockquote>
 <p>参考文档: <a href="https://huggingface.co/docs/tokenizers/quicktour">https://huggingface.co/docs/tokenizers/quicktour</a></p>
