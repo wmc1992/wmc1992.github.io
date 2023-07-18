@@ -77,6 +77,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、报错记录</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -97,7 +101,16 @@
 <p>如果在计算loss时并不是上述那种方式，也有可能导致出现如上图的现象，这种解释出自 <a href="https://github.com/huggingface/transformers/issues/18730#issuecomment-1229769519">这里</a>。首先有一个假设：模型对某条数据训练之后，对该条数据的loss大幅降低，对其他条数据的loss降低幅度要远小于该条数据（这个假设比较直观，也比较合理）。在每个epoch内的训练过程中，模型对部分数据做训练之后，对另外一部分数据的loss降低并不明显；而当到达下一个epoch之后，由于所有的数据在上一个epoch中已经全部训练过一遍了，于是在这个epoch中对所有数据的loss都明显小于上一个epoch中loss。于是就会产生如上图所示的图像。</p>
 <p><strong>可能的原因3</strong></p>
 <p>如下图所示，第三种原因认为在loss下降缓慢时，其处在局部最优点，即下图红色箭头部分。当其跳出当前局部最优点，进入到另一个更低一些的最优点之后，就会有一段loss快速下降的过程，比如下图中绿色箭头的部分。</p>
-<div align=center><img src="/BuWz4uEu/assets/002.png" width=50%/></div></div>
+<div align=center><img src="/BuWz4uEu/assets/002.png" width=50%/></div>
+
+<h2 id="2">2、报错记录<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<pre><code>../aten/src/ATen/native/cuda/Indexing.cu:1146: indexSelectLargeIndex: block: [61,0,0], thread: [96,0,0] Assertion `srcIndex &lt; srcSelectDimSize` failed.
+../aten/src/ATen/native/cuda/Indexing.cu:1146: indexSelectLargeIndex: block: [61,0,0], thread: [97,0,0] Assertion `srcIndex &lt; srcSelectDimSize` failed.
+../aten/src/ATen/native/cuda/Indexing.cu:1146: indexSelectLargeIndex: block: [61,0,0], thread: [98,0,0] Assertion `srcIndex &lt; srcSelectDimSize` failed.
+../aten/src/ATen/native/cuda/Indexing.cu:1146: indexSelectLargeIndex: block: [61,0,0], thread: [99,0,0] Assertion `srcIndex &lt; srcSelectDimSize` failed.
+</code></pre>
+<p>出现如上述的这种报错时，原因就是数组越界（或者张量越界），但是具体是哪个数组/张量越界了，需要具体看，一般是embedding部分越界的可能性更高。</p>
+<p>出现该报错时，堆栈一般不具有参考性，可将模型放到CPU上运行，这样堆栈才是正确的。</p></div>
             </div>
         </div>
 

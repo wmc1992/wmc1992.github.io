@@ -89,6 +89,10 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#2llamacheckpoint" class="nav-link">2、llama不同checkpoint的区别</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -136,7 +140,79 @@
 <li>
 <p>从形式上，训练方式2并不是 "给一个问题，预测一个输出" 的形式，这种训练方式在使用时效果如何未知。</p>
 </li>
-</ul></div>
+</ul>
+<h2 id="2llamacheckpoint">2、llama不同checkpoint的区别<a class="headerlink" href="#2llamacheckpoint" title="Permanent link">#</a></h2>
+<p>这里主要是记录一下通过下述两种方式获取到的模型，在使用时的区别：</p>
+<ul>
+<li>
+<p>使用 huggingface 的 transformers 中的代码 <a href="https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/convert_llama_weights_to_hf.py">convert_llama_weights_to_hf</a> 对原始的meta放出来的模型转换得到的模型文件。为了方便描述，把这个叫做convert版模型；</p>
+</li>
+<li>
+<p>从 huggingface model hub 中下载的已经转化好的模型文件，比如7B的模型文件为："decapoda-research/llama-7b-hf"。为了方便描述，把这个叫做decapoda-research版模型。</p>
+</li>
+</ul>
+<p>主要的区别在模型的config文件上，convert版模型的配置文件 <code>config.json</code> 如下所示：</p>
+<pre><code class="language-json">{
+    &quot;architectures&quot;: [
+      &quot;LlamaForCausalLM&quot;
+    ],
+    &quot;bos_token_id&quot;: 1,
+    &quot;eos_token_id&quot;: 2,
+    &quot;pad_token_id&quot;: 0,
+    &quot;hidden_act&quot;: &quot;silu&quot;,
+    &quot;hidden_size&quot;: 4096,
+    &quot;initializer_range&quot;: 0.02,
+    &quot;intermediate_size&quot;: 11008,
+    &quot;max_position_embeddings&quot;: 2048,
+    &quot;model_type&quot;: &quot;llama&quot;,
+    &quot;num_attention_heads&quot;: 32,
+    &quot;num_hidden_layers&quot;: 32,
+    &quot;rms_norm_eps&quot;: 1e-06,
+    &quot;rope_scaling&quot;: null,
+    &quot;tie_word_embeddings&quot;: false,
+    &quot;torch_dtype&quot;: &quot;float16&quot;,
+    &quot;transformers_version&quot;: &quot;4.31.0.dev0&quot;,
+    &quot;use_cache&quot;: true,
+    &quot;vocab_size&quot;: 32000
+}
+</code></pre>
+<p>decapoda-research版模型的配置文件 <code>config.json</code> 如下所示： </p>
+<pre><code class="language-json">{
+    &quot;architectures&quot;: [
+        &quot;LLaMAForCausalLM&quot;
+    ],
+    &quot;bos_token_id&quot;: 0,
+    &quot;eos_token_id&quot;: 1,
+    &quot;pad_token_id&quot;: -1,
+    &quot;hidden_act&quot;: &quot;silu&quot;,
+    &quot;hidden_size&quot;: 4096,
+    &quot;initializer_range&quot;: 0.02,
+    &quot;intermediate_size&quot;: 11008,
+    &quot;max_sequence_length&quot;: 2048,
+    &quot;model_type&quot;: &quot;llama&quot;,
+    &quot;num_attention_heads&quot;: 32,
+    &quot;num_hidden_layers&quot;: 32,
+    &quot;rms_norm_eps&quot;: 1e-06,
+    &quot;torch_dtype&quot;: &quot;float16&quot;,
+    &quot;transformers_version&quot;: &quot;4.27.0.dev0&quot;,
+    &quot;use_cache&quot;: true,
+    &quot;vocab_size&quot;: 32000
+}
+</code></pre>
+<p>可以看出 "bos_token_id"、"eos_token_id"、"pad_token_id" 这三个特殊的token在两个模型中是完全不同的。下面看一下llama的32000个vocab对应的字典，如下所示：</p>
+<pre><code>{
+  &quot;&lt;unk&gt;&quot;: 0,
+  &quot;&lt;s&gt;&quot;: 1,
+  &quot;&lt;/s&gt;&quot;: 2,
+  &quot;&lt;0x00&gt;&quot;: 3,
+  &quot;&lt;0x01&gt;&quot;: 4,
+  ... ...
+  &quot;收&quot;: 31997,
+  &quot;弘&quot;: 31998,
+  &quot;给&quot;: 31999,
+}
+</code></pre>
+<p>可以看出将 "bos_token_id"、"eos_token_id" 分别设置为 1 和 2 比较合适。至于 "pad_token_id" 设置为 -1 虽然也没有问题，但还是推荐设置为 0。因为不同的代码中对 "pad_token_id" 的处理方式不一致，将其设置为 0 可以避免出现问题。比如在 QLoRA 的官方代码中，如果配置文件里的 "pad_token_id" 设置为 -1 了，那么运行时就会出现很离谱的bug。</p></div>
             </div>
         </div>
 
