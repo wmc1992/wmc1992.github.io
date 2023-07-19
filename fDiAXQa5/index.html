@@ -141,7 +141,10 @@
 </tbody>
 </table>
 <p>然后下面是给GPT-4做leetcode题目时的指令模版及其返回结果：</p>
-<div align=center><img src="/fDiAXQa5/assets/03.png" width=100% /></div>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/03.png" width=100% /></div>
+</details>
 
 <h4 id="112">1.1.2 数据可视化<a class="headerlink" href="#112" title="Permanent link">#</a></h4>
 <p>可视化这里的任务是让模型对上面图2中的数据绘制条形图，图2的表格是以LATEX的形式输入给模型的。在该表格中，任务难度有Easy、Median、Hard、Overall四种，角色有GPT-4、text-davinci-003、Codex、Human四种，同时每次还会评估top1和top5两种。在测试时，ChatGPT无法绘制出正确的表格，下图是GPT-4绘制的结果。另外，可以看到在第一个次绘制的结果上，添加上以下两个新的需求之后，GPT-4依然能够正确的理解需求，并且给出正确的代码：</p>
@@ -149,7 +152,10 @@
 <li>（1）要求两个图表的纵坐标相同；</li>
 <li>（2）突出Human这个角色；</li>
 </ul>
-<div align=center><img src="/fDiAXQa5/assets/04.png" width=100% /></div>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/04.png" width=100% /></div>
+</details>
 
 <h4 id="113">1.1.3 前端代码开发<a class="headerlink" href="#113" title="Permanent link">#</a></h4>
 <p>这个是让模型使用HTML和JavaScript开发一个小游戏。所使用的prompt如下表所示，中文部分是直接谷歌翻译的结果。从prompt可以看出这个是zero-shot调用的。</p>
@@ -187,7 +193,10 @@
 <p>下图是prompt，以及GPT-4生成的代码执行的结果。</p>
 <p>图1中蓝色为玩家角色，红色为敌方角色，品红色为防御者角色。玩家角色没有移动，所以没有行动轨迹。图中的红色的线和品红色的线为敌方角色和防御者角色的行动轨迹，可以看出地方角色径直对着玩家角色移动，防御者角色跟随地方角色试图拦截在地方角色与玩家角色之间。同时防御者角色的轨迹中在初始那一段由于有障碍物还有两次拐弯。</p>
 <p>图2中玩家角色有移动，所以也有轨迹。可以看出敌方角色目的还是抓住玩家角色，防御者角色还是拦截在两者之间。另外在这个图中，敌方角色和防御者角色由于撞到了障碍物抛起来到了空中。</p>
-<div align=center><img src="/fDiAXQa5/assets/05.png" width=100% /></div>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/05.png" width=100% /></div>
+</details>
 
 <h4 id="114">1.1.4 深度学习代码<a class="headerlink" href="#114" title="Permanent link">#</a></h4>
 <p>接下来是对比GPT-4和ChatGPT写深度学习代码的能力。对该优化器的要求和说明如下表所示。在下表的描述中可以看出，在指令中并没有对每个操作都有着非常详细的描述，比如倒数第二条描述 "Apply momentum on W_k, and then update the network parameters using this momentum"，这里并没有解释什么是动量，模型如果想要正确的实现这一条要求，那么就需要他自己本身知道深度学习的优化器中动量的概念。</p>
@@ -223,11 +232,17 @@
 </table>
 
 <p>下图是ChatGPT和GPT-4生成的优化器的代码。</p>
-<div align=center><img src="/fDiAXQa5/assets/06.png" width=100% /></div>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/06.png" width=100% /></div>
+</details>
 
 <h4 id="115-latex">1.1.5 LATEX 代码<a class="headerlink" href="#115-latex" title="Permanent link">#</a></h4>
 <p>接下来是测试GPT-4写LATEX的能力，输入的LATEX是带有一些问题的，比如不规范、语法有问题、编译不通过，然后让模型修复其中存在的问题。效果如下图所示，对于下例中的prompt实际调用GPT-4测试了一下，生成的LATEX确实能够直接使用，且格式上都是正确的。</p>
-<div align=center><img src="/fDiAXQa5/assets/07.png" width=100% /></div>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/07.png" width=100% /></div>
+</details>
 
 <h3 id="12">1.2 理解代码能力<a class="headerlink" href="#12" title="Permanent link">#</a></h3>
 <h4 id="121">1.2.1 逆向工程<a class="headerlink" href="#121" title="Permanent link">#</a></h4>
@@ -287,11 +302,17 @@
 <h4 id="122">1.2.2 推理代码执行结果<a class="headerlink" href="#122" title="Permanent link">#</a></h4>
 <p>这部分是测试GPT-4和ChatGPT推理代码的执行结果，出的问题对于我这个写python的来说是比较刁钻的，不确定对写C的人来说是不是属于常识了。题目和两个模型的输出结果都见下图。代码块A和代码块B中都是声明了两个char类型变量和一个int类型的变量，不过声明时的顺序不同，问题是其使用的内存大小分别是多少。GPT-4的回答是在不同的实现里所使用的内存大小是不同的，有的会做对齐，有的不会做。而ChatGPT则给出了不同的答案，它的答案是两者使用的内存必然相同，并且非常肯定的说明了变量的声明顺序不会改变其所占用的内存大小。</p>
 <p>上述两个答案中GPT-4的答案是正确的，而且ChatGPT解释的那句 "变量的声明顺序不会改变其所占用的内存大小"（下图中红色部分）在这个题目下是完全不正确的，但是它的这种自信的语气实在是厉害。</p>
-<div align=center><img src="/fDiAXQa5/assets/08.png" width=100% /></div>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/08.png" width=100% /></div>
+</details>
 
 <h4 id="123">1.2.3 执行代码<a class="headerlink" href="#123" title="Permanent link">#</a></h4>
 <p>给了一段python代码，代码中带有递归，让GPT-4输出该代码执行结果的同时，把中间每一步的递归过程也同时输出出来。结果如下图，如果能够保证GPT-4在执行代码时的结果都是正确的话，对于那种复杂的代码，让其输出整个执行过程用来辅助理解倒是个挺好的方法，可以看到下图中GPT-4给出的代码中间每步执行过程的说明非常的详细。</p>
-<div align=center><img src="/fDiAXQa5/assets/09.png" width=100% /></div>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/09.png" width=100% /></div>
+</details>
 
 <h4 id="124">1.2.4 执行伪代码<a class="headerlink" href="#124" title="Permanent link">#</a></h4>
 <p>上面一小节测试使用的是python代码，无论是python代码，还是Java代码，抑或是C/C++，这些代码都是有着严格的代码规范的，而且在模型训练过程中有着大量的该语言的代码。在这小节要测试的是GPT-4执行伪代码的能力。伪代码是没有严格的语法规范的。下表是所给出的指令和伪代码。</p>
@@ -329,7 +350,10 @@
 </table>
 
 <p>从下图的GPT-4的输出结果中可以看到，GPT-4能够理解所给出的伪代码的含义，并执行得出正确的结果。</p>
-<div align=center><img src="/fDiAXQa5/assets/10.png" width=100% /></div>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/10.png" width=100% /></div>
+</details>
 
 <h2 id="_1">临时记录<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
 <p>除了通用的对话能力以外，GPT-4能够解决的问题包括的行业有：</p>
