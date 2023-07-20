@@ -149,6 +149,8 @@
 <p>结论："前向传播时产生的中间状态消耗的显存" 与 "隐层维度 * batch size * seq_length * transformer 层数" 成正相关。</p>
 <p>比如参数量 1.5B 的 GPT-2，其前向传播时产生的中间状态消耗的显存为 "12 * 隐层维度 * batch size * seq_length * transformer 层数"（这里的系数 12 是怎么得出来的不清楚）。将 1.5B 的 GPT-2 各参数代入到该式可以算出大概为 60G。</p>
 <p>需要明确的是：上述结论是基于比较古老的计算方式得出来的，由于 "前向传播时产生的中间状态消耗的显存" 与具体的实现有着比较大的关系，所以不同的实现方式下这部分消耗的显存是不同的。比如 <a href="https://arxiv.org/pdf/1910.02054.pdf">ZeRO: Memory Optimizations Toward Training Trillion Parameter Models</a> 中提到的 activation checkpointing 技术就可以显著降低这部分消耗的显存。</p>
+<h2 id="2023-07-20">2023-07-20 补充<a class="headerlink" href="#2023-07-20" title="Permanent link">#</a></h2>
+<p>文章 <a href="https://zhuanlan.zhihu.com/p/624740065">https://zhuanlan.zhihu.com/p/624740065</a> 写的非常好，仔细读一下这个文章。</p>
 <h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
 <ul>
 <li><a href="https://arxiv.org/pdf/1910.02054.pdf">ZeRO: Memory Optimizations Toward Training Trillion Parameter Models</a></li>
