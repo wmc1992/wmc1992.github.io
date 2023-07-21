@@ -122,6 +122,15 @@ with torch.no_grad():
 print(out_text)
 </code></pre>
 <h3 id="5">5、底层实现细节<a class="headerlink" href="#5" title="Permanent link">#</a></h3>
+<p>KV Cache 配置开启后，推理过程可以分为2个阶段：</p>
+<ul>
+<li>
+<p>预填充阶段：发生在计算第一个输出token过程中，这时Cache是空的，计算时需要为每个 transformer layer 计算并保存 key cache 和 value cache，在输出 token 时 Cache 完成填充。</p>
+</li>
+<li>
+<p>使用KV Cache阶段：发生在计算第二个输出token至最后一个token过程中，这时Cache是有值的，每轮推理只需读取Cache，同时将当前轮计算出的新的 Key、Value 追加写入至Cache。</p>
+</li>
+</ul>
 <p>下面是以GPT2模型为例，展示了如果在原始的GPT2模型上添加 KVCache 功能需要修改哪些代码。</p>
 <p>如果对原始的 GPT2 模型结构和代码不了解，请参考 <a href="/wiyOMRd9/">GPT2 模型结构和实现代码</a>，本文中 GPT2 的原始代码就是取自该文。下述代码中注释已经足够清晰。同样的，该代码仅是用于学习理解，其在语法上有不少的bug，也是跑不通的；同时该代码不一定是最优雅的实现，而是尽量选择容易理解的实现方式。</p>
 <p>阅读并理解该代码时可以思考以下问题：</p>
