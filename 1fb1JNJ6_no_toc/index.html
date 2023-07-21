@@ -197,7 +197,35 @@
 <div class="MathJax_Preview">8h^2 = 3 \alpha h^2</div>
 <script type="math/tex; mode=display">8h^2 = 3 \alpha h^2</script>
 </div>
-<p>解得 <span class="arithmatex"><span class="MathJax_Preview">\alpha=\frac{8}{3}</span><script type="math/tex">\alpha=\frac{8}{3}</script></span>，最终 <span class="arithmatex"><span class="MathJax_Preview">W</span><script type="math/tex">W</script></span>、<span class="arithmatex"><span class="MathJax_Preview">V</span><script type="math/tex">V</script></span>、<span class="arithmatex"><span class="MathJax_Preview">W_2</span><script type="math/tex">W_2</script></span> 这三个矩阵的维度分别为：<span class="arithmatex"><span class="MathJax_Preview">(h, \frac{8}{3} h)</span><script type="math/tex">(h, \frac{8}{3} h)</script></span>、<span class="arithmatex"><span class="MathJax_Preview">(h, \frac{8}{3} h)</span><script type="math/tex">(h, \frac{8}{3} h)</script></span>、<span class="arithmatex"><span class="MathJax_Preview">(\frac{8}{3} h, h)</span><script type="math/tex">(\frac{8}{3} h, h)</script></span>。</p>
+<p>解得 <span class="arithmatex"><span class="MathJax_Preview">\alpha=\frac{8}{3}</span><script type="math/tex">\alpha=\frac{8}{3}</script></span>，最终 <span class="arithmatex"><span class="MathJax_Preview">W</span><script type="math/tex">W</script></span>、<span class="arithmatex"><span class="MathJax_Preview">V</span><script type="math/tex">V</script></span>、<span class="arithmatex"><span class="MathJax_Preview">W_2</span><script type="math/tex">W_2</script></span> 这三个矩阵的维度分别为：<span class="arithmatex"><span class="MathJax_Preview">(h, \frac{8}{3} h)</span><script type="math/tex">(h, \frac{8}{3} h)</script></span>、<span class="arithmatex"><span class="MathJax_Preview">(h, \frac{8}{3} h)</span><script type="math/tex">(h, \frac{8}{3} h)</script></span>、<span class="arithmatex"><span class="MathJax_Preview">(\frac{8}{3} h, h)</span><script type="math/tex">(\frac{8}{3} h, h)</script></span>，可以很明显的看出严格按照该公式计算出来的不是整数，所以使用该公式计算出来的是模型真实维度的近似值。</p>
+<p>下面是65B的LLaMA的模型结构，可以看到在attention部分隐藏层的维度为8192，乘上 <span class="arithmatex"><span class="MathJax_Preview">\frac{8}{3}</span><script type="math/tex">\frac{8}{3}</script></span> 就是 <span class="arithmatex"><span class="MathJax_Preview">8192 * \frac{8}{3} = 21845.33</span><script type="math/tex">8192 * \frac{8}{3} = 21845.33</script></span>，与下述模型中真实的维度 22016 是基本一致的。</p>
+<pre><code>LlamaForCausalLM(
+  (model): LlamaModel(
+    (embed_tokens): Embedding(32000, 8192, padding_idx=0)
+    (layers): ModuleList(
+      (0-79): 80 x LlamaDecoderLayer(
+        (self_attn): LlamaAttention(
+          (q_proj): Linear4bit(in_features=8192, out_features=8192, bias=False)
+          (k_proj): Linear4bit(in_features=8192, out_features=8192, bias=False)
+          (v_proj): Linear4bit(in_features=8192, out_features=8192, bias=False)
+          (o_proj): Linear4bit(in_features=8192, out_features=8192, bias=False)
+          (rotary_emb): LlamaRotaryEmbedding()
+        )
+        (mlp): LlamaMLP(
+          (gate_proj): Linear4bit(in_features=8192, out_features=22016, bias=False)
+          (down_proj): Linear4bit(in_features=22016, out_features=8192, bias=False)
+          (up_proj): Linear4bit(in_features=8192, out_features=22016, bias=False)
+          (act_fn): SiLUActivation()
+        )
+        (input_layernorm): LlamaRMSNorm()
+        (post_attention_layernorm): LlamaRMSNorm()
+      )
+    )
+    (norm): LlamaRMSNorm()
+  )
+  (lm_head): Linear(in_features=8192, out_features=32000, bias=False)
+)
+</code></pre>
 <h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
 <ul>
 <li>
