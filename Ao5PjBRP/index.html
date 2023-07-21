@@ -420,7 +420,7 @@ print(out_text)
 <li>
 <p>使用了 KVCache 之后，MLP层（也称FFN层）的运算有没有减少？</p>
 <ul>
-<li>MLP层的计算量也减小了，虽然在上述代码中类 <code>GPT2MLP</code> 里面的代码没有任何修改，但是其 <code>forward()</code> 函数的输入维度变了，原来是 [1, seq_len, ebemd_dim]，使用 KVCache 之后是 [1, 1, ebemd_dim]。</li>
+<li>MLP层的计算量也减小了，虽然在上述代码中 <code>GPT2MLP</code> 里面的代码没有任何修改，但是其 <code>forward()</code> 函数的输入维度变了，原来是 [1, seq_len, ebemd_dim]，使用 KVCache 之后是 [1, 1, ebemd_dim]。</li>
 </ul>
 </li>
 <li>
