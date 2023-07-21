@@ -170,7 +170,6 @@ print(out_text)
 <ul>
 <li>KVCache 减少了 multi-head attention 层中哪部分运算？</li>
 <li>使用了 KVCache 之后，MLP层（也称FFN层）的运算有没有减少？</li>
-<li>在 GPT2Block 的前向传播中，在经过第一个 layer norm 时还没有拼接上次的(k,v)，这是否会导致使用 KVCache 与不使用 KVCache 推理结果不一致？</li>
 <li>为什么仅缓存 key 和 value，不缓存 query？</li>
 </ul>
 <pre><code class="language-python">  import torch
@@ -226,7 +225,8 @@ print(out_text)
 +         if use_cache:
 +             present = (key, value)
 
-          # 注意力权重矩阵att_weights: [bs, num_heads, seq_len, seq_len]
+          # 如果是预填充阶段，那么注意力权重矩阵att_weights的维度为: [bs, num_heads, seq_len, seq_len]
+          # 如果是使用KVCache阶段，那么注意力权重矩阵att_weights的维度为: [bs, num_heads, 1, seq_len]
           att_weights = torch.matmul(query, key.transpose(-1, -2))
 
           # 对注意力矩阵除上一个根号d_k，然后再做softmax
@@ -236,11 +236,16 @@ print(out_text)
           att_weights = nn.functional.softmax(att_weights, dim=-1)
           att_weights = self.attn_dropout(att_weights)
 
-          # att_output: [bs, num_heads, seq_len, head_dim] = [bs, num_heads, seq_len, seq_len] * [bs, num_heads, seq_len, head_dim]
+          # 如果是预填充阶段，那么att_output的维度为: 
+          #      [bs, num_heads, seq_len, head_dim] = [bs, num_heads, seq_len, seq_len] * [bs, num_heads, seq_len, head_dim]
+          # 如果是使用KVCache阶段，那么att_output的维度为: 
+          #      [bs, num_heads, 1, head_dim] = [bs, num_heads, 1, seq_len] * [bs, num_heads, seq_len, head_dim]
           att_output = torch.matmul(att_weights, value)
 
-          # 注意：这里不能够直接将 att_output 由 [bs, num_heads, seq_len, head_dim] 变为 [bs, seq_len, embed_dim]
-          # [bs, num_heads, seq_len, head_dim] -&gt; [bs, seq_len, num_heads, head_dim] -&gt; [bs, seq_len, embed_dim]
+          # 如果是预填充阶段，那么维度变化是: 
+          #      [bs, num_heads, seq_len, head_dim] -&gt; [bs, seq_len, num_heads, head_dim] -&gt; [bs, seq_len, embed_dim]
+          # 如果是使用KVCache阶段，那么维度变化是: 
+          #      [bs, num_heads, 1, head_dim] -&gt; [bs, 1, num_heads, head_dim] -&gt; [bs, 1, embed_dim]
           att_output = att_output.permute(0, 2, 1, 3)
           att_output = att_output.view(att_output.size()[:-2] + [self.num_heads * self.head_dim, ])
 
@@ -293,6 +298,10 @@ print(out_text)
 
 -     def forward(self, hidden_states, attention_mask=None):
 +     def forward(self, hidden_states, attention_mask=None, layer_past=None, use_cache=False):
+          # 如果是预填充阶段，那么 hidden_states 维度为: [bs, seq_len, embed_dim]
+          # 如果是使用KVCache阶段，那么 hidden_states 维度为: [bs, 1, embed_dim]
+          # 相应的，在该函数中下面的变量 residual, attn_outputs, feed_forward_hidden_states 维度都与 hidden_states 是相同的
+
           # ------------------------------------------------------
           # multi-head attention 部分
           # ------------------------------------------------------
@@ -304,7 +313,7 @@ print(out_text)
 +         if use_cache:
 +             attn_outputs, present = self.att(hidden_states, attention_mask, layer_past)
 +         else:
-+             atten_outputs = self.att(hidden_states, sttention_mask, layer_past)
++             attn_outputs = self.att(hidden_states, sttention_mask, layer_past)
           # 残差连接
           hidden_states = attn_outputs + residual
 
