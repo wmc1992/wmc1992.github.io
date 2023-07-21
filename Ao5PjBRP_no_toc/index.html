@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/015_%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84/03_KVCache/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/Ao5PjBRP_no_toc/">隐藏左侧目录栏</a>][<a href="/Ao5PjBRP/">显示左侧目录栏</a>]</p>
+
+<h1 id="kvcache">KVCache<a class="headerlink" href="#kvcache" title="Permanent link">#</a></h1>
+<p>关于该技术知乎的 <a href="https://www.zhihu.com/question/596900067/answer/3040011798">Young 的回答</a> 非常清晰易懂，推荐去看一看。本文的中文描述基本都是来自该回答。</p>
+<h3 id="1kvcache">1、KVCache是啥？<a class="headerlink" href="#1kvcache" title="Permanent link">#</a></h3>
+<p>大模型推理性能优化的一个常用技术是KVCache，该技术可以在不影响任何计算精度的前提下，通过空间换时间思想，提高推理性能。</p>
+<h3 id="2">2、背景<a class="headerlink" href="#2" title="Permanent link">#</a></h3>
+<p>生成式generative模型的推理过程很有特点，我们给一个输入文本，模型会输出一个回答（长度为N），其实该过程中执行了N次推理过程。即GPT类模型一次推理只输出一个token，输出token会与输入tokens 拼接在一起，然后作为下一次推理的输入，这样不断反复直到遇到终止符。</p>
+<h3 id="3">3、原理<a class="headerlink" href="#3" title="Permanent link">#</a></h3>
+<p>在上面的推理过程中，每 step 内，输入一个 token 序列，经过 Embedding 层将输入 token 序列变为一个三维张量[bs, seq_len, embed_dim]，经过一通计算，最后经 logits 层将计算结果映射至词表空间，输出张量维度为[bs, seq_len, vocab_size]。</p>
+<p>当前轮输出 token 与输入 tokens 拼接，并作为下一轮的输入 tokens，反复多次。可以看出第 <span class="arithmatex"><span class="MathJax_Preview">i+1</span><script type="math/tex">i+1</script></span> 轮输入数据只比第 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 轮输入数据新增了一个token，其他全部相同。因此第 <span class="arithmatex"><span class="MathJax_Preview">i+1</span><script type="math/tex">i+1</script></span> 轮推理时必然包含了第 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 轮的部分计算。KVCache 的出发点就在这里，缓存当前轮可重复利用的计算结果，下一轮计算时直接读取缓存结果。</p>
+<h3 id="4">4、调用层面实现细节<a class="headerlink" href="#4" title="Permanent link">#</a></h3>
+<p>目前各大模型推理都实现了 KVCache，下面就看如何使用了。增加了 KVCache 之后主要改动：</p>
+<ul>
+<li>
+<p>在推理时新增了 past_key_values 参数，该参数就会以追加方式保存每一轮的 (k,v) 值。past_key_values 变量内容为((k,v), (k,v), ..., (k,v))，即有 <span class="arithmatex"><span class="MathJax_Preview">n_{\text{layers}}</span><script type="math/tex">n_{\text{layers}}</script></span> 个 (k,v) 组成的一个元组，其中 k 和 v 的维度均为 [bs, num_heads, seq_len, head_dims]。这里可以顺带计算出每轮推理对应的 cache 数据量为 <span class="arithmatex"><span class="MathJax_Preview">2*\text{bs}*\text{seq_len}*\text{num_heads}*\text{head_dims}*n_{\text{layers}}</span><script type="math/tex">2*\text{bs}*\text{seq_len}*\text{num_heads}*\text{head_dims}*n_{\text{layers}}</script></span>。以GPT3-175B为例，假设以 float16 来保存 KVCache，senquence长度为100，batch_size=1，则 KVCache占用显存为 (2×1×100×12288×96)×2Byte= 472MB。</p>
+</li>
+<li>
+<p>推理输出的 token 直接作为下一轮的输入，不再拼接，因为上文信息已经在 KVCache 中。</p>
+</li>
+</ul>
+<p>如果使用像 huggingface 的 <a href="https://github.com/huggingface/transformers">transformers</a> 库中提供的 <code>model.generate()</code> 函数，那么基本什么都不用做就启用了 KVCache，这里是为了了解其原理，所以不调用该函数，而是使用 model 的 forward() 函数。下面是在推理时不使用 KVCache 和使用 KVCache 的代码对比：</p>
+<pre><code class="language-python">import torch
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
+
+model_name_or_path = &quot;/path/for/gpt2&quot;
+model = GPT2LMHeadModel.from_pretrained(model_name_or_path, torchscript=True).eval()
+tokenizer = GPT2Tokenizer.from_pretrained(model_name_or_path)
+
+# 不使用 KVCache 时的推理代码
+in_text = &quot;Lionel Messi is a&quot;
+in_tokens = torch.tensor(tokenizer.encode(in_text))
+token_eos = torch.tensor([198]) # 终止符，遇到该字符就结束推理
+out_token = None
+with torch.no_grad():
+    while out_token != token_eos:
+        logits, _ = model(in_tokens)
+        out_token = torch.argmax(logits[-1, :], dim=0, keepdim=True)
+        in_tokens = torch.cat((in_tokens, out_token), 0)  # 每次都把之前的所有token与推理得到的新token拼接起来作为下次的输入
+        text = tokenizer.decode(in_tokens)
+out_text = tokenizer.decode(in_tokens)
+print(out_text)
+
+# 使用 KVCache 时的推理代码
+in_text = &quot;Lionel Messi is a&quot;
+in_tokens = torch.tensor(tokenizer.encode(in_text))
+token_eos = torch.tensor([198]) # 终止符，遇到该字符就结束推理
+out_token = None
+kvcache = None
+out_text = in_text
+with torch.no_grad():
+    while out_token != token_eos:
+        logits, kvcache = model(in_tokens, past_key_values=kvcache)  # 这里需要传入上次推理缓存的(k,v)
+        out_token = torch.argmax(logits[-1, :], dim=0, keepdim=True)
+        in_tokens = out_token  # 每次输出的out_token直接作为下一次的输入，这个不需要再和之前的in_tokens做拼接了
+        text = tokenizer.decode(in_tokens)
+        out_text += text
+print(out_text)
+</code></pre>
+<h3 id="5">5、底层实现细节<a class="headerlink" href="#5" title="Permanent link">#</a></h3>
+<p>下面是以GPT2模型为例，展示了如果在原始的GPT2模型上添加 KVCache 功能需要修改哪些代码。</p>
+<p>如果对原始的 GPT2 模型结构和代码不了解，请参考 <a href="/wiyOMRd9/">GPT2 模型结构和实现代码</a>，本文中 GPT2 的原始代码就是取自该文。下述代码中注释已经足够清晰。同样的，该代码仅是用于学习理解，其在语法上有不少的bug，也是跑不通的；同时该代码不一定是最优雅的实现，而是尽量选择容易理解的实现方式。</p>
+<p>阅读并理解该代码时可以思考以下问题：</p>
+<ul>
+<li>KVCache 减少了 multi-head attention 层中哪部分运算？</li>
+<li>使用了 KVCache 之后，MLP层（也称FFN层）的运算有没有减少？</li>
+<li>在 GPT2Block 的前向传播中，在经过第一个 layer norm 时还没有拼接上次的(k,v)，这是否会导致使用 KVCache 与不使用 KVCache 推理结果不一致？</li>
+<li>为什么仅缓存 key 和 value，不缓存 query？</li>
+</ul>
+<pre><code class="language-python">  import torch
+  from torch import nn
+
+  class GTP2Attention(nn.Module):
+      &quot;&quot;&quot; 该类为一个完整的 multi-head attention 结构 &quot;&quot;&quot;
+
+      def __init__(self, config):
+          super().__init__()
+
+          self.embed_dim = config.hidden_size
+          self.num_heads = config.num_attention_heads
+          self.head_dim = self.embed_dim // self.num_heads
+          self.split_size = self.embed_dim
+
+          self.c_attn = nn.Linear(self.embed_dim, 3 * self.embed_dim)
+          self.c_proj = nn.Linear(self.embed_dim, self.embed_dim)
+
+          self.attn_dropout = nn.Dropout(config.attn_pdrop)
+          self.resid_dropout = nn.Dropout(config.resid_pdrop)
+
+-     def forward(self, hidden_states, attention_mask=None):
++     def forward(self, hidden_states, attention_mask=None, layer_past=None, use_cache=False):
+          # 如果是预填充阶段，那么hidden_states的维度是: [bs, seq_len, embed_dim]
+          # 如果是使用KVCache阶段，那么hidden_states的维度是: [bs, 1, embed_dim]
+
+          # 将 W_q, W_k, W_v 三个矩阵合成一次矩阵乘法运算，乘完之后再分割开来
+          # 如果是预填充阶段，那么query, key, value的维度都是: [bs, seq_len, embed_dim]
+          # 如果是使用KVCache阶段，那么query, key, value的维度都是: [bs, 1, embed_dim]
+          query, key, value = self.c_attn(hidden_states).split(self.embed_dim, dim=2)
+
+          # 如果是预填充阶段，那么query, key, value的维度变化为：
+          #       [bs, seq_len, embed_dim] -&gt; [bs, seq_len, num_heads, head_dim] -&gt; [bs, num_heads, seq_len, head_dim]
+          # 如果是使用KVCache阶段，那么query, key, value的维度变化为：
+          #       [bs, 1, embed_dim] -&gt; [bs, 1, num_heads, head_dim] -&gt; [bs, num_heads, 1, head_dim] 
+          new_size = query.size()[:-1] + [self.num_heads, self.head_dim]
+          query, key, value = query.view(new_size), key.view(new_size), value.view(new_size)
+          query, key, value = query.permute(0, 2, 1, 3), key.permute(0, 2, 1, 3), value.permute(0, 2, 1, 3)
+
++         if layer_past is not None:
++             past_key, past_value = layer_past
++ 
++             # past_key: [bs, num_heads, past_seq_len, head_dim]
++             # key: [bs, num_heads, 1, head_dim] -&gt; [bs, num_heads, seq_len, head_dim]，其中 seq_len = past_seq_len + 1
++             key = torch.cat((past_key, key), dim=-2)
++ 
++             # past_value: [bs, num_heads, past_seq_len, head_dim]
++             # value: [bs, num_heads, 1, head_dim] -&gt; [bs, num_heads, seq_len, head_dim]，其中 seq_len = past_seq_len + 1
++             value = torch.cat((past_value, value), dim=-2)
+
++         present = None
++         if use_cache:
++             present = (key, value)
+
+          # 注意力权重矩阵att_weights: [bs, num_heads, seq_len, seq_len]
+          att_weights = torch.matmul(query, key.transpose(-1, -2))
+
+          # 对注意力矩阵除上一个根号d_k，然后再做softmax
+          att_weights = att_weights / torch.full([], value.size()[-1] ** 0.5)
+          if attention_mask is not None:
+              att_weights = att_weights + attention_mask
+          att_weights = nn.functional.softmax(att_weights, dim=-1)
+          att_weights = self.attn_dropout(att_weights)
+
+          # att_output: [bs, num_heads, seq_len, head_dim] = [bs, num_heads, seq_len, seq_len] * [bs, num_heads, seq_len, head_dim]
+          att_output = torch.matmul(att_weights, value)
+
+          # 注意：这里不能够直接将 att_output 由 [bs, num_heads, seq_len, head_dim] 变为 [bs, seq_len, embed_dim]
+          # [bs, num_heads, seq_len, head_dim] -&gt; [bs, seq_len, num_heads, head_dim] -&gt; [bs, seq_len, embed_dim]
+          att_output = att_output.permute(0, 2, 1, 3)
+          att_output = att_output.view(att_output.size()[:-2] + [self.num_heads * self.head_dim, ])
+
+          # 
+          att_output = self.c_proj(att_output)
+          att_output = self.resid_dropout(att_output)
+
+-         return att_output
++         if use_caceh:
++             return (att_output, present)
++         else:
++             return att_output
+
+
+  class GPT2MLP(nn.Module):
+      &quot;&quot;&quot; 该类为一个完整的 FFN 结构 &quot;&quot;&quot;
+
+      def __init__(self, intermediate_size, config):
+          super().__init__()
+
+          self.embed_dim = config.hidden_size
+
+          # 一般情况下 intermediate_size = 4 * self.embed_dim，所以这里是一个先升维，后降维的过程
+          self.c_fc = nn.Linear(self.embed_dim, intermediate_size)
+          self.c_proj = nn.Linear(intermediate_size, self.embed_dim)
+          self.act = ... # TODO 这里初始化一个激活函数，比如 ReLU、GELU 等
+          self.dropout = nn.Dropout(config.resid_pdrop)
+
+      def forward(self, hidden_states, ):
+          hidden_states = self.c_fc(hidden_states)
+          hidden_states = self.act(hidden_states)
+          hidden_states = self.c_proj(hidden_states)
+          hidden_states = self.dropout(hidden_states)
+          return hidden_states
+
+
+  class GPT2Block(nn.Module):
+      &quot;&quot;&quot; 该类为一个完整的 transformer 结构 &quot;&quot;&quot;
+
+      def __init__(self, config):
+          super().__init__()
+
+          hidden_size = config.hidden_size
+          inner_dim = 4 * hidden_size
+
+          self.ln_1 = nn.LayerNorm(hidden_size, eps=config.layer_norm_epsilon)
+          self.att = GTP2Attention(config)
+          self.ln_2 = nn.LayerNorm(hidden_size, eps=config.layer_norm_epsilon)
+          self.mlp = GPT2MLP(inner_dim, config)
+
+-     def forward(self, hidden_states, attention_mask=None):
++     def forward(self, hidden_states, attention_mask=None, layer_past=None, use_cache=False):
+          # ------------------------------------------------------
+          # multi-head attention 部分
+          # ------------------------------------------------------
+          # 保存一下 multi-head attention 层的输入值，等会用于残差连接
+          residual = hidden_states
+          # 前置（pred）layer norm
+          hidden_states = self.ln_1(hidden_states)
+-         attn_outputs = self.att(hidden_states, attention_mask)
++         if use_cache:
++             attn_outputs, present = self.att(hidden_states, attention_mask, layer_past)
++         else:
++             atten_outputs = self.att(hidden_states, sttention_mask, layer_past)
+          # 残差连接
+          hidden_states = attn_outputs + residual
+
+          # ------------------------------------------------------
+          # FFN 部分
+          # ------------------------------------------------------
+          # 保存一下 FFN 层的输入值，等会用于残差连接
+          residual = hidden_states
+          # 前置（pred）layer norm
+          hidden_states = self.ln_2(hidden_states)
+          feed_forward_hidden_states = self.mlp(hidden_states)
+          # 残差连接
+          hidden_states = residual + feed_forward_hidden_states
+
+-         return hidden_states
++         if use_cache:
++             return (hidden_states, present)
++         else:
++             return hidden_states
+
+
+  class GPT2Model(nn.Module):
+      &quot;&quot;&quot; 该类是堆叠 embedding 层以及多个 transformer 层 &quot;&quot;&quot;
+
+      def __init__(self, config):
+          super().__init__()
+
+          self.embed_dim = config.hidden_size
+
+          self.wte = nn.Embedding(config.vocab_size, self.embed_dim)
+          self.wpe = nn.Embedding(config.max_position_embeddings, self.embed_dim)
+          self.drop = nn.Dropout(config.embd_pdrop)
+
+          self.h = nn.ModuleList([GPT2Block(config) for _ in range(config.num_hidden_layers)])
+          self.ln_f = nn.LayerNorm(self.embed_dim, eps=config.layer_norm_epsilon)
+
+-     def forward(self, input_ids, attention_mask):
++     def forward(self, input_ids, attention_mask, past_key_values=None, use_cache=False):
+
+-         # position_ids 的维度为: [bs, seq_len]
+-         input_shape = input_ids.size()
+-         position_ids = torch.arange(input_shape[-1]).unsqueeze(0)
++
++         # 如果是预填充阶段，那么 position_ids 的维度为: [bs, seq_len]
++         # 如果是使用KVCache阶段，那么 position_ids 的维度为: [bs, 1]，不过要注意 position_ids 里面的值不是0，而是 past_length
++         if past_key_values is not None:
++             past_length = past_key_values[0][0].size(-2)
++         else:
++             past_length = 0
++         input_shape = input_ids.size()
++         position_ids = torch.arange(start=past_length, end=input_shape[-1] + past_length).unsqueeze(0)
+
+          # Embedding层，这里只相加了token embedding和position embeddding，忽略了token type embedding
+          inputs_embed = self.wte(input_ids)
+          position_embed = self.wpe(position_ids)
+          # 如果是预填充阶段，那么 inputs_embed 的维度是: [bs, seq_len, embed_dim], position_embed 的维度是 [1, seq_len, embed_dim]
+          # 如果是使用KVCache阶段，那么 inputs_embed 的维度是: [bs, 1, embed_dim], position_embed 的维度是 [1, 1, embed_dim]
+          # 无论上述哪个阶段，这里 inputs_embed 和 position_embed 相加时都会在 dim=0 这个维度做广播
+          hidden_states = inputs_embed + position_embed
+          hidden_states = self.drop(hidden_states)
+
+          # 经过多个transformer层
+-         for block in self.h:
+-             hidden_states = block(hidden_states, attention_mask)
++
++         # past_key_values 中存储的是上次推理时保存的KVCache，本次推理时会使用这里面的变量；
++         # presents 中存储的是本次推理时的KVCache，这个会返回用于下次推理；
++         presents = [] if use_cache else None
++         for block, layer_past in zip(self.h, past_key_values):
++             if use_cache:
++                 hidden_states, present = block(hidden_states, attention_mask, layer_past)
++                 presents += [present, ]
++             else:
++                 hidden_states = block(hidden_states, attention_mask, layer_past)
+
+          # 由于tranformer中使用的是pre layer norm，所以最后还需要过一层layer norm
+          hidden_states = self.ln_f(hidden_states)
+
+-         return hidden_states
++         if use_cache:  # 如果使用KVCache，会把本次推理时的缓存返回，下次推理时使用
++             return (hidden_states, presents)
++         else:
++             return hidden_states
+</code></pre>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://www.zhihu.com/question/596900067/answer/3040011798">https://www.zhihu.com/question/596900067/answer/3040011798</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/522481806">https://zhuanlan.zhihu.com/p/522481806</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/622780434">https://zhuanlan.zhihu.com/p/622780434</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

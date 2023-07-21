@@ -88,7 +88,7 @@
 
 <h1 id="gpt2">GPT2 模型结构和实现代码<a class="headerlink" href="#gpt2" title="Permanent link">#</a></h1>
 <p>GPT2 的模型结构相比于 GPT 是有着少许改变的，后续的 GPT3 等模型也是在 GPT2 的基础上改出来的，所以详细了解 GPT2 的整个模型结构的细节是很有必要的。</p>
-<p>在huggingface的项目 <a href="https://github.com/huggingface/transformers">transformers</a> 中对 GPT2 有着完整的实现，不过该项目毕竟是一个庞大的工程项目，里面有着各种功能的代码，不利于阅读。下面的代码是从 <a href="https://github.com/huggingface/transformers">transformers</a> 中的 GPT2 的实现中仅把模型结构部分的代码摘取出来之后的结果。需要注意的是，下述代码仅用于学习理解，其在语法上有着不少的bug，同时也是跑不通的。</p>
+<p>在huggingface的项目 <a href="https://github.com/huggingface/transformers">transformers</a> 中对 GPT2 有着完整的实现，不过该项目毕竟是一个庞大的工程项目，里面有着各种功能的代码，不利于阅读。下面的代码是从 <a href="https://github.com/huggingface/transformers">transformers</a> 中的 GPT2 的实现中仅把模型结构部分的代码摘取出来之后的结果。需要注意的是，下述代码仅用于学习理解，其在语法上有着不少的bug，是跑不通的；同时该代码不一定是最优雅的实现，而是尽量选择容易理解的实现方式。</p>
 <p>模型中涉及的几个公式如下所示：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}\text{Attention}(x) = \text{softmax}(\frac{xW_q \cdot xW_k}{\sqrt{d_k}}) \cdot xW_v\end{equation}</div>
