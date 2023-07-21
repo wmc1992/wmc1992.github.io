@@ -64,33 +64,39 @@
 
 <p align="right">[<a href="/wiyOMRd9_no_toc/">隐藏左侧目录栏</a>][<a href="/wiyOMRd9/">显示左侧目录栏</a>]</p>
 
-<h1 id="gpt2">GPT2<a class="headerlink" href="#gpt2" title="Permanent link">#</a></h1>
+<h1 id="gpt2">GPT2 模型结构和实现代码<a class="headerlink" href="#gpt2" title="Permanent link">#</a></h1>
 <p>GPT2 的模型结构相比于 GPT 是有着少许改变的，后续的 GPT3 等模型也是在 GPT2 的基础上改出来的，所以详细了解 GPT2 的整个模型结构的细节是很有必要的。</p>
 <p>在huggingface的项目 <a href="https://github.com/huggingface/transformers">transformers</a> 中对 GPT2 有着完整的实现，不过该项目毕竟是一个庞大的工程项目，里面有着各种功能的代码，不利于阅读。下面的代码是从 <a href="https://github.com/huggingface/transformers">transformers</a> 中的 GPT2 的实现中仅把模型结构部分的代码摘取出来之后的结果。需要注意的是，下述代码仅用于学习理解，其在语法上有着不少的bug，同时也是跑不通的。</p>
-<p>下述代码中有四个类：</p>
-<ul>
-<li><code>GTP2Attention</code>: 该类实现的功能是 multi-head attention 部分的功能；</li>
-<li><code>GPT2MLP</code>: 该类实现的功能是 FFN 部分的功能；</li>
-<li><code>GPT2Block</code>: 该类堆叠了 multi-head attention 和 FFN，也就是实现了 transformer 层；</li>
-<li><code>GPT2Model</code>: 该类是堆叠了 embedding 层和多个 tranformer 层，也就是一个完整的 decoder-only 的模型结构；</li>
-</ul>
-<p>几个公式如下所示：</p>
+<p>模型中涉及的几个公式如下所示：</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\text{Self-Attention}(x) = \text{softmax}(\frac{xW_q \cdot xW_k}{\sqrt{d_k}}) \cdot xW_v\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\text{Self-Attention}(x) = \text{softmax}(\frac{xW_q \cdot xW_k}{\sqrt{d_k}}) \cdot xW_v\end{equation}</script>
-</div>
-<div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\text{Multi-Head Attention}(x) = \end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\text{Multi-Head Attention}(x) = \end{equation}</script>
+<div class="MathJax_Preview">\begin{equation}\text{Attention}(x) = \text{softmax}(\frac{xW_q \cdot xW_k}{\sqrt{d_k}}) \cdot xW_v\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\text{Attention}(x) = \text{softmax}(\frac{xW_q \cdot xW_k}{\sqrt{d_k}}) \cdot xW_v\end{equation}</script>
 </div>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}\text{FFN}(x) = \text{act}(xW_1)W_2\end{equation}</div>
 <script type="math/tex; mode=display">\begin{equation}\text{FFN}(x) = \text{act}(xW_1)W_2\end{equation}</script>
 </div>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\text{transformer}(x) = \text{residual}(\text{FFN}(\text{LN}(\text{residual}(\text{Multi-Head Attention}(\text{LN}(x))))))\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\text{transformer}(x) = \text{residual}(\text{FFN}(\text{LN}(\text{residual}(\text{Multi-Head Attention}(\text{LN}(x))))))\end{equation}</script>
+<div class="MathJax_Preview">\begin{equation}\text{transformer}(x) = \text{residual}(\text{FFN}(\text{LN}(\text{residual}(\text{Attention}(\text{LN}(x))))))\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\text{transformer}(x) = \text{residual}(\text{FFN}(\text{LN}(\text{residual}(\text{Attention}(\text{LN}(x))))))\end{equation}</script>
 </div>
+<p>上述公式中 <span class="arithmatex"><span class="MathJax_Preview">\text{act}(\cdot)</span><script type="math/tex">\text{act}(\cdot)</script></span> 表示激活函数。</p>
+<p>下述代码中有四个类：</p>
+<ul>
+<li>
+<p><code>GTP2Attention</code>: 该类实现的功能是 multi-head attention 部分的功能；</p>
+</li>
+<li>
+<p><code>GPT2MLP</code>: 该类实现的功能是 FFN 部分的功能；</p>
+</li>
+<li>
+<p><code>GPT2Block</code>: 该类堆叠了 multi-head attention 和 FFN，也就是实现了 transformer 层；</p>
+</li>
+<li>
+<p><code>GPT2Model</code>: 该类是堆叠了 embedding 层和多个 tranformer 层，也就是一个完整的 decoder-only 的模型结构；</p>
+</li>
+</ul>
+<p>主要部分的代码都已经有了注释，比较容易理解：</p>
 <pre><code class="language-python">import torch
 from torch import nn
 
@@ -246,7 +252,11 @@ class GPT2Model(nn.Module):
         # 由于tranformer中使用的是pre layer norm，所以最后还需要过一层layer norm
         hidden_states = self.ln_f(hidden_states)
         return hidden_states
-</code></pre></div>
+</code></pre>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://github.com/huggingface/transformers">https://github.com/huggingface/transformers</a></li>
+</ul></div>
             </div>
         </div>
 
