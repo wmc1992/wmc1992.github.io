@@ -71,7 +71,7 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#llama2" class="nav-link">LLaMA2</a>
+            <li class="nav-item" data-level="1"><a href="#llama2-open-foundation-and-fine-tuned-chat-models" class="nav-link">LLaMA2: Open Foundation and Fine-Tuned Chat Models</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="2"><a href="#1pretraining" class="nav-link">1、Pretraining</a>
               <ul class="nav flex-column">
@@ -166,7 +166,10 @@
 
 <p align="right">[<a href="/gIk6wBrI_no_toc/">隐藏左侧目录栏</a>][<a href="/gIk6wBrI/">显示左侧目录栏</a>]</p>
 
-<h1 id="llama2">LLaMA2<a class="headerlink" href="#llama2" title="Permanent link">#</a></h1>
+<h1 id="llama2-open-foundation-and-fine-tuned-chat-models">LLaMA2: Open Foundation and Fine-Tuned Chat Models<a class="headerlink" href="#llama2-open-foundation-and-fine-tuned-chat-models" title="Permanent link">#</a></h1>
+<blockquote>
+<p>原论文链接: <a href="https://arxiv.org/pdf/2307.09288.pdf">LLaMA2: Open Foundation and Fine-Tuned Chat Models</a></p>
+</blockquote>
 <h2 id="1pretraining">1、Pretraining<a class="headerlink" href="#1pretraining" title="Permanent link">#</a></h2>
 <h3 id="11-pretraining-data">1.1 Pretraining Data<a class="headerlink" href="#11-pretraining-data" title="Permanent link">#</a></h3>
 <ul>
@@ -184,6 +187,7 @@
 <li>rotary positional embeddings</li>
 <li>grouped-query attention (GQA)</li>
 </ul>
+<p>另外，相比于 llama1 本次的模型的输入文本的长度翻了一倍，达到了4096。</p>
 <p><strong>预训练超参数配置：</strong></p>
 <table align=center style="width:auto">
     <thead style="font-size: 0.6rem">
@@ -225,8 +229,20 @@
 <p>LLaMA2 和 LLaMA1 的各项对比如下表所示：</p>
 <div align=center><img src="/gIk6wBrI/assets/01.png" width=70% /></div>
 
+<p>然后贴一下其在预训练阶段的 training loss，这个 loss 训练的是非常的稳定：</p>
+<div align=center><img src="/gIk6wBrI/assets/12.png" width=60% /></div>
+
 <h3 id="13-pretrained-model-evaluation">1.3 Pretrained Model Evaluation<a class="headerlink" href="#13-pretrained-model-evaluation" title="Permanent link">#</a></h3>
-<p>待补充 TODO</p>
+<p>预训练模型与开源模型的对比效果如下图所示，对比的模型有 MPT、Falcon、LLaMA1。</p>
+<div align=center><img src="/gIk6wBrI/assets/10.png" width=70% /></div>
+
+<p>预训练模型与闭源模型的对比效果如下图所示，对比的模型有 GPT-3.5、GPT-4、PaLM、PaLM-2L。</p>
+<div align=center><img src="/gIk6wBrI/assets/11.png" width=70% /></div>
+
+<p>整体来看，相比于开源模型 llama2 有着明显的优势。相比于 OpenAI 和 google 的闭源模型，llama2 基本上是和初代模型（OpenAI的GPT-3.5和google的PaLM）性能持平，而如果和 OpenAI 和 google 的最新版模型相比，llama2 则明显有着性能上的差距。</p>
+<blockquote>
+<p>虽然本文对预训练部分描述的非常少，但这部分的模型能力却非常重要，这也直接决定着后续训练过程中模型能力的上限。</p>
+</blockquote>
 <h2 id="2supervised-fine-tuning-sft">2、Supervised Fine-Tuning (SFT)<a class="headerlink" href="#2supervised-fine-tuning-sft" title="Permanent link">#</a></h2>
 <h3 id="21-sft-data">2.1 SFT Data<a class="headerlink" href="#21-sft-data" title="Permanent link">#</a></h3>
 <p>初步启动时是直接使用了开源的指令微调数据集。</p>
@@ -472,10 +488,17 @@
 <li>目前仅评估多轮对话的结果，并不是按照这种方式评估：让模型执行一个具体的任务，完成之后对整理做评估，既评估对话的流畅程度，也评估任务的完成度。</li>
 </ul>
 <h2 id="_1">总结<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
+<p>本文几个非常有意思的点，总结如下：</p>
+<ul>
+<li>再一次强调数据质量和丰富度的重要性；</li>
+<li>chat model 优秀的写作能力主要来自于 RLHF 阶段；</li>
+<li>在 RLHF 阶段中，reward model 非常重要（在原论文 RLHF 那一小节有 2/3 在讲 reward model）；</li>
+<li>reward model 所应该学习的是自己的 chat model 的输出分布，而不是其他模型的；</li>
+</ul>
 <h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p><a href="https://arxiv.org/pdf/2307.09288.pdf">https://arxiv.org/pdf/2307.09288.pdf</a></p>
+<p><a href="https://arxiv.org/pdf/2307.09288.pdf">LLaMA2: Open Foundation and Fine-Tuned Chat Models</a></p>
 </li>
 <li>
 <p><a href="https://www.interconnects.ai/p/llama-2-from-meta">Llama 2: an incredible open LLM</a></p>
