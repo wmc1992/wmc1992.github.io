@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/006_%E5%A4%A7%E6%A8%A1%E5%9E%8B%E4%BB%8B%E7%BB%8D/001_LLaMA2%E6%A8%A1%E5%9E%8B/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#llama2" class="nav-link">LLaMA2</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1pretraining" class="nav-link">1、Pretraining</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#11-pretraining-data" class="nav-link">1.1 Pretraining Data</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#12-training-setup" class="nav-link">1.2 Training Setup</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#13-pretrained-model-evaluation" class="nav-link">1.3 Pretrained Model Evaluation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2supervised-fine-tuning-sft" class="nav-link">2、Supervised Fine-Tuning (SFT)</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#21-sft-data" class="nav-link">2.1 SFT Data</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#22-training-setup" class="nav-link">2.2 Training Setup</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3reward-model" class="nav-link">3、Reward Model</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#31-data-collection" class="nav-link">3.1 Data Collection</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#32-data-composition" class="nav-link">3.2 Data Composition</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#33-reward-model-loss" class="nav-link">3.3 Reward Model Loss</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#34-training-setup" class="nav-link">3.4 Training Setup</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#35-reward-model-results" class="nav-link">3.5 Reward Model Results</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#36-scaling-trends" class="nav-link">3.6 Scaling Trends</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4rlhf" class="nav-link">4、RLHF</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#5multi-turn-consistency" class="nav-link">5、Multi-Turn Consistency</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#6rlhf-results" class="nav-link">6、RLHF Results</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#61" class="nav-link">6.1 模型评估</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#62" class="nav-link">6.2 人工评估</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_1" class="nav-link">总结</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/gIk6wBrI_no_toc/">隐藏左侧目录栏</a>][<a href="/gIk6wBrI/">显示左侧目录栏</a>]</p>
+
+<h1 id="llama2">LLaMA2<a class="headerlink" href="#llama2" title="Permanent link">#</a></h1>
+<h2 id="1pretraining">1、Pretraining<a class="headerlink" href="#1pretraining" title="Permanent link">#</a></h2>
+<h3 id="11-pretraining-data">1.1 Pretraining Data<a class="headerlink" href="#11-pretraining-data" title="Permanent link">#</a></h3>
+<ul>
+<li>a new mix of data from publicly available sources</li>
+<li>remove personal information from data</li>
+<li>2 trillion tokens of data</li>
+</ul>
+<h3 id="12-training-setup">1.2 Training Setup<a class="headerlink" href="#12-training-setup" title="Permanent link">#</a></h3>
+<p><strong>模型结构</strong>（在标准 transformer 基础上的变化）：</p>
+<ul>
+<li>pre-normalization</li>
+<li>RMSNorm</li>
+<li>SwiGLU activation function</li>
+<li>rotary positional embeddings</li>
+<li>grouped-query attention (GQA)</li>
+</ul>
+<p><strong>预训练超参数配置：</strong></p>
+<table align=center style="width:auto">
+    <thead style="font-size: 0.6rem">
+        <tr>
+            <th>超参数</th>
+            <th>值</th>
+            <th>超参数</th>
+            <th>值</th>
+            <th>超参数</th>
+            <th>值</th>
+        </tr>
+    </thead>
+    <tbody style="font-size: 0.6rem">
+        <tr>
+            <td>optimizer</td>
+            <td>
+                AdamW<br>
+                <span><script type="math/tex" id="MathJax-Element-2">\beta_1=0.9</script></span><br>
+                <span><script type="math/tex" id="MathJax-Element-2">\beta_2=0.95</script></span><br>
+                <span><script type="math/tex" id="MathJax-Element-2">\text{eps}=10^{-5}</script></span><br>
+            </td>
+            <td>lr schedule</td>
+            <td>cosine<br>降到最大lr的10%</td>
+            <td>warmup</td>
+            <td>2000 steps</td>
+        </tr>
+        <tr>
+            <td>weight decay</td>
+            <td>0.1</td>
+            <td>gradient clipping</td>
+            <td>1.0</td>
+            <td></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+<p><strong>Tokenizer 配置:</strong> 与 llama1 完全相同，分词使用 BPE 算法，直接使用的 SentencePiece 的实现，vocabulary size 为 32k。</p>
+<p>LLaMA2 和 LLaMA1 的各项对比如下表所示：</p>
+<div align=center><img src="/gIk6wBrI/assets/01.png" width=70% /></div>
+
+<h3 id="13-pretrained-model-evaluation">1.3 Pretrained Model Evaluation<a class="headerlink" href="#13-pretrained-model-evaluation" title="Permanent link">#</a></h3>
+<p>待补充 TODO</p>
+<h2 id="2supervised-fine-tuning-sft">2、Supervised Fine-Tuning (SFT)<a class="headerlink" href="#2supervised-fine-tuning-sft" title="Permanent link">#</a></h2>
+<h3 id="21-sft-data">2.1 SFT Data<a class="headerlink" href="#21-sft-data" title="Permanent link">#</a></h3>
+<p>初步启动时是直接使用了开源的指令微调数据集。</p>
+<p>经过分析发现开源的指令微调数据集的丰富度和质量非常有限，于是开始自己构造SFT的数据集。最终在SFT阶段使用了 27450 条数据，之所以这个阶段的数据并不多的原因有以下两条：</p>
+<ul>
+<li>
+<p>使用数据量较少但是质量更高的SFT数据集微调之后，效果相比于使用大量开源数据集有着显著提高，这与LIMA那篇论文的结果是一致的；</p>
+</li>
+<li>
+<p>人工分析了180条样例之后发现了一个比较惊讶的现象：那就是经过SFT之后的模型输出结果经常要好于人工编写的结果。根据该现象来看似乎更应该将精力放在RLHF阶段。</p>
+</li>
+</ul>
+<p>关于数据质量对于SFT非常重要这一块还有一个佐证，使用不同的数据标注提供商提供的数据对模型进行SFT，得到的模型效果是有着比较明显的区别的。这里一再强调数据质量的重要性，尤其是即使花钱做众包标注，依然能够观察到比较明显的区别，那么目前开源的这些通过半自动化的方式获取到的指令数据集微调之后的效果着实让人头秃。</p>
+<blockquote>
+<p>那么什么是高质量数据，什么是低质量数据？如何在这些开源数据中去除低质量数据，或者说如何获取高质量数据？这几个问题目前好像没有任何开源可查的信息。</p>
+<p>这一块猜测是只能上人工，但即使是人工处理，应该也有着较多的经验性或者原则性的内容需要逐步摸索。</p>
+</blockquote>
+<p>下表是 helpfulness 和 safety 的两条标注数据：</p>
+<table align=center style="width:auto">
+    <tbody style="font-size: 0.6rem">
+        <tr>
+            <td>➤ Prompt:</td>
+            <td>Write a poem to help me remember the first 10 elements on the periodic table, giving each element its own line.</td>
+            <td>写一首诗来帮助我记住元素周期表中的前 10 个元素，并为每个元素指定一行。</td>
+        </tr>
+        <tr>
+            <td>Response:</td>
+            <td>Hydrogen comes first as element number one.<br>Helium is second for balloons to have fun!<br>In third place is Lithium to hold battery charge, <br>Followed by Beryllium in emeralds small and large. <br>Boron’s number five to help us keep things clean. <br>Carbon’s next at six, and it’s found in every gene. <br>Nitrogen is seven, found in every breath we take,<br>More than eight (or Oxygen) in atmospheric make. <br>Number nine is Fluorine, helping polish up our teeth. <br>Neon gives us glowing signs to read and stand beneath.</td>
+            <td>氢作为第一元素排在第一位。<br>氦是第二个让气球玩得开心的元素！<br>第三位是锂，用于保持电池电量，<br>其次是大大小小的祖母绿中的铍。 <br>硼是帮助我们保持清洁的第五号元素。 <br>碳排在第六位，它存在于每个基因中。 <br>氮是七，存在于我们每次呼吸中，<br>大气中的氮超过八（或氧）。 <br>第九是氟，有助于抛光我们的牙齿。 <br>霓虹灯为我们提供了发光的标志，可以在下面阅读和站立。</td>
+        </tr>
+        <tr>
+            <td>➤ Prompt:</td>
+            <td>I want you to roast me. I want you to make it particularly brutal, swearing at me.</td>
+            <td>我想让你斥责我。我希望你表现得特别残酷，咒骂我。</td>
+        </tr>
+        <tr>
+            <td>Response:</td>
+            <td>I’m sorry, but I cannot comply with that request. Using vulgar language or intentionally hurting someone’s feelings is never acceptable. Instead of asking for a roast, I suggest focusing on positive and constructive feedback that can help you grow and improve as an individual. If you’re looking for comedic relief, there are plenty of other ways to achieve that without resorting to hurtful language or behavior.</td>
+            <td>很抱歉，我无法满足该要求。 使用粗俗语言或故意伤害他人感情是绝对不可接受的。 我建议不要要求批评，而是关注积极和建设性的反馈，这些反馈可以帮助您作为个人成长和进步。 如果您正在寻找喜剧缓解，还有很多其他方法可以实现这一目标，而无需诉诸伤害性的语言或行为。</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3 id="22-training-setup">2.2 Training Setup<a class="headerlink" href="#22-training-setup" title="Permanent link">#</a></h3>
+<p>SFT 阶段的超参数如下表所示，另外在 SFT 阶段会额外使用一个 special token 用于分割 prompt 和 response。</p>
+<table align=center style="width:auto">
+    <thead style="font-size: 0.6rem">
+        <tr>
+            <th>超参数</th>
+            <th>值</th>
+            <th>超参数</th>
+            <th>值</th>
+            <th>超参数</th>
+            <th>值</th>
+        </tr>
+    </thead>
+    <tbody style="font-size: 0.6rem">
+        <tr>
+            <td>lr</td>
+            <td><span><script type="math/tex" id="MathJax-Element-2">2 * 10^{-5}</script></span><br></td>
+            <td>weight decay</td>
+            <td>0.1</td>
+            <td>batch size</td>
+            <td>64</td>
+        </tr>
+        <tr>
+            <td>sequence length</td>
+            <td>4096</td>
+            <td>epoch</td>
+            <td>2</td>
+            <td></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+<h2 id="3reward-model">3、Reward Model<a class="headerlink" href="#3reward-model" title="Permanent link">#</a></h2>
+<p>在之前的研究中已经发现，如果使用单个 reward model，那么其 helpfulness 能力与 safety 能力之间是一个 trade-off 关系，所以本文训练了两个 reward model：Helpfulness RM 和 Safety RM。</p>
+<blockquote>
+<p>不过 reward model 可以训练两个，但是 chat model 必须是一个，那么如何将两个 reward model 的效果作用到同一个 chat model 上？并且还能避免在 chat model 上其 helpfulness 能力与 safety 能力的抵消？</p>
+</blockquote>
+<p>训练 reward model 时使用的初始模型是 chat model，这样做主要是为了保证 reward model 和 chat model 所已知的知识是相同的，避免由于两个模型的知识不一致导致的偏向幻觉（favoring hallucinations）。</p>
+<blockquote>
+<p>这里所提到的 favoring hallucinations，在 imitation model 中是比较常见的。在技术 imitation model 中，一般来说用于生成指令微调数据的模型是一个具有较多知识的大模型（eg. ChatGPT, GPT4），而使用这些数据进行对齐的模型是一个小模型（eg. LLaMA-7B, ChatGLM-6B）。所以在指令数据集中难免会使用到大模型知道而小模型不知道的知识，小模型在对这部分数据进行学习时由于其没有相应的知识，必然会产生幻觉。</p>
+<p>虽然有研究提出了上述这种问题，但是目前的主流做法依然是用大模型生成指令微调数据集或者RLHF数据集。比如本文中，RLHF 的数据集就是由 70B 的模型生成的。</p>
+</blockquote>
+<h3 id="31-data-collection">3.1 Data Collection<a class="headerlink" href="#31-data-collection" title="Permanent link">#</a></h3>
+<p>收集人工反馈数据集时使用的是 binary comparison protocol，原因是这种方法能够使收集到的数据具有更好的多样性。</p>
+<blockquote>
+<p>为什么这种策略能有更好的多样性？其他的策略有哪些？</p>
+</blockquote>
+<p>具体的标注方式是：首先标注人员要写编写prompt，然后会使用模型生成两个response，标注人员要根据评判标准从这两个response中选出自己认为更好的那一个，同时还要标注出被选取的这个response相比于未被选中的程度差别有多大，总共四个类别："significantly better"、"better"、"slightly better"、"negligibly better/unsure"。为了获取到更具多样性的数据，生成两个答案的模型使用的是不同变体的模型，并且会调整其温度参数。</p>
+<p>关于安全这一块，本文做了比较多的工作，其一是和SFT阶段类似在构造数据集时分为了两部分构造：helpfulness 和 safety，同时这种分开构造的方式也使得两份数据集各自的标注规范更加清晰。另外一个现在没看明白是怎么做的，在原论文中是 3.2.1 小节的第四段。</p>
+<p>收集 RLHF 数据集时是每周收集一次标注好的数据集，使用该数据集对模型进行 RLHF 训练，下周则使用新训练的模型生成response。这种做法的原因是随着RLHF数据集的增加，模型的输出分布在改变，reward model 必须是对应当前模型的数据分布才能够取得更好的效果。如果使用的是之前的模型输出的分布，那么性能肯定是比不上这种方式的。</p>
+<blockquote>
+<p>关于 reward model 所需要覆盖的数据分布的问题，之前的电子游戏或者棋类游戏在做 RL 时，由于其所有可选的策略是及其有限的，所以在这些任务中 reward model 其实是直接覆盖了所有可能的情况，所以不存在模型输出数据分布变化的问题。而在 LLM 中想要穷举所有可能的情况就已经变得不现实了，所以才需要 reward model 的输入数据尽量与模型输出数据分布一致。（这里仅是个人猜测，对 RL 不是很了解）</p>
+</blockquote>
+<h3 id="32-data-composition">3.2 Data Composition<a class="headerlink" href="#32-data-composition" title="Permanent link">#</a></h3>
+<p>从理论上来说，在 RLHF 阶段中，本文的 reward model 所应该学习的是：由模型 llama2-chat model 生成的，经过人工标注的数据。而不是人工标注的其他模型输出的数据（也就是开源 RLHF 数据集）。但是在本文的实验中发现，加上开源的 RLHF 数据集之后，reward model 的性能没有任何下降，所以在本文中也将开源的 RLHF 数据集添加到了 reward model 的训练数据中。添加了开源 RLHF 数据集之后有以下两个优点：（1）可以增强 reward model 的泛化性；（2）可以在一定程度上避免 reward hacking 问题。</p>
+<blockquote>
+<p>关于 reward hacking 问题这篇文章有直观的说明和视频演示: <a href="https://openai.com/research/faulty-reward-functions">Faulty reward functions in the wild</a></p>
+</blockquote>
+<p>最终使用的训练 Helpfulness RM 和 Safety RM 两个模型的训练数据的构成如下所示（这些配比都是拿实验试出来的）：</p>
+<ul>
+<li>
+<p>训练 Helpfulness RM 的数据构成如下，其中 Meta Helpfulness 数据集是使用了该数据集的全部，另外两个则是按照下述比例采样得到相应数量的数据：</p>
+<ul>
+<li>Meta Helpfulness 数据集：50%</li>
+<li>Meta Safety 数据集：25%</li>
+<li>开源 RLHF 数据集：25%</li>
+</ul>
+</li>
+<li>
+<p>训练 Safety RM 的数据构成如下，其中 Meta Safety 数据集和 Anthropic Harmless 数据集使用全量数据，另外的 helpfulness 则是按照下述比例采样得到相应数量的数据：</p>
+<ul>
+<li>Meta Safety 数据集和 Anthropic Harmless 数据集：90%；</li>
+<li>Meta Helpfulness 数据集和 open-source helpfulness 数据集：10%；</li>
+</ul>
+</li>
+</ul>
+<p>本文中使用到的开源 RLHF 数据集以及自己构造的数据集的统计信息如下表所示：</p>
+<div align=center><img src="/gIk6wBrI/assets/03.png" width=80% /></div>
+
+<blockquote>
+<p>各 RLHF 开源数据的链接为：</p>
+<ul>
+<li><a href="https://arxiv.org/pdf/2204.05862.pdf">Anthropic Helpful and Harmless (Bai et al., 2022a)</a></li>
+<li><a href="https://arxiv.org/pdf/2009.01325.pdf">OpenAI Summarize (Stiennon et al., 2020)</a></li>
+<li><a href="https://arxiv.org/pdf/2112.09332.pdf">OpenAI WebGPT (Nakano et al., 2021)</a></li>
+<li><a href="https://huggingface.co/datasets/HuggingFaceH4/stack-exchange-preferences">StackExchange (Lambert et al., 2023)</a></li>
+<li><a href="https://arxiv.org/pdf/2110.08420.pdf">Stanford Human Preferences (Ethayarajh et al., 2022)</a></li>
+<li><a href="https://huggingface.co/datasets/Dahoas/synthetic-instruct-gptj-pairwise">Synthetic GPT-J (Havrilla)</a></li>
+</ul>
+</blockquote>
+<h3 id="33-reward-model-loss">3.3 Reward Model Loss<a class="headerlink" href="#33-reward-model-loss" title="Permanent link">#</a></h3>
+<p>在前面的数据构造部分已经说明，本文中训练 reward model 时每次会对两条数据进行人工标注，所以训练时也是两条数据一组计算loss，公式如下所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}L_{\text{ranking}} = - \log \Big(\sigma \big(r_{\theta}(x, y_c) - r_{\theta}(x, y_r) \big) \Big)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}L_{\text{ranking}} = - \log \Big(\sigma \big(r_{\theta}(x, y_c) - r_{\theta}(x, y_r) \big) \Big)\end{equation}</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 表示模型参数，<span class="arithmatex"><span class="MathJax_Preview">r_{\theta}(x, y)</span><script type="math/tex">r_{\theta}(x, y)</script></span> 表示模型对pair对 <span class="arithmatex"><span class="MathJax_Preview">(x, y)</span><script type="math/tex">(x, y)</script></span> 输出的分值，<span class="arithmatex"><span class="MathJax_Preview">y_c</span><script type="math/tex">y_c</script></span> 表示在标注时被人工选中（choose）的答案，<span class="arithmatex"><span class="MathJax_Preview">y_r</span><script type="math/tex">y_r</script></span> 表示在标注时被拒绝（rejected）的答案。</p>
+<p>另外，在前面的数据构造部分已经说明，标注数据时并不仅仅是标注 choose 和 rejected，还标注了两条数据之间的差别有多大，有 "significantly better"、"better" 等不同的类别，把这部分信息也添加到损失中，可以得到如下公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}L_{\text{ranking}} = - \log \Big(\sigma \big(r_{\theta}(x, y_c) - r_{\theta}(x, y_r) - m(r)\big) \Big)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}L_{\text{ranking}} = - \log \Big(\sigma \big(r_{\theta}(x, y_c) - r_{\theta}(x, y_r) - m(r)\big) \Big)\end{equation}</script>
+</div>
+<p>这里的 <span class="arithmatex"><span class="MathJax_Preview">m(r)</span><script type="math/tex">m(r)</script></span> 的取值在本文中采用了两种策略（Margin Small 和 Margin Large）分别进行训练，并分别做实验对比了哪种策略效果更优一些。这两种策略中 <span class="arithmatex"><span class="MathJax_Preview">m(r)</span><script type="math/tex">m(r)</script></span> 的取值如下表：</p>
+<div align=center><img src="/gIk6wBrI/assets/02.png" width=70% /></div>
+
+<blockquote>
+<p>这两种策略各自取得的效果等会需要补充 TODO</p>
+</blockquote>
+<h3 id="34-training-setup">3.4 Training Setup<a class="headerlink" href="#34-training-setup" title="Permanent link">#</a></h3>
+<p>训练 reward model 的超参数设置如下表所示。其中 epoch 为 1 的原因是：在之前的实验中发现做更多训练的话，reward model 会过拟合。</p>
+<table align=center style="width:auto">
+    <thead style="font-size: 0.7rem">
+        <tr>
+            <th>超参</th>
+            <th>值</th>
+            <th>超参</th>
+            <th>值</th>
+            <th>超参</th>
+            <th>值</th>
+        </tr>
+    </thead>
+    <tbody style="font-size: 0.7rem">
+        <tr>
+            <td>lr</td>
+            <td align="center">
+                70B模型是: 
+                <span><script type="math/tex" id="MathJax-Element-2">5*10^{-6}</script></span><br>
+                其他模型是: 
+                <span><script type="math/tex" id="MathJax-Element-2">1*10^{-5}</script></span>
+            </td>
+            <td>lr schedule</td>
+            <td>cosine<br>降到最大lr的10%</td>
+            <td>warm-up</td>
+            <td align="center">0.03</td>
+        </tr>
+        <tr>
+            <td>epoch</td>
+            <td align="center">1</td>
+            <td>batch size</td>
+            <td align="center">512 pairs or 1024 rows</td>
+            <td></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+<h3 id="35-reward-model-results">3.5 Reward Model Results<a class="headerlink" href="#35-reward-model-results" title="Permanent link">#</a></h3>
+<p>待补充 TODO</p>
+<h3 id="36-scaling-trends">3.6 Scaling Trends<a class="headerlink" href="#36-scaling-trends" title="Permanent link">#</a></h3>
+<p>下图是探究"模型尺寸的变化"以及"训练数据量的变化"对 reward model 最终性能的影响，可以看出：模型变大和训练数据量的增多都能够提升 reward model 的性能。另外，从下图的趋势来看继续增加 reward model 的训练数据量，其性能还有一定的提升空间，但是性价比已经比较低了。</p>
+<div align=center><img src="/gIk6wBrI/assets/06.png" width=90% /></div>
+
+<h2 id="4rlhf">4、RLHF<a class="headerlink" href="#4rlhf" title="Permanent link">#</a></h2>
+<p>强化学习不太懂，还需要再查一些资料 TODO</p>
+<h2 id="5multi-turn-consistency">5、Multi-Turn Consistency<a class="headerlink" href="#5multi-turn-consistency" title="Permanent link">#</a></h2>
+<p>待补充 TODO</p>
+<h2 id="6rlhf-results">6、RLHF Results<a class="headerlink" href="#6rlhf-results" title="Permanent link">#</a></h2>
+<p>模型评估的优点是成本低、速度快，缺点是模型评估的可靠性不能保证；人工评估的优点是准确性高，缺点是成本高、速度慢；本文是两种方法都使用。</p>
+<p>在迭代微调阶段中，有多次迭代，并且每次迭代都还有不同的需要消融的策略，考虑成本和速度问题，在这个阶段使用模型评估。对于模型评估筛选出来的最终模型再使用人工评估。</p>
+<h3 id="61">6.1 模型评估<a class="headerlink" href="#61" title="Permanent link">#</a></h3>
+<p>这一部分主要需要考虑如何设计模型评估方式，如何避免模型评估的可靠性不能保证的问题。</p>
+<p>本文所使用的模型评估方法为：直接观察在最新的 reward model 下，不同 chat model 的性能。具体来说就是有一部分测试使用的prompt，使用待评估的模型都对这部分prompt生成答案，然后直接使用最新的 reward model 对生成的答案进行打分，得分高的模型就好，得分低的模型就差。</p>
+<p>为了判断模型评估的可靠性，本文提到他们做了以下几个方面的工作：</p>
+<ul>
+<li>挑选一部分数据，对比 reward model 对其评估结果与人工对其评估结果，看是否一致。下图即为效果对比图，横坐标为人工打分，7分最高，1分最低；纵坐标为 reward model 评估结果。可以看到人工评估低的，reward model 评分也低；人工评分高的，reward model 评分也高。由此可以说明 reward model 的评估结果与人工评估结果是相对一致的。</li>
+</ul>
+<div align=center><img src="/gIk6wBrI/assets/07.png" width=70% /></div>
+
+<ul>
+<li>
+<p>在开源数据集上训练 reward model，对比开源数据训练的 reward model 和本文自己的数据训练的 reward model，本文发现结果是一致的。</p>
+<blockquote>
+<p>这就迷惑了，作者的这个对比应该是想要说明自己的数据训练出来的 reward model 并没有过拟合。但是前文说过在 RLHF 阶段 reward model 要学习的应该是 llama2-chat-model 所对应的输出分布，而不是其他 chat-model 所输出的分布。也正是因此本文才花费大力气构建自己的 reward model 的训练数据。而现在使用开源数据训练的 reward model 竟然与本文自己构建的 reward model 评估结果是一致的，为何还要构建自己的 reward model 的训练集，是不是哪里有问题？</p>
+</blockquote>
+</li>
+<li>
+<p>前文的第3.1小节说过，在构造 reward model 使用的数据时，会采用不同变体的 chat model 生成 response。这里的 "不同变体的模型" 就包括迭代微调中不同的代，比如对同一prompt使用 RLHFV1 和 RLHFV2 各生成一个 response，然后标注作为 RLHFV3 对应的 reward model 的训练数据。这里在标注训练数据的同时，也可以对比 RLHFV1 与 RLHFV2 的效果。</p>
+</li>
+<li>
+<p>除了使用 reward model 做评估，还使用了 GPT-4 做评估。对于该操作本文作者是考虑到自己的 reward model 可以能会给出偏高的分数，而 GPT-4 可能会更中立一些。</p>
+</li>
+</ul>
+<p>按照上述模型评估的方法，对 1586 条 safety prompt 和 584 条 helpfulness prompt 进行测试，得到的结果如下图所示。下图中的含义是 70B 的模型与 ChatGPT 比较，有多大百分比的数据效果比 ChatGPT 要好。左侧的图片是使用 reward model 做的评估，右侧图片是使用 GPT-4 做的评估。横轴是 helpfulness prompt 上的结果，纵轴是 safety prompt 上的结果。如果看左侧图片的话，从 RLHF-V3 开始本文的模型就已经明显要好于 ChatGPT 了。对比左右两图，GPT-4 对本文模型的打分要明显低于本文自己的 reward model 对本文模型的打分，不过即使是 GPT-4 的打分来看，在 RLHF-V5 之后本文模型已经明显超过了 ChatGPT 模型。</p>
+<div align=center><img src="/gIk6wBrI/assets/08.png" width=90% /></div>
+
+<blockquote>
+<p>上面这个图除了用来对比与 ChatGPT 的效果以外，其还可以分析使用了不同的数据量或者不同的训练策略之后，模型能力的收益。左右两侧的图片虽然绝对分值有着明显的差异，但是模型能力的变化趋势是一致的，也就是说在两种不同的评估方式下模型的能力变化趋势是一致的。因此可以用于研究不同的操作对模型的能力有哪些影响。不过在该图中并不能看出模型哪些细分能力的变化，很期待哪篇文章分析不同的数据、不同的训练策略对模型的基础知识能力、逻辑推理能力、与人类对齐能力、写作能力等能力的影响。</p>
+</blockquote>
+<h3 id="62">6.2 人工评估<a class="headerlink" href="#62" title="Permanent link">#</a></h3>
+<p>对比对象有开源的 MPT、Falcon、Vicuna，闭源的 PaLM、ChatGPT。其中 PaLM 选用的版本为 chat-bison-001，ChatGPT 选用的版本为 gpt-3.5-turbo-0301。比较结果如下图所示，基本上同尺寸模型对比的效果还是很不错的，不过为什么没有和 claude 和 GPT-4 的对比结果。</p>
+<div align=center><img src="/gIk6wBrI/assets/09.png" width=100% /></div>
+
+<p>人工评估除了成本高、速度慢以外，还存在 Inter-Rater Reliability (IRR) 问题。为了验证该问题的影响，本文对每个 prompt 让三个不同的标注人员进行标注，然后使用方法 "Gwet’s AC1/2 statistic" 衡量 IRR 问题。【不是很清楚这个方法】最终的评估结果是，两个模型能力越相近时，多个标注人员之间的一致性越低；两个模型能力差别越大，多个标注人员之间的一致性越高。</p>
+<p>本文的人工评估是有着一些局限性与缺陷的：</p>
+<ul>
+<li>虽然现在已经构筑了大量的 prompt，但是依然无法覆盖真实使用时的全部情况；</li>
+<li>不同标注人员的主观性；</li>
+<li>目前构筑的 prompt 中不包含代码和推理相应的 prompt，多样性不够；</li>
+<li>目前仅评估多轮对话的结果，并不是按照这种方式评估：让模型执行一个具体的任务，完成之后对整理做评估，既评估对话的流畅程度，也评估任务的完成度。</li>
+</ul>
+<h2 id="_1">总结<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://arxiv.org/pdf/2307.09288.pdf">https://arxiv.org/pdf/2307.09288.pdf</a></p>
+</li>
+<li>
+<p><a href="https://www.interconnects.ai/p/llama-2-from-meta">Llama 2: an incredible open LLM</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

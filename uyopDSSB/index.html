@@ -75,27 +75,11 @@
               <ul class="nav flex-column">
             <li class="nav-item" data-level="2"><a href="#_2" class="nav-link">一、常识推断</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#boolq" class="nav-link">BoolQ</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#piqa" class="nav-link">PIQA</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#siqa" class="nav-link">SIQA</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#hellaswag" class="nav-link">HellaSwag</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#winogrande" class="nav-link">WinoGrande</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
             <li class="nav-item" data-level="3"><a href="#arc-easy-and-challenge" class="nav-link">ARC easy and challenge</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#commonsenseqa" class="nav-link">CommonsenseQA</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -103,15 +87,35 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#boolq" class="nav-link">BoolQ</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#hellaswag" class="nav-link">HellaSwag</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#siqa" class="nav-link">SIQA</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#piqa" class="nav-link">PIQA</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#winogrande" class="nav-link">WinoGrande</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#_3" class="nav-link">二、闭卷问答</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#natural-questions" class="nav-link">Natural Questions</a>
+            <li class="nav-item" data-level="3"><a href="#triviaqa" class="nav-link">TriviaQA</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#triviaqa" class="nav-link">TriviaQA</a>
+            <li class="nav-item" data-level="3"><a href="#natural-questions" class="nav-link">Natural Questions</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -127,11 +131,11 @@
             </li>
             <li class="nav-item" data-level="2"><a href="#_5" class="nav-link">四、数学推理</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#math" class="nav-link">MATH</a>
+            <li class="nav-item" data-level="3"><a href="#gsm8k" class="nav-link">GSM8k</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#gsm8k" class="nav-link">GSM8k</a>
+            <li class="nav-item" data-level="3"><a href="#math" class="nav-link">MATH</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -176,6 +180,90 @@
 </blockquote>
 <h2 id="_2">一、常识推断<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
 <p>常识推断（Common Sense Reasoning）：</p>
+<h3 id="arc-easy-and-challenge">ARC easy and challenge<a class="headerlink" href="#arc-easy-and-challenge" title="Permanent link">#</a></h3>
+<blockquote>
+<p>论文链接: <a href="https://arxiv.org/pdf/1803.05457.pdf">https://arxiv.org/pdf/1803.05457.pdf</a></p>
+<p>Clark et al., 2018</p>
+</blockquote>
+<p>该数据集主要是小学科学问题，共计7787个问题。划分为了简单集（ARC Easy）5197个问题，挑战集（ARC Challenge）2590个问题。下面是该数据集的一些样例。</p>
+<table align=center style="width:100%">
+    <tbody style="font-size: 0.8rem">
+        <tr>
+            <td>What is a worldwide increase in temperature called? (A) greenhouse effect (B) global warming (C) ozone depletion (D) solar heating</td>
+            <td>全球气温升高被称为什么？ (A) 温室效应 (B) 全球变暖 (C) 臭氧层破坏 (D) 太阳能加热</td>
+        </tr>
+        <tr>
+            <td>Which element makes up most of the air we breathe? (A) carbon (B) nitrogen (C) oxygen (D) argon</td>
+            <td>我们呼吸的空气主要由哪种元素构成？ (A) 碳 (B) 氮气 (C) 氧气 (D) 氩气</td>
+        </tr>
+        <tr>
+            <td>The crust, the mantle, and the core are structures of Earth. Which description is a feature of Earth’s mantle? (A) contains fossil remains (B) consists of tectonic plates (C) is located at the center of Earth (D) has properties of both liquids and solids</td>
+            <td>地壳、地幔和地核是地球的结构。 下列哪一项描述是地幔的特征？ (A) 包含化石遗迹 (B) 由构造板块组成 (C) 位于地球中心 (D) 具有液体和固体特性</td>
+        </tr>
+        <tr>
+            <td>What is the first step of the process in the formation of sedimentary rocks? (A) erosion (B) deposition (C) compaction (D) cementation</td>
+            <td>沉积岩形成过程的第一步是什么？ (A) 侵蚀 (B) 沉积 (C) 压实 (D) 胶结</td>
+        </tr>
+        <tr>
+            <td>What is the main function of the circulatory system? (1) secrete enzymes (2) digest proteins (3) produce hormones (4) transport materials</td>
+            <td>循环系统的主要功能是什么？ (1) 分泌酶 (2) 消化蛋白质 (3) 产生激素 (4) 运输物质</td>
+        </tr>
+        <tr>
+            <td>If a red flowered plant (RR) is crossed with a white flowered plant (rr), what color will the offspring be? (A) 100% pink (B) 100% red (C) 50% white, 50% red (D) 100% white</td>
+            <td>如果红花植物（RR）与白花植物（rr）杂交，后代会是什么颜色？ (A) 100% 粉色 (B) 100% 红色 (C) 50% 白色，50% 红色 (D) 100% 白色</td>
+        </tr>
+        <tr>
+            <td>Scientists perform experiments to test hypotheses. How do scientists try to remain ob- jective during experiments? (A) Scientists analyze all results. (B) Scientists use safety precautions. (C) Scientists conduct experiments once. (D) Scientists change at least two variables.</td>
+            <td>科学家进行实验来检验假设。 科学家如何在实验过程中保持客观？ (A) 科学家分析所有结果。 (B) 科学家采取安全预防措施。 (C) 科学家进行一次实验。 (D) 科学家改变至少两个变量。</td>
+        </tr>
+        <tr>
+            <td>In studying layers of rock sediment, a geologist found an area where older rock was layered on top of younger rock. Which best explains how this occurred? (A) Earthquake activity folded the rock layers...</td>
+            <td>在研究岩石沉积层时，一位地质学家发现了一个区域，较旧的岩石层叠在较年轻的岩石之上。 哪个最能解释这是如何发生的？ (A) 地震活动使岩层折叠…</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3 id="commonsenseqa">CommonsenseQA<a class="headerlink" href="#commonsenseqa" title="Permanent link">#</a></h3>
+<blockquote>
+<p>论文链接: <a href="https://arxiv.org/pdf/1811.00937.pdf">https://arxiv.org/pdf/1811.00937.pdf</a></p>
+<p>Talmor et al., 2018</p>
+</blockquote>
+<p>总共 12247 个常识问答数据。该数据集是选择题的形式，每个问题有五个选项。该数据集的特点是：需要知道一些概念的固有属性才能够回答。比如说关于"河流"这个概念，模型可能需要知道"河流里面有水"这个信息才能够回答问题，这个信息并不出现在问题或答案中，需要模型自己知道。</p>
+<p>下面根据下表步骤a和步骤b的截图来说明该数据集的构造方式：</p>
+<ul>
+<li>
+<p>如步骤a的图片所示，在 ConceptNet 中采样一个源概念和三个目标概念，在步骤a的图中，river 是源概念，waterfall、bridge、valley是目标概念。</p>
+</li>
+<li>
+<p>如步骤b的图片所示，众包人员根据一个源概念和一个目标概念编写一条数据，步骤b的图片中就是根据三组概念(river, waterfall)、(river, bridge)、(river, valley)编写的三条数据。</p>
+</li>
+<li>
+<p>众包人员再给每条编写的数据从 ConceptNet 中采样一个概念作为混淆的概念，即步骤b图片中红色单词。</p>
+</li>
+<li>
+<p>最后众包人员再给每条编写的数据自己写一个混淆概念，即步骤b图片中紫色单词。</p>
+</li>
+</ul>
+<table align=center style="width:auto">
+    <thead>
+        <tr>
+            <th>步骤a</th>
+            <th>步骤b</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align="center"><img src="/uyopDSSB/assets/005.png" width=100%/></td>
+            <td align="center"><img src="/uyopDSSB/assets/006.png" width=100%/></td>
+        </tr>
+    </tbody>
+</table>
+
+<h3 id="openbookqa">OpenBookQA<a class="headerlink" href="#openbookqa" title="Permanent link">#</a></h3>
+<blockquote>
+<p>论文链接: <a href="https://arxiv.org/pdf/1809.02789.pdf">https://arxiv.org/pdf/1809.02789.pdf</a></p>
+<p>Mihaylov et al., 2018</p>
+</blockquote>
 <h3 id="boolq">BoolQ<a class="headerlink" href="#boolq" title="Permanent link">#</a></h3>
 <blockquote>
 <p>论文链接: <a href="https://arxiv.org/pdf/1905.10044.pdf">https://arxiv.org/pdf/1905.10044.pdf</a></p>
@@ -228,75 +316,57 @@
     </tbody>
 </table>
 
-<h3 id="piqa">PIQA<a class="headerlink" href="#piqa" title="Permanent link">#</a></h3>
+<h3 id="hellaswag">HellaSwag<a class="headerlink" href="#hellaswag" title="Permanent link">#</a></h3>
 <blockquote>
-<p>论文链接: <a href="https://arxiv.org/pdf/1911.11641.pdf">https://arxiv.org/pdf/1911.11641.pdf</a></p>
-<p>Bisk et al., 2020</p>
+<p>论文链接: <a href="https://arxiv.org/pdf/1905.07830.pdf">https://arxiv.org/pdf/1905.07830.pdf</a></p>
+<p>Zellers et al., 2019</p>
 </blockquote>
-<p>物理常识推理数据集，在该数据集中如果要做出正确判断，需要理解物理概念、物理属性、物理性状、物理材质、以及如何对物体操作等常识信息。下面两个表中是该数据集中的一些例子，第一个表格中的三个例子分别涉及到物体的材质、性状、和用途。第二个表格中的数据则需要理解两种方式哪种更方便实现。</p>
+<p>该数据集是采用 Adversarial Filtering (AF) 筛选出来的模型预测效果较差的一个常识推理数据集，按照论文所说人工判断时能够得到95%的指标。不过就个人感觉这个数据集还挺难的，下面是这个数据集的两个数据样例。比如第一个样例，问题文本为："一个女人带着一个水桶和一只狗在外面。 狗到处乱跑，试图避免洗澡。"，接下来要从四个选项中选取这个人将会如何做，正确的答案是她试图给狗洗澡，把狗弄湿，然后狗不想洗澡，又跑了。</p>
+<p>和之前的常识推理不同的是，之前较简单的常识推理的答案是唯一且固定的，该数据集的答案则变成了最合理的那一个选项。</p>
 <table align=center style="width:100%">
-    <thead>
-        <tr>
-            <th colspan="2">Shape, Material, and Purpose</th>
-        </tr>
-    </thead>
     <tbody style="font-size: 0.8rem">
         <tr>
-            <td>
-            <p><span style="color:orange">[Goal] </span>Make an out door pillow</p>
-            <p><span style="color:blue">[Sol1] </span>Blow into a <span style="color:red">tin can</span> and tie with rubber band - ✗</p>
-            <p><span style="color:blue">[Sol2] </span>Blow into a <span style="color:blue">trash bag</span> and tie with rubber band - ✔</p>
+            <td style="width:50%">
+            <p><b>Question: </b>A woman is outside with a bucket and a dog. The dog is running around trying to avoid a bath. She...</p>
+            <p><b>Answers: </b></p>
+            <ul>
+            <li>A. rinses the bucket off with soap and blow dry the dog’s head.</li>
+            <li>B. uses a hose to keep it from getting soapy.</li>
+            <li>C. gets the dog wet, then it runs away again. - ✔</li>
+            <li>D. gets into a bath tub with the dog.</li>
+            </ul>
             </td>
-            <td>
-            <p><span style="color:orange">[Goal] </span>制作一个户外枕头</p>
-            <p><span style="color:blue">[Sol1] </span>向锡罐中吹气并用橡皮筋扎紧 - ✗</p>
-            <p><span style="color:blue">[Sol2] </span>向垃圾袋吹气并用橡皮筋扎紧 - ✔</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-            <p><span style="color:orange">[Goal] </span>To make a hard shelled taco,</p>
-            <p><span style="color:blue">[Sol1] </span>put seasoned beef, cheese, and lettuce <span style="color:red">onto</span> the hard shell. - ✗</p>
-            <p><span style="color:blue">[Sol2] </span>put seasoned beef, cheese, and lettuce <span style="color:blue">into</span> the hard shell. - ✔</p>
-            </td>
-            <td>
-            <p><span style="color:orange">[Goal] </span>制作硬壳炸玉米饼</p>
-            <p><span style="color:blue">[Sol1] </span>将调味牛肉、奶酪和生菜放在硬壳上。 - ✗</p>
-            <p><span style="color:blue">[Sol2] </span>将调味牛肉、奶酪和生菜放入硬壳中。 - ✔</p>
+            <td style="width:50%">
+            <p><b>Question: </b>一个女人带着一个水桶和一只狗在外面。狗到处乱跑，试图避免洗澡。她...</p>
+            <p><b>Answers: </b></p>
+            <ul>
+            <li>A. 用肥皂冲洗水桶并吹干狗的头。</li>
+            <li>B. 使用软管防止其沾上肥皂。</li>
+            <li>C. 把狗弄湿了，然后它又跑了。 - ✔</li>
+            <li>D. 和狗一起进入浴缸。</li>
+            </ul>
             </td>
         </tr>
         <tr>
             <td>
-            <p><span style="color:orange">[Goal] </span>How do I find something I lost on the carpet?</p>
-            <p><span style="color:blue">[Sol1] </span>Put a <span style="color:red">solid seal</span> on the end of your vacuum and turn it on. - ✗</p>
-            <p><span style="color:blue">[Sol2] </span>Put a <span style="color:blue">hair net</span> on the end of your vacuum and turn it on. - ✔</p>
+            <p><b>Question: </b>Come to a complete halt at a stop sign or red light. At a stop sign, come to a complete halt for about 2 seconds or until vehicles that arrived before you clear the intersection. If you're stopped at a red light, proceed when the light has turned green. ...</p>
+            <p><b>Answers: </b></p>
+            <ul>
+            <li>A. Stop for no more than two seconds, or until the light turns yellow. A red light in front of you indicates that you should stop.</li>
+            <li>B. After you come to a complete stop, turn off your turn signal. Allow vehicles to move in different directions before moving onto the sidewalk.</li>
+            <li>C. Stay out of the oncoming traffic. People coming in from behind may elect to stay left or right.</li>
+            <li> D. If the intersection has a white stripe in your lane, stop before this line. Wait until all traffic has cleared before crossing the intersection. - ✔</li>
+            </ul>
             </td>
             <td>
-            <p><span style="color:orange">[Goal] </span>如何找到丢失在地毯上的东西？</p>
-            <p><span style="color:blue">[Sol1] </span>在真空吸尘器的末端放置一个牢固的密封件并打开它。 - ✗</p>
-            <p><span style="color:blue">[Sol2] </span>在吸尘器末端放一个发网并打开它。 - ✔</p>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<table align=center style="width:100%">
-    <thead>
-        <tr>
-            <th colspan="2">Commonsense Convenience</th>
-        </tr>
-    </thead>
-    <tbody style="font-size: 0.8rem">
-        <tr>
-            <td>
-            <p><span style="color:orange">[Goal] </span>How to make sure all the clocks in the house are set accurately?</p>
-            <p><span style="color:blue">[Sol1] </span>Get a solar clock for a reference and place it just outside a window that gets lots of sun. Use a system of call and response once a month, having one person stationed at the solar clock who yells out the correct time and have another person move to each of the indoor clocks to check if they are showing the right time. Adjust as necessary. - ✗</p>
-            <p><span style="color:blue">[Sol2] </span>Replace all wind-ups with digital clocks. That way, you set them once, and that’s it. Check the batteries once a year or if you notice anything looks a little off. - ✔</p>
-            </td>
-            <td>
-            <p><span style="color:orange">[Goal] </span>如何确保家里所有的时钟都设置准确？</p>
-            <p><span style="color:blue">[Sol1] </span>准备一个太阳能时钟作为参考，并将其放置在阳光充足的窗外。 每月使用一次呼叫和响应系统，让一个人站在太阳钟前喊出正确的时间，并让另一个人走到每个室内时钟前检查它们是否显示正确的时间。 根据需要进行调整。 - ✗</p>
-            <p><span style="color:blue">[Sol2] </span>将所有发条更换为数字时钟。 这样，您只需设置一次即可。 每年检查一次电池，或者如果您发现任何东西看起来有点不对劲。 - ✔</p>
+            <p><b>Question: </b>在停车标志或红灯处完全停车。 在停车标志处，完全停车约 2 秒钟，或者直到车辆到达后您才通过路口。 如果您在红灯处停下来，请在灯变绿时继续行驶。 ...</p>
+            <p><b>Answers: </b></p>
+            <ul>
+            <li>A. 停止时间不超过两秒，或直到指示灯变黄。 您面前的红灯表示您应该停车。</li>
+            <li>B. 完全停下来后，关闭转向灯。 在驶入人行道之前，允许车辆向不同方向行驶。</li>
+            <li>C. 远离迎面驶来的车辆。 从后面进来的人可能会选择留在左边或右边。</li>
+            <li>D. 如果十字路口的车道上有白色条纹，请在此线之前停车。 等到所有交通畅通后再穿过十字路口。 - ✔</li>
+            </ul>
             </td>
         </tr>
     </tbody>
@@ -407,57 +477,75 @@
     </tbody>
 </table>
 
-<h3 id="hellaswag">HellaSwag<a class="headerlink" href="#hellaswag" title="Permanent link">#</a></h3>
+<h3 id="piqa">PIQA<a class="headerlink" href="#piqa" title="Permanent link">#</a></h3>
 <blockquote>
-<p>论文链接: <a href="https://arxiv.org/pdf/1905.07830.pdf">https://arxiv.org/pdf/1905.07830.pdf</a></p>
-<p>Zellers et al., 2019</p>
+<p>论文链接: <a href="https://arxiv.org/pdf/1911.11641.pdf">https://arxiv.org/pdf/1911.11641.pdf</a></p>
+<p>Bisk et al., 2020</p>
 </blockquote>
-<p>该数据集是采用 Adversarial Filtering (AF) 筛选出来的模型预测效果较差的一个常识推理数据集，按照论文所说人工判断时能够得到95%的指标。不过就个人感觉这个数据集还挺难的，下面是这个数据集的两个数据样例。比如第一个样例，问题文本为："一个女人带着一个水桶和一只狗在外面。 狗到处乱跑，试图避免洗澡。"，接下来要从四个选项中选取这个人将会如何做，正确的答案是她试图给狗洗澡，把狗弄湿，然后狗不想洗澡，又跑了。</p>
-<p>和之前的常识推理不同的是，之前较简单的常识推理的答案是唯一且固定的，该数据集的答案则变成了最合理的那一个选项。</p>
+<p>物理常识推理数据集，在该数据集中如果要做出正确判断，需要理解物理概念、物理属性、物理性状、物理材质、以及如何对物体操作等常识信息。下面两个表中是该数据集中的一些例子，第一个表格中的三个例子分别涉及到物体的材质、性状、和用途。第二个表格中的数据则需要理解两种方式哪种更方便实现。</p>
 <table align=center style="width:100%">
+    <thead>
+        <tr>
+            <th colspan="2">Shape, Material, and Purpose</th>
+        </tr>
+    </thead>
     <tbody style="font-size: 0.8rem">
         <tr>
-            <td style="width:50%">
-            <p><b>Question: </b>A woman is outside with a bucket and a dog. The dog is running around trying to avoid a bath. She...</p>
-            <p><b>Answers: </b></p>
-            <ul>
-            <li>A. rinses the bucket off with soap and blow dry the dog’s head.</li>
-            <li>B. uses a hose to keep it from getting soapy.</li>
-            <li>C. gets the dog wet, then it runs away again. - ✔</li>
-            <li>D. gets into a bath tub with the dog.</li>
-            </ul>
+            <td>
+            <p><span style="color:orange">[Goal] </span>Make an out door pillow</p>
+            <p><span style="color:blue">[Sol1] </span>Blow into a <span style="color:red">tin can</span> and tie with rubber band - ✗</p>
+            <p><span style="color:blue">[Sol2] </span>Blow into a <span style="color:blue">trash bag</span> and tie with rubber band - ✔</p>
             </td>
-            <td style="width:50%">
-            <p><b>Question: </b>一个女人带着一个水桶和一只狗在外面。狗到处乱跑，试图避免洗澡。她...</p>
-            <p><b>Answers: </b></p>
-            <ul>
-            <li>A. 用肥皂冲洗水桶并吹干狗的头。</li>
-            <li>B. 使用软管防止其沾上肥皂。</li>
-            <li>C. 把狗弄湿了，然后它又跑了。 - ✔</li>
-            <li>D. 和狗一起进入浴缸。</li>
-            </ul>
+            <td>
+            <p><span style="color:orange">[Goal] </span>制作一个户外枕头</p>
+            <p><span style="color:blue">[Sol1] </span>向锡罐中吹气并用橡皮筋扎紧 - ✗</p>
+            <p><span style="color:blue">[Sol2] </span>向垃圾袋吹气并用橡皮筋扎紧 - ✔</p>
             </td>
         </tr>
         <tr>
             <td>
-            <p><b>Question: </b>Come to a complete halt at a stop sign or red light. At a stop sign, come to a complete halt for about 2 seconds or until vehicles that arrived before you clear the intersection. If you're stopped at a red light, proceed when the light has turned green. ...</p>
-            <p><b>Answers: </b></p>
-            <ul>
-            <li>A. Stop for no more than two seconds, or until the light turns yellow. A red light in front of you indicates that you should stop.</li>
-            <li>B. After you come to a complete stop, turn off your turn signal. Allow vehicles to move in different directions before moving onto the sidewalk.</li>
-            <li>C. Stay out of the oncoming traffic. People coming in from behind may elect to stay left or right.</li>
-            <li> D. If the intersection has a white stripe in your lane, stop before this line. Wait until all traffic has cleared before crossing the intersection. - ✔</li>
-            </ul>
+            <p><span style="color:orange">[Goal] </span>To make a hard shelled taco,</p>
+            <p><span style="color:blue">[Sol1] </span>put seasoned beef, cheese, and lettuce <span style="color:red">onto</span> the hard shell. - ✗</p>
+            <p><span style="color:blue">[Sol2] </span>put seasoned beef, cheese, and lettuce <span style="color:blue">into</span> the hard shell. - ✔</p>
             </td>
             <td>
-            <p><b>Question: </b>在停车标志或红灯处完全停车。 在停车标志处，完全停车约 2 秒钟，或者直到车辆到达后您才通过路口。 如果您在红灯处停下来，请在灯变绿时继续行驶。 ...</p>
-            <p><b>Answers: </b></p>
-            <ul>
-            <li>A. 停止时间不超过两秒，或直到指示灯变黄。 您面前的红灯表示您应该停车。</li>
-            <li>B. 完全停下来后，关闭转向灯。 在驶入人行道之前，允许车辆向不同方向行驶。</li>
-            <li>C. 远离迎面驶来的车辆。 从后面进来的人可能会选择留在左边或右边。</li>
-            <li>D. 如果十字路口的车道上有白色条纹，请在此线之前停车。 等到所有交通畅通后再穿过十字路口。 - ✔</li>
-            </ul>
+            <p><span style="color:orange">[Goal] </span>制作硬壳炸玉米饼</p>
+            <p><span style="color:blue">[Sol1] </span>将调味牛肉、奶酪和生菜放在硬壳上。 - ✗</p>
+            <p><span style="color:blue">[Sol2] </span>将调味牛肉、奶酪和生菜放入硬壳中。 - ✔</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+            <p><span style="color:orange">[Goal] </span>How do I find something I lost on the carpet?</p>
+            <p><span style="color:blue">[Sol1] </span>Put a <span style="color:red">solid seal</span> on the end of your vacuum and turn it on. - ✗</p>
+            <p><span style="color:blue">[Sol2] </span>Put a <span style="color:blue">hair net</span> on the end of your vacuum and turn it on. - ✔</p>
+            </td>
+            <td>
+            <p><span style="color:orange">[Goal] </span>如何找到丢失在地毯上的东西？</p>
+            <p><span style="color:blue">[Sol1] </span>在真空吸尘器的末端放置一个牢固的密封件并打开它。 - ✗</p>
+            <p><span style="color:blue">[Sol2] </span>在吸尘器末端放一个发网并打开它。 - ✔</p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<table align=center style="width:100%">
+    <thead>
+        <tr>
+            <th colspan="2">Commonsense Convenience</th>
+        </tr>
+    </thead>
+    <tbody style="font-size: 0.8rem">
+        <tr>
+            <td>
+            <p><span style="color:orange">[Goal] </span>How to make sure all the clocks in the house are set accurately?</p>
+            <p><span style="color:blue">[Sol1] </span>Get a solar clock for a reference and place it just outside a window that gets lots of sun. Use a system of call and response once a month, having one person stationed at the solar clock who yells out the correct time and have another person move to each of the indoor clocks to check if they are showing the right time. Adjust as necessary. - ✗</p>
+            <p><span style="color:blue">[Sol2] </span>Replace all wind-ups with digital clocks. That way, you set them once, and that’s it. Check the batteries once a year or if you notice anything looks a little off. - ✔</p>
+            </td>
+            <td>
+            <p><span style="color:orange">[Goal] </span>如何确保家里所有的时钟都设置准确？</p>
+            <p><span style="color:blue">[Sol1] </span>准备一个太阳能时钟作为参考，并将其放置在阳光充足的窗外。 每月使用一次呼叫和响应系统，让一个人站在太阳钟前喊出正确的时间，并让另一个人走到每个室内时钟前检查它们是否显示正确的时间。 根据需要进行调整。 - ✗</p>
+            <p><span style="color:blue">[Sol2] </span>将所有发条更换为数字时钟。 这样，您只需设置一次即可。 每年检查一次电池，或者如果您发现任何东西看起来有点不对劲。 - ✔</p>
             </td>
         </tr>
     </tbody>
@@ -527,56 +615,13 @@
     </tbody>
 </table>
 
-<h3 id="arc-easy-and-challenge">ARC easy and challenge<a class="headerlink" href="#arc-easy-and-challenge" title="Permanent link">#</a></h3>
-<blockquote>
-<p>论文链接: <a href="https://arxiv.org/pdf/1803.05457.pdf">https://arxiv.org/pdf/1803.05457.pdf</a></p>
-<p>Clark et al., 2018</p>
-</blockquote>
-<p>该数据集主要是小学科学问题，共计7787个问题。划分为了简单集（ARC Easy）5197个问题，挑战集（ARC Challenge）2590个问题。下面是该数据集的一些样例。</p>
-<table align=center style="width:100%">
-    <tbody style="font-size: 0.8rem">
-        <tr>
-            <td>What is a worldwide increase in temperature called? (A) greenhouse effect (B) global warming (C) ozone depletion (D) solar heating</td>
-            <td>全球气温升高被称为什么？ (A) 温室效应 (B) 全球变暖 (C) 臭氧层破坏 (D) 太阳能加热</td>
-        </tr>
-        <tr>
-            <td>Which element makes up most of the air we breathe? (A) carbon (B) nitrogen (C) oxygen (D) argon</td>
-            <td>我们呼吸的空气主要由哪种元素构成？ (A) 碳 (B) 氮气 (C) 氧气 (D) 氩气</td>
-        </tr>
-        <tr>
-            <td>The crust, the mantle, and the core are structures of Earth. Which description is a feature of Earth’s mantle? (A) contains fossil remains (B) consists of tectonic plates (C) is located at the center of Earth (D) has properties of both liquids and solids</td>
-            <td>地壳、地幔和地核是地球的结构。 下列哪一项描述是地幔的特征？ (A) 包含化石遗迹 (B) 由构造板块组成 (C) 位于地球中心 (D) 具有液体和固体特性</td>
-        </tr>
-        <tr>
-            <td>What is the first step of the process in the formation of sedimentary rocks? (A) erosion (B) deposition (C) compaction (D) cementation</td>
-            <td>沉积岩形成过程的第一步是什么？ (A) 侵蚀 (B) 沉积 (C) 压实 (D) 胶结</td>
-        </tr>
-        <tr>
-            <td>What is the main function of the circulatory system? (1) secrete enzymes (2) digest proteins (3) produce hormones (4) transport materials</td>
-            <td>循环系统的主要功能是什么？ (1) 分泌酶 (2) 消化蛋白质 (3) 产生激素 (4) 运输物质</td>
-        </tr>
-        <tr>
-            <td>If a red flowered plant (RR) is crossed with a white flowered plant (rr), what color will the offspring be? (A) 100% pink (B) 100% red (C) 50% white, 50% red (D) 100% white</td>
-            <td>如果红花植物（RR）与白花植物（rr）杂交，后代会是什么颜色？ (A) 100% 粉色 (B) 100% 红色 (C) 50% 白色，50% 红色 (D) 100% 白色</td>
-        </tr>
-        <tr>
-            <td>Scientists perform experiments to test hypotheses. How do scientists try to remain ob- jective during experiments? (A) Scientists analyze all results. (B) Scientists use safety precautions. (C) Scientists conduct experiments once. (D) Scientists change at least two variables.</td>
-            <td>科学家进行实验来检验假设。 科学家如何在实验过程中保持客观？ (A) 科学家分析所有结果。 (B) 科学家采取安全预防措施。 (C) 科学家进行一次实验。 (D) 科学家改变至少两个变量。</td>
-        </tr>
-        <tr>
-            <td>In studying layers of rock sediment, a geologist found an area where older rock was layered on top of younger rock. Which best explains how this occurred? (A) Earthquake activity folded the rock layers...</td>
-            <td>在研究岩石沉积层时，一位地质学家发现了一个区域，较旧的岩石层叠在较年轻的岩石之上。 哪个最能解释这是如何发生的？ (A) 地震活动使岩层折叠…</td>
-        </tr>
-    </tbody>
-</table>
-
-<h3 id="openbookqa">OpenBookQA<a class="headerlink" href="#openbookqa" title="Permanent link">#</a></h3>
-<blockquote>
-<p>论文链接: <a href="https://arxiv.org/pdf/1809.02789.pdf">https://arxiv.org/pdf/1809.02789.pdf</a></p>
-<p>Mihaylov et al., 2018</p>
-</blockquote>
 <h2 id="_3">二、闭卷问答<a class="headerlink" href="#_3" title="Permanent link">#</a></h2>
 <p>闭卷问答（Closed-book Question Answering）：</p>
+<h3 id="triviaqa">TriviaQA<a class="headerlink" href="#triviaqa" title="Permanent link">#</a></h3>
+<blockquote>
+<p>论文链接: <a href="https://arxiv.org/pdf/1705.03551.pdf">https://arxiv.org/pdf/1705.03551.pdf</a></p>
+<p>Joshi et al., 2017</p>
+</blockquote>
 <h3 id="natural-questions">Natural Questions<a class="headerlink" href="#natural-questions" title="Permanent link">#</a></h3>
 <blockquote>
 <p>论文链接: <a href="https://aclanthology.org/Q19-1026.pdf">https://aclanthology.org/Q19-1026.pdf</a></p>
@@ -591,11 +636,6 @@
     </tbody>
 </table>
 
-<h3 id="triviaqa">TriviaQA<a class="headerlink" href="#triviaqa" title="Permanent link">#</a></h3>
-<blockquote>
-<p>论文链接: <a href="https://arxiv.org/pdf/1705.03551.pdf">https://arxiv.org/pdf/1705.03551.pdf</a></p>
-<p>Joshi et al., 2017</p>
-</blockquote>
 <h2 id="_4">三、阅读理解<a class="headerlink" href="#_4" title="Permanent link">#</a></h2>
 <p>阅读理解（Reading Comprehension）：</p>
 <h3 id="race">RACE<a class="headerlink" href="#race" title="Permanent link">#</a></h3>
@@ -656,20 +696,6 @@
 
 <h2 id="_5">四、数学推理<a class="headerlink" href="#_5" title="Permanent link">#</a></h2>
 <p>数学推理（Mathematical reasoning）：</p>
-<h3 id="math">MATH<a class="headerlink" href="#math" title="Permanent link">#</a></h3>
-<blockquote>
-<p>论文链接: <a href="https://arxiv.org/pdf/2103.03874.pdf">https://arxiv.org/pdf/2103.03874.pdf</a></p>
-<p>Hendrycks et al., 2021</p>
-</blockquote>
-<p>包含12500个竞赛数学题，数据中的答案包含了完整的分步求解步骤，并不只是最终答案。下图是数据的样例，其中数据集里面的公式是使用LATEX书写的，所以该数据集也有一点代码生成的意思。</p>
-<table align=center style="width:50%">
-    <tbody>
-        <tr>
-            <td align="center"><img src="/uyopDSSB/assets/002.png" width=100%/></td>
-        </tr>
-    </tbody>
-</table>
-
 <h3 id="gsm8k">GSM8k<a class="headerlink" href="#gsm8k" title="Permanent link">#</a></h3>
 <blockquote>
 <p>论文链接: <a href="https://arxiv.org/pdf/2110.14168.pdf">https://arxiv.org/pdf/2110.14168.pdf</a></p>
@@ -680,6 +706,20 @@
     <tbody>
         <tr>
             <td align="center"><img src="/uyopDSSB/assets/003.png" width=100%/></td>
+        </tr>
+    </tbody>
+</table>
+
+<h3 id="math">MATH<a class="headerlink" href="#math" title="Permanent link">#</a></h3>
+<blockquote>
+<p>论文链接: <a href="https://arxiv.org/pdf/2103.03874.pdf">https://arxiv.org/pdf/2103.03874.pdf</a></p>
+<p>Hendrycks et al., 2021</p>
+</blockquote>
+<p>包含12500个竞赛数学题，数据中的答案包含了完整的分步求解步骤，并不只是最终答案。下图是数据的样例，其中数据集里面的公式是使用LATEX书写的，所以该数据集也有一点代码生成的意思。</p>
+<table align=center style="width:50%">
+    <tbody>
+        <tr>
+            <td align="center"><img src="/uyopDSSB/assets/002.png" width=100%/></td>
         </tr>
     </tbody>
 </table>
