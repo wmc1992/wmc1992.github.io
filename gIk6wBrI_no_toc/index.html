@@ -133,7 +133,7 @@
 <p>预训练模型与闭源模型的对比效果如下图所示，对比的模型有 GPT-3.5、GPT-4、PaLM、PaLM-2L。</p>
 <div align=center><img src="/gIk6wBrI/assets/11.png" width=70% /></div>
 
-<p>整体来看，相比于开源模型 llama2 有着明显的优势。相比于 OpenAI 和 google 的闭源模型，llama2 基本上是和初代模型（OpenAI的GPT-3.5和google的PaLM）性能持平，而如果和 OpenAI 和 google 的最新版模型相比，llama2 则明显有着性能上的差距。</p>
+<p>整体来看，相比于开源模型，llama2 有着明显的优势。相比于 OpenAI 和 google 的闭源模型，llama2 基本上是和初代模型（OpenAI的GPT-3.5和google的PaLM）性能持平，而如果和 OpenAI 和 google 的最新版模型相比，llama2 则明显有着性能上的差距。</p>
 <blockquote>
 <p>虽然本文对预训练部分描述的非常少，但这部分的模型能力却非常重要，这也直接决定着后续训练过程中模型能力的上限。</p>
 </blockquote>
@@ -213,6 +213,7 @@
     </tbody>
 </table>
 
+<p>经过 SFT 之后的模型的效果的评估，与经过 RLHF 之后模型的评估放在一起说明了，在后文的模型评估部分有描述。</p>
 <h2 id="3reward-model">3、Reward Model<a class="headerlink" href="#3reward-model" title="Permanent link">#</a></h2>
 <p>在之前的研究中已经发现，如果使用单个 reward model，那么其 helpfulness 能力与 safety 能力之间是一个 trade-off 关系，所以本文训练了两个 reward model：Helpfulness RM 和 Safety RM。</p>
 <blockquote>
@@ -239,6 +240,20 @@
 <blockquote>
 <p>关于 reward hacking 问题这篇文章有直观的说明和视频演示: <a href="https://openai.com/research/faulty-reward-functions">Faulty reward functions in the wild</a></p>
 </blockquote>
+<p>本文中使用到的开源 RLHF 数据集以及自己构造的数据集的统计信息如下表所示：</p>
+<div align=center><img src="/gIk6wBrI/assets/03.png" width=80% /></div>
+
+<blockquote>
+<p>各 RLHF 开源数据的链接为：</p>
+<ul>
+<li><a href="https://arxiv.org/pdf/2204.05862.pdf">Anthropic Helpful and Harmless (Bai et al., 2022a)</a></li>
+<li><a href="https://arxiv.org/pdf/2009.01325.pdf">OpenAI Summarize (Stiennon et al., 2020)</a></li>
+<li><a href="https://arxiv.org/pdf/2112.09332.pdf">OpenAI WebGPT (Nakano et al., 2021)</a></li>
+<li><a href="https://huggingface.co/datasets/HuggingFaceH4/stack-exchange-preferences">StackExchange (Lambert et al., 2023)</a></li>
+<li><a href="https://arxiv.org/pdf/2110.08420.pdf">Stanford Human Preferences (Ethayarajh et al., 2022)</a></li>
+<li><a href="https://huggingface.co/datasets/Dahoas/synthetic-instruct-gptj-pairwise">Synthetic GPT-J (Havrilla)</a></li>
+</ul>
+</blockquote>
 <p>最终使用的训练 Helpfulness RM 和 Safety RM 两个模型的训练数据的构成如下所示（这些配比都是拿实验试出来的）：</p>
 <ul>
 <li>
@@ -257,20 +272,6 @@
 </ul>
 </li>
 </ul>
-<p>本文中使用到的开源 RLHF 数据集以及自己构造的数据集的统计信息如下表所示：</p>
-<div align=center><img src="/gIk6wBrI/assets/03.png" width=80% /></div>
-
-<blockquote>
-<p>各 RLHF 开源数据的链接为：</p>
-<ul>
-<li><a href="https://arxiv.org/pdf/2204.05862.pdf">Anthropic Helpful and Harmless (Bai et al., 2022a)</a></li>
-<li><a href="https://arxiv.org/pdf/2009.01325.pdf">OpenAI Summarize (Stiennon et al., 2020)</a></li>
-<li><a href="https://arxiv.org/pdf/2112.09332.pdf">OpenAI WebGPT (Nakano et al., 2021)</a></li>
-<li><a href="https://huggingface.co/datasets/HuggingFaceH4/stack-exchange-preferences">StackExchange (Lambert et al., 2023)</a></li>
-<li><a href="https://arxiv.org/pdf/2110.08420.pdf">Stanford Human Preferences (Ethayarajh et al., 2022)</a></li>
-<li><a href="https://huggingface.co/datasets/Dahoas/synthetic-instruct-gptj-pairwise">Synthetic GPT-J (Havrilla)</a></li>
-</ul>
-</blockquote>
 <h3 id="33-reward-model-loss">3.3 Reward Model Loss<a class="headerlink" href="#33-reward-model-loss" title="Permanent link">#</a></h3>
 <p>在前面的数据构造部分已经说明，本文中训练 reward model 时每次会对两条数据进行人工标注，所以训练时也是两条数据一组计算loss，公式如下所示：</p>
 <div class="arithmatex">
@@ -283,7 +284,7 @@
 <div class="MathJax_Preview">\begin{equation}L_{\text{ranking}} = - \log \Big(\sigma \big(r_{\theta}(x, y_c) - r_{\theta}(x, y_r) - m(r)\big) \Big)\end{equation}</div>
 <script type="math/tex; mode=display">\begin{equation}L_{\text{ranking}} = - \log \Big(\sigma \big(r_{\theta}(x, y_c) - r_{\theta}(x, y_r) - m(r)\big) \Big)\end{equation}</script>
 </div>
-<p>这里的 <span class="arithmatex"><span class="MathJax_Preview">m(r)</span><script type="math/tex">m(r)</script></span> 的取值在本文中采用了两种策略（Margin Small 和 Margin Large）分别进行训练，并分别做实验对比了哪种策略效果更优一些。这两种策略中 <span class="arithmatex"><span class="MathJax_Preview">m(r)</span><script type="math/tex">m(r)</script></span> 的取值如下表：</p>
+<p>这里的 <span class="arithmatex"><span class="MathJax_Preview">m(r)</span><script type="math/tex">m(r)</script></span> 的取值在本文中采用了两种策略（Margin Small 和 Margin Large）分别进行训练，这两种策略中 <span class="arithmatex"><span class="MathJax_Preview">m(r)</span><script type="math/tex">m(r)</script></span> 的取值如下表。至于以下两种策略中哪种策略更好，则是通过实验进行验证。</p>
 <div align=center><img src="/gIk6wBrI/assets/02.png" width=70% /></div>
 
 <blockquote>
@@ -338,7 +339,7 @@
 <h2 id="5multi-turn-consistency">5、Multi-Turn Consistency<a class="headerlink" href="#5multi-turn-consistency" title="Permanent link">#</a></h2>
 <p>待补充 TODO</p>
 <h2 id="6model-eval-results">6、Model Eval Results<a class="headerlink" href="#6model-eval-results" title="Permanent link">#</a></h2>
-<p>模型评估的优点是成本低、速度快，缺点是模型评估的可靠性不能保证；人工评估的优点是准确性高，缺点是成本高、速度慢；本文是两种方法都使用。</p>
+<p>想要对训练出来的 chat model 的性能做评估，目前主流的方法有两种：通过模型进行评估、通过人工进行评估。模型评估的优点是成本低、速度快，缺点是模型评估的可靠性不能保证；人工评估的优点是准确性高，缺点是成本高、速度慢；本文是两种方法都使用。</p>
 <p>在迭代微调阶段中，有多次迭代，并且每次迭代都还有不同的需要消融的策略，考虑成本和速度问题，在这个阶段使用模型评估。对于模型评估筛选出来的最终模型再使用人工评估。</p>
 <h3 id="61">6.1 模型评估<a class="headerlink" href="#61" title="Permanent link">#</a></h3>
 <p>这一部分主要需要考虑如何设计模型评估方式，如何避免模型评估的可靠性不能保证的问题。</p>
