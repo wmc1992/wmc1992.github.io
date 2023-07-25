@@ -64,17 +64,13 @@
 
 <p align="right">[<a href="/gIk6wBrI_no_toc/">隐藏左侧目录栏</a>][<a href="/gIk6wBrI/">显示左侧目录栏</a>]</p>
 
-<h1 id="llama2-open-foundation-and-fine-tuned-chat-models">LLaMA2: Open Foundation and Fine-Tuned Chat Models<a class="headerlink" href="#llama2-open-foundation-and-fine-tuned-chat-models" title="Permanent link">#</a></h1>
+<h1 id="llama2">LLaMA2<a class="headerlink" href="#llama2" title="Permanent link">#</a></h1>
 <blockquote>
 <p>原论文链接: <a href="https://arxiv.org/pdf/2307.09288.pdf">LLaMA2: Open Foundation and Fine-Tuned Chat Models</a></p>
 </blockquote>
 <h2 id="1pretraining">1、Pretraining<a class="headerlink" href="#1pretraining" title="Permanent link">#</a></h2>
-<h3 id="11-pretraining-data">1.1 Pretraining Data<a class="headerlink" href="#11-pretraining-data" title="Permanent link">#</a></h3>
-<ul>
-<li>a new mix of data from publicly available sources</li>
-<li>remove personal information from data</li>
-<li>2 trillion tokens of data</li>
-</ul>
+<h3 id="11">1.1 概述<a class="headerlink" href="#11" title="Permanent link">#</a></h3>
+<p>llama2 相比于 llama1 其训练数据提升了40%，有 7B、13B、34B、70B 四个大小，其中 34B 的没有开放，另外三个都可下载。llama2 总共使用 2T 的 token 进行训练，上下文长度为 4096，是 llama1 的两倍。</p>
 <h3 id="12-training-setup">1.2 Training Setup<a class="headerlink" href="#12-training-setup" title="Permanent link">#</a></h3>
 <p><strong>模型结构</strong></p>
 <p>在标准 transformer 基础上有如下几个模型结构上的变化：</p>
@@ -374,8 +370,8 @@
 <p>上面这个图除了用来对比与 ChatGPT 的效果以外，其还可以分析使用了不同的数据量或者不同的训练策略之后，模型能力的收益。左右两侧的图片虽然绝对分值有着明显的差异，但是模型能力的变化趋势是一致的，也就是说在两种不同的评估方式下模型的能力变化趋势是一致的。因此可以用于研究不同的操作对模型的能力有哪些影响。不过在该图中并不能看出模型哪些细分能力的变化，很期待哪篇文章分析不同的数据、不同的训练策略对模型的基础知识能力、逻辑推理能力、与人类对齐能力、写作能力等能力的影响。</p>
 </blockquote>
 <h3 id="62">6.2 人工评估<a class="headerlink" href="#62" title="Permanent link">#</a></h3>
-<p>对比对象有开源的 MPT、Falcon、Vicuna，闭源的 PaLM、ChatGPT。其中 PaLM 选用的版本为 chat-bison-001，ChatGPT 选用的版本为 gpt-3.5-turbo-0301。比较结果如下图所示，基本上同尺寸模型对比的效果还是很不错的，不过为什么没有和 claude 和 GPT-4 的对比结果。</p>
-<div align=center><img src="/gIk6wBrI/assets/09.png" width=100% /></div>
+<p>对比对象有开源的 MPT、Falcon、Vicuna，闭源的 PaLM、ChatGPT。其中 PaLM 选用的版本为 chat-bison-001，ChatGPT 选用的版本为 gpt-3.5-turbo-0301。比较结果如下图所示，基本上同尺寸模型对比的效果还是很不错的。不过为什么没有和 claude 和 GPT-4 的对比结果。</p>
+<div align=center><img src="/gIk6wBrI/assets/09.png" width=90% /></div>
 
 <p>人工评估除了成本高、速度慢以外，还存在 Inter-Rater Reliability (IRR) 问题。为了验证该问题的影响，本文对每个 prompt 让三个不同的标注人员进行标注，然后使用方法 "Gwet’s AC1/2 statistic" 衡量 IRR 问题。【不是很清楚这个方法】最终的评估结果是，两个模型能力越相近时，多个标注人员之间的一致性越低；两个模型能力差别越大，多个标注人员之间的一致性越高。</p>
 <p>本文的人工评估是有着一些局限性与缺陷的：</p>
