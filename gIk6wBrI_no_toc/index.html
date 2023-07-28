@@ -335,7 +335,7 @@
 <div align=center><img src="/gIk6wBrI/assets/06.png" width=90% /></div>
 
 <h2 id="4rlhf">4、RLHF<a class="headerlink" href="#4rlhf" title="Permanent link">#</a></h2>
-<p>训练 RL 和 reward model 的过程是迭代进行的，即标注完一批数据之后，将这批数据加入到之前的数据中，训练新一版的 reward model 和 chat model，然后使用新训练的模型生成新的待标注数据，由人工进行标注。标注完这一批之后再次加入并训练新一版的 reward model 和 chat model，如果迭代训练。</p>
+<p>训练 RL 和 reward model 的过程是迭代进行的，即标注完一批数据之后，将这批数据加入到之前的数据中，训练新一版的 reward model 和 chat model，然后使用新训练的模型生成新的待标注数据，由人工进行标注。标注完这一批之后再次加入并训练新一版的 reward model 和 chat model，如此迭代训练。本文总共迭代了5个版本，使用 RLHFV1～RLHFV5 代表每个版本。</p>
 <p>对于 RL，本文尝试了两种策略：PPO（Proximal Policy Optimization） 和 Rejection Sampling。所谓的 Rejection Sampling 是指对于同一个 prompt 采样出多条 response，使用 reward model 对这多条 response 进行打分，仅选取得分最高的 response，其他的丢弃不用，然后使用得分最高的 response 对 chat model 进行权重的更新。</p>
 <p>这两种 RL 方法在理论上的区别：</p>
 <ul>
@@ -348,7 +348,7 @@
 <p>就本文的实际实验结果来看，这两种策略的最终结果没有太明显的差异，本文最终采用的策略为：在 RLHFV1～RLHFV4 的迭代阶段，仅使用策略 Rejection Sampling，在训练 RLHFV5 时先使用策略 Rejection Sampling，再使用策略 PPO，注意在训练 RLHFV5 时 reward model 是同一个，只是使用不同的策略做了两阶段的训练。</p>
 <p>关于 RL 阶段是迭代进行的这部分，还有一个细节。初始时，仅使用当前已经训练好的最新版本的 chat model 做采样，比如已经有了 RLHFV1 和 RLHFV2，那么此时仅使用 RLHFV2 进行采样。经过分析发现，这种方式会在一定程度上造成模型能力的回归，比如 RLHFV3 在诗歌创作方面的效果比 RLHFV2 要弱一些。所以改为了使用所有的之前阶段的 chat model 做采样。</p>
 <blockquote>
-<p>这里有一个问题，本文作者是如何评判出 RLHFV3 的能力相比于 RLHFV2 出现了回归的？这一块目前还不清晰。</p>
+<p>这里有一个问题，本文作者是如何评判出 RLHFV3 的能力相比于 RLHFV2 出现了回归的？这种对模型的评估也是一个难点。</p>
 </blockquote>
 <h3 id="41-rejection-sampling">4.1 Rejection Sampling<a class="headerlink" href="#41-rejection-sampling" title="Permanent link">#</a></h3>
 <p>下图横坐标表示对于同一个 prompt 采样的 response 的数量，橙色线表示使用 reward model 对多个 response 打分之后的平均分，蓝色线表示使用 reward model 对多个 response 打分之后的最高分。由于策略 Rejection Sampling 是对同一个 prompt 采样多个 response 然后仅使用得分最高的 response 优化 chat model，所以下图中的三角区域部分就是使用策略 Rejection Sampling 的收益。</p>
@@ -422,6 +422,8 @@
 <p><a href="https://www.interconnects.ai/p/llama-2-from-meta">Llama 2: an incredible open LLM</a></p>
 </li>
 </ul>
+<hr />
+<h2 id="-">零散记录-未整理完成部分<a class="headerlink" href="#-" title="Permanent link">#</a></h2>
 <p>70B-chat-model 模型中的参数量如下，关于 GQA 部分，num_attention_heads 为 64，num_key_value_heads 为 8：</p>
 <pre><code>LlamaForCausalLM(
   (model): LlamaModel(
