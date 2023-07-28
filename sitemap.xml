@@ -331,32 +331,32 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://mingchao.wang/006_LLM/001_PromptEngineering-MindsEye/</loc>
+         <loc>https://mingchao.wang/006_LLM/001_PromptEngineering/00_Survey/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://mingchao.wang/006_LLM/001_PromptEngineering-PAL/</loc>
+         <loc>https://mingchao.wang/006_LLM/001_PromptEngineering/01_basic/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://mingchao.wang/006_LLM/001_PromptEngineering-Survey/</loc>
+         <loc>https://mingchao.wang/006_LLM/001_PromptEngineering/02_PAL/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://mingchao.wang/006_LLM/001_PromptEngineering-adversarial/</loc>
+         <loc>https://mingchao.wang/006_LLM/001_PromptEngineering/03_MindsEye/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://mingchao.wang/006_LLM/001_PromptEngineering-applications/</loc>
+         <loc>https://mingchao.wang/006_LLM/001_PromptEngineering/04_adversarial/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://mingchao.wang/006_LLM/001_PromptEngineering-basic/</loc>
+         <loc>https://mingchao.wang/006_LLM/001_PromptEngineering/05_applications/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
