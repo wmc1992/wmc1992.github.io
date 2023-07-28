@@ -99,18 +99,18 @@
 <blockquote>
 <p>在原论文中这部分的符号使用的有点奇怪，在定义原始输入序列时使用的是符号 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> ，但是在后面的推导过程中全部使用的符号 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> ，这里不对其做纠正，只要知道后面的所有的 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 其实就是输入数据 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 即可。</p>
 </blockquote>
-<p>Decoder部分解码的联合概率为，其中 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 表示原始输入序列：</p>
+<p>Decoder部分解码的联合概率为下述公式，其中 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 表示原始输入序列：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}\log p(y|s) = \sum_{j=1}^m \log p(y_j|y_{&lt;j}, s)\end{equation}</div>
 <script type="math/tex; mode=display">\begin{equation}\log p(y|s) = \sum_{j=1}^m \log p(y_j|y_{<j}, s)\end{equation}</script>
 </div>
-<p>每个token的解码概率 <span class="arithmatex"><span class="MathJax_Preview">p(y_j|y_{&lt;j}, s)</span><script type="math/tex">p(y_j|y_{<j}, s)</script></span> 在后面涉及attention部分进行说明；</p>
-<p>隐藏层 <span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span> 的计算公式为，就像在第一部分中所描述的，这里的 <span class="arithmatex"><span class="MathJax_Preview">f(\cdot)</span><script type="math/tex">f(\cdot)</script></span> 对应着哪种模型结构在本文中并不关心，只要其输入为 <span class="arithmatex"><span class="MathJax_Preview">h_{t-1}</span><script type="math/tex">h_{t-1}</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> ，输出为 <span class="arithmatex"><span class="MathJax_Preview">h_t</span><script type="math/tex">h_t</script></span> 即可：</p>
+<p>上述公式中的 <span class="arithmatex"><span class="MathJax_Preview">p(y_j|y_{&lt;j}, s)</span><script type="math/tex">p(y_j|y_{<j}, s)</script></span> 表示每个token的解码概率，在后面涉及 attention 的部分还会进行说明。</p>
+<p>隐藏层 <span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span> 的计算公式为下述公式，就像在第一部分中所描述的，这里的 <span class="arithmatex"><span class="MathJax_Preview">f(\cdot)</span><script type="math/tex">f(\cdot)</script></span> 对应着哪种模型结构在本文中并不关心，只要其输入为 <span class="arithmatex"><span class="MathJax_Preview">h_{t-1}</span><script type="math/tex">h_{t-1}</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> ，输出为 <span class="arithmatex"><span class="MathJax_Preview">h_t</span><script type="math/tex">h_t</script></span> 即可：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}h_j = f(h_{j-1}, s)\end{equation}</div>
 <script type="math/tex; mode=display">\begin{equation}h_j = f(h_{j-1}, s)\end{equation}</script>
 </div>
-<p>目标函数，其中 <span class="arithmatex"><span class="MathJax_Preview">D</span><script type="math/tex">D</script></span> 表示训练数据集：</p>
+<p>目标函数为下述公式，其中 <span class="arithmatex"><span class="MathJax_Preview">D</span><script type="math/tex">D</script></span> 表示训练数据集：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}J_t = \sum_{(x,y) \in D} - \log p(y|x)\end{equation}</div>
 <script type="math/tex; mode=display">\begin{equation}J_t = \sum_{(x,y) \in D} - \log p(y|x)\end{equation}</script>
@@ -142,8 +142,8 @@
 </table>
 <p>每个token的解码概率：</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}p(y_j|y_{&lt;j},s) = \text{softmax}(W_s \cdot \tilde{h}_t)\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}p(y_j|y_{<j},s) = \text{softmax}(W_s \cdot \tilde{h}_t)\end{equation}</script>
+<div class="MathJax_Preview">\begin{equation}p(y_t|y_{&lt;t},s) = \text{softmax}(W_s \cdot \tilde{h}_t)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}p(y_t|y_{<t},s) = \text{softmax}(W_s \cdot \tilde{h}_t)\end{equation}</script>
 </div>
 <p>其中 <span class="arithmatex"><span class="MathJax_Preview">\tilde{h}_t</span><script type="math/tex">\tilde{h}_t</script></span> 表示Decoder中对每个token输出的logits，公式如下，在该公式中 <span class="arithmatex"><span class="MathJax_Preview">[c_t;h_t]</span><script type="math/tex">[c_t;h_t]</script></span> 表示concat操作：</p>
 <div class="arithmatex">
@@ -155,7 +155,7 @@
 <div class="MathJax_Preview">\begin{equation}c_t = \sum_{l = 1}^L a_t^{(l)} \bar{h}_s^{(l)}\end{equation}</div>
 <script type="math/tex; mode=display">\begin{equation}c_t = \sum_{l = 1}^L a_t^{(l)} \bar{h}_s^{(l)}\end{equation}</script>
 </div>
-<p>在该公式中，<span class="arithmatex"><span class="MathJax_Preview">L</span><script type="math/tex">L</script></span> 表示原始输入序列的长度。<span class="arithmatex"><span class="MathJax_Preview">a_t^{(l)}</span><script type="math/tex">a_t^{(l)}</script></span> 表示在预测第 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 个token时，原始输入序列中第 <span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 个token的权重。<span class="arithmatex"><span class="MathJax_Preview">\bar{h}_s^{(l)}</span><script type="math/tex">\bar{h}_s^{(l)}</script></span> 表示原始输入序列第 <span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 个token对应的隐层输出。注意这里的 <span class="arithmatex"><span class="MathJax_Preview">a_t^{(l)}</span><script type="math/tex">a_t^{(l)}</script></span> 是一个标量，而 <span class="arithmatex"><span class="MathJax_Preview">\bar{h}_s^{(l)}</span><script type="math/tex">\bar{h}_s^{(l)}</script></span> 是一个向量，该公式的含义就是按照权重 <span class="arithmatex"><span class="MathJax_Preview">a_t^{(l)}</span><script type="math/tex">a_t^{(l)}</script></span> 对原始输入序列中每个token的隐向量进行加权求和得到一个新的向量 <span class="arithmatex"><span class="MathJax_Preview">c_t</span><script type="math/tex">c_t</script></span>。</p>
+<p>在该公式中，<span class="arithmatex"><span class="MathJax_Preview">L</span><script type="math/tex">L</script></span> 表示原始输入序列的长度。<span class="arithmatex"><span class="MathJax_Preview">a_t^{(l)}</span><script type="math/tex">a_t^{(l)}</script></span> 表示在预测第 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 个token时，原始输入序列中第 <span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 个token的权重，这里的 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 就是 attention 的首字母，所以 <span class="arithmatex"><span class="MathJax_Preview">a_t^{(l)}</span><script type="math/tex">a_t^{(l)}</script></span> 就是注意力权重。<span class="arithmatex"><span class="MathJax_Preview">\bar{h}_s^{(l)}</span><script type="math/tex">\bar{h}_s^{(l)}</script></span> 表示原始输入序列第 <span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 个token对应的隐层输出。注意这里的 <span class="arithmatex"><span class="MathJax_Preview">a_t^{(l)}</span><script type="math/tex">a_t^{(l)}</script></span> 是一个标量，而 <span class="arithmatex"><span class="MathJax_Preview">\bar{h}_s^{(l)}</span><script type="math/tex">\bar{h}_s^{(l)}</script></span> 是一个向量，该公式的含义就是按照权重 <span class="arithmatex"><span class="MathJax_Preview">a_t^{(l)}</span><script type="math/tex">a_t^{(l)}</script></span> 对原始输入序列中每个token的隐向量进行加权求和得到一个新的向量 <span class="arithmatex"><span class="MathJax_Preview">c_t</span><script type="math/tex">c_t</script></span>。</p>
 <p>在预测第 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 个token时的权重 <span class="arithmatex"><span class="MathJax_Preview">a_t</span><script type="math/tex">a_t</script></span> 的计算公式为，该公式其实就是在对原始输入序列中每个token的得分做softmax：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}a_t^{(l)} = \frac{\exp (\text{score}(h_t, \bar{h}_s^{(l)}))}{\sum_{l'=1}^L \exp (\text{score} (h_t, \bar{h}_s^{(l')}))} = \text{softmax}(\text{score}(h_t, \bar{h}_s))\end{equation}</div>

@@ -499,7 +499,35 @@
 <li>
 <p><a href="https://www.interconnects.ai/p/llama-2-from-meta">Llama 2: an incredible open LLM</a></p>
 </li>
-</ul></div>
+</ul>
+<p>70B-chat-model 模型中的参数量如下，关于 GQA 部分，num_attention_heads 为 64，num_key_value_heads 为 8：</p>
+<pre><code>LlamaForCausalLM(
+  (model): LlamaModel(
+    (embed_tokens): Embedding(32000, 8192, padding_idx=0)
+    (layers): ModuleList(
+      (0-79): 80 x LlamaDecoderLayer(
+        (input_layernorm): LlamaRMSNorm()
+        (self_attn): LlamaAttention(
+          (q_proj): Linear8bitLt(in_features=8192, out_features=8192, bias=False)
+          (k_proj): Linear8bitLt(in_features=8192, out_features=1024, bias=False)
+          (v_proj): Linear8bitLt(in_features=8192, out_features=1024, bias=False)
+          (o_proj): Linear8bitLt(in_features=8192, out_features=8192, bias=False)
+          (rotary_emb): LlamaRotaryEmbedding()
+        )
+        (post_attention_layernorm): LlamaRMSNorm()
+        (mlp): LlamaMLP(
+          (gate_proj): Linear8bitLt(in_features=8192, out_features=28672, bias=False)
+          (up_proj): Linear8bitLt(in_features=8192, out_features=28672, bias=False)
+          (down_proj): Linear8bitLt(in_features=28672, out_features=8192, bias=False)
+          (act_fn): SiLUActivation()
+        )
+      )
+    )
+    (norm): LlamaRMSNorm()
+  )
+  (lm_head): Linear(in_features=8192, out_features=32000, bias=False)
+)
+</code></pre></div>
             </div>
         </div>
 

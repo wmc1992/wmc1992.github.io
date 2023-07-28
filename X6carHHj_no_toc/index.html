@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/015_%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84/02_QKV%E5%90%91%E9%87%8F%E5%90%84%E8%87%AA%E7%9A%84%E4%BD%9C%E7%94%A8/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/X6carHHj_no_toc/">隐藏左侧目录栏</a>][<a href="/X6carHHj/">显示左侧目录栏</a>]</p>
+
+<h1 id="self-attention-qkv">分析 self-attention 中 QKV 三个向量各自的作用<a class="headerlink" href="#self-attention-qkv" title="Permanent link">#</a></h1>
+<p>首先 self-attention 的公式如下所示，这个都知道，但是 QKV 这三部分各自的作用一直不清晰，本文是对 QKV 各自具体的作用做一下分析。</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\text{Attention} = \text{softmax}(\frac{Q K^T}{\sqrt{d}}) \cdot V\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\text{Attention} = \text{softmax}(\frac{Q K^T}{\sqrt{d}}) \cdot V\end{equation}</script>
+</div>
+<h2 id="1">1、使用公式分析<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>为了后文的描述，先说明概念并定义符号。</p>
+<p>在 attention 中，key 序列与 value 序列必然是同一个序列，而 query 序列却不一定与 key/value 序列是同一个序列。后文在描述时使用 "query序列" 和 "key/value序列" 这两种说法指代这两个序列。将 query 序列的长度定义为 <span class="arithmatex"><span class="MathJax_Preview">L</span><script type="math/tex">L</script></span>，将 key/value 序列的长度定义为 <span class="arithmatex"><span class="MathJax_Preview">L'</span><script type="math/tex">L'</script></span>，则 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span>、<span class="arithmatex"><span class="MathJax_Preview">K</span><script type="math/tex">K</script></span>、<span class="arithmatex"><span class="MathJax_Preview">V</span><script type="math/tex">V</script></span> 这三个矩阵的维度为：<span class="arithmatex"><span class="MathJax_Preview">(L, d)</span><script type="math/tex">(L, d)</script></span>, <span class="arithmatex"><span class="MathJax_Preview">(L', d)</span><script type="math/tex">(L', d)</script></span>, <span class="arithmatex"><span class="MathJax_Preview">(L', d)</span><script type="math/tex">(L', d)</script></span>，其中 <span class="arithmatex"><span class="MathJax_Preview">d</span><script type="math/tex">d</script></span> 是每个 token 对应的向量的维度。</p>
+<h3 id="11">1.1 计算注意力权重矩阵<a class="headerlink" href="#11" title="Permanent link">#</a></h3>
+<p>把矩阵 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">K</span><script type="math/tex">K</script></span> 中的每一行写成向量的形式，为：<span class="arithmatex"><span class="MathJax_Preview">Q = \begin{bmatrix}
+   \vec{q_1} \\
+   \vec{q_2} \\
+   \vdots \\
+   \vec{q_l} \\
+   \vdots \\
+   \vec{q_L}
+\end{bmatrix}</span><script type="math/tex">Q = \begin{bmatrix}
+   \vec{q_1} \\
+   \vec{q_2} \\
+   \vdots \\
+   \vec{q_l} \\
+   \vdots \\
+   \vec{q_L}
+\end{bmatrix}</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">K = \begin{bmatrix}
+   \vec{k_1} \\
+   \vec{k_2} \\
+   \vdots \\
+   \vec{k_{l'}} \\
+   \vdots \\
+   \vec{k_{L'}}
+\end{bmatrix}</span><script type="math/tex">K = \begin{bmatrix}
+   \vec{k_1} \\
+   \vec{k_2} \\
+   \vdots \\
+   \vec{k_{l'}} \\
+   \vdots \\
+   \vec{k_{L'}}
+\end{bmatrix}</script></span>，其中所有的元素 <span class="arithmatex"><span class="MathJax_Preview">\vec{q_l}</span><script type="math/tex">\vec{q_l}</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">\vec{k_{l'}}</span><script type="math/tex">\vec{k_{l'}}</script></span> 都是维度为 <span class="arithmatex"><span class="MathJax_Preview">d</span><script type="math/tex">d</script></span> 的向量。将这两个矩阵相乘得到：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+\frac{1}{\sqrt{d}} \cdot Q \cdot K^T  &amp;= \frac{1}{\sqrt{d}} \cdot \begin{bmatrix}
+   \vec{q_1} \\
+   \vec{q_2} \\
+   \vdots \\
+   \vec{q_l} \\
+   \vdots \\
+   \vec{q_L}
+\end{bmatrix} \cdot [\vec{k_1^T}, \vec{k_2^T}, ..., \vec{k_{l'}^T}, ..., \vec{k_{L'}^T}] \\
+&amp;= \frac{1}{\sqrt{d}} \cdot \begin{bmatrix}
+   \vec{q_1}\vec{k_1^T} &amp; \vec{q_1}\vec{k_2^T} &amp; ... &amp; \vec{q_1}\vec{k_{l'}^T} &amp; ... &amp; \vec{q_1}\vec{k_{L'}^T} \\
+   \vec{q_2}\vec{k_1^T} &amp; \vec{q_2}\vec{k_2^T} &amp; ... &amp; \vec{q_2}\vec{k_{l'}^T} &amp; ... &amp; \vec{q_2}\vec{k_{L'}^T} \\
+   &amp; &amp; \vdots \\
+   \vec{q_l}\vec{k_1^T} &amp; \vec{q_l}\vec{k_2^T} &amp; ... &amp; \vec{q_l}\vec{k_{l'}^T} &amp; ... &amp; \vec{q_l}\vec{k_{L'}^T} \\
+   &amp; &amp; \vdots \\
+   \vec{q_L}\vec{k_1^T} &amp; \vec{q_L}\vec{k_2^T} &amp; ... &amp; \vec{q_L}\vec{k_{l'}^T} &amp; ... &amp; \vec{q_L}\vec{k_{L'}^T}
+\end{bmatrix}
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+\frac{1}{\sqrt{d}} \cdot Q \cdot K^T  &= \frac{1}{\sqrt{d}} \cdot \begin{bmatrix}
+   \vec{q_1} \\
+   \vec{q_2} \\
+   \vdots \\
+   \vec{q_l} \\
+   \vdots \\
+   \vec{q_L}
+\end{bmatrix} \cdot [\vec{k_1^T}, \vec{k_2^T}, ..., \vec{k_{l'}^T}, ..., \vec{k_{L'}^T}] \\
+&= \frac{1}{\sqrt{d}} \cdot \begin{bmatrix}
+   \vec{q_1}\vec{k_1^T} & \vec{q_1}\vec{k_2^T} & ... & \vec{q_1}\vec{k_{l'}^T} & ... & \vec{q_1}\vec{k_{L'}^T} \\
+   \vec{q_2}\vec{k_1^T} & \vec{q_2}\vec{k_2^T} & ... & \vec{q_2}\vec{k_{l'}^T} & ... & \vec{q_2}\vec{k_{L'}^T} \\
+   & & \vdots \\
+   \vec{q_l}\vec{k_1^T} & \vec{q_l}\vec{k_2^T} & ... & \vec{q_l}\vec{k_{l'}^T} & ... & \vec{q_l}\vec{k_{L'}^T} \\
+   & & \vdots \\
+   \vec{q_L}\vec{k_1^T} & \vec{q_L}\vec{k_2^T} & ... & \vec{q_L}\vec{k_{l'}^T} & ... & \vec{q_L}\vec{k_{L'}^T}
+\end{bmatrix}
+\end{split}\end{equation}</script>
+</div>
+<p>接下来就该对上述矩阵做 <span class="arithmatex"><span class="MathJax_Preview">\text{softmax}(\cdot)</span><script type="math/tex">\text{softmax}(\cdot)</script></span> 操作了，注意是对上述矩阵的每一行做 <span class="arithmatex"><span class="MathJax_Preview">\text{softmax}(\cdot)</span><script type="math/tex">\text{softmax}(\cdot)</script></span>，变形过程如下式，该矩阵就是注意力权重矩阵了：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+\text{att weight matrix} = \text{softmax}(\frac{1}{\sqrt{d}} \cdot Q \cdot K^T) &amp;= \begin{bmatrix}
+   \text{softmax}(\begin{bmatrix}\vec{q_1}\vec{k_1^T} &amp; \vec{q_1}\vec{k_2^T} &amp; ... &amp; \vec{q_1}\vec{k_{l'}^T} &amp; ... &amp; \vec{q_1}\vec{k_{L'}^T}\end{bmatrix}) \\
+   \text{softmax}(\begin{bmatrix}\vec{q_2}\vec{k_1^T} &amp; \vec{q_2}\vec{k_2^T} &amp; ... &amp; \vec{q_2}\vec{k_{l'}^T} &amp; ... &amp; \vec{q_2}\vec{k_{L'}^T}\end{bmatrix}) \\
+   \vdots \\
+   \text{softmax}(\begin{bmatrix}\vec{q_l}\vec{k_1^T} &amp; \vec{q_l}\vec{k_2^T} &amp; ... &amp; \vec{q_l}\vec{k_{l'}^T} &amp; ... &amp; \vec{q_l}\vec{k_{L'}^T}\end{bmatrix}) \\
+   \vdots \\
+   \text{softmax}(\begin{bmatrix}\vec{q_L}\vec{k_1^T} &amp; \vec{q_L}\vec{k_2^T} &amp; ... &amp; \vec{q_L}\vec{k_{l'}^T} &amp; ... &amp; \vec{q_L}\vec{k_{L'}^T}\end{bmatrix}) \\
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+   a_{11} &amp; a_{12} &amp; ... &amp; a_{1l'} &amp; ... &amp; a_{1L'} \\
+   a_{21} &amp; a_{22} &amp; ... &amp; a_{2l'} &amp; ... &amp; a_{2L'} \\
+   &amp; &amp; \vdots \\
+   a_{l1} &amp; a_{l2} &amp; ... &amp; a_{ll'} &amp; ... &amp; a_{lL'} \\
+   &amp; &amp; \vdots \\
+   a_{L1} &amp; a_{L2} &amp; ... &amp; a_{Ll'} &amp; ... &amp; a_{LL'} \\
+\end{bmatrix}
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+\text{att weight matrix} = \text{softmax}(\frac{1}{\sqrt{d}} \cdot Q \cdot K^T) &= \begin{bmatrix}
+   \text{softmax}(\begin{bmatrix}\vec{q_1}\vec{k_1^T} & \vec{q_1}\vec{k_2^T} & ... & \vec{q_1}\vec{k_{l'}^T} & ... & \vec{q_1}\vec{k_{L'}^T}\end{bmatrix}) \\
+   \text{softmax}(\begin{bmatrix}\vec{q_2}\vec{k_1^T} & \vec{q_2}\vec{k_2^T} & ... & \vec{q_2}\vec{k_{l'}^T} & ... & \vec{q_2}\vec{k_{L'}^T}\end{bmatrix}) \\
+   \vdots \\
+   \text{softmax}(\begin{bmatrix}\vec{q_l}\vec{k_1^T} & \vec{q_l}\vec{k_2^T} & ... & \vec{q_l}\vec{k_{l'}^T} & ... & \vec{q_l}\vec{k_{L'}^T}\end{bmatrix}) \\
+   \vdots \\
+   \text{softmax}(\begin{bmatrix}\vec{q_L}\vec{k_1^T} & \vec{q_L}\vec{k_2^T} & ... & \vec{q_L}\vec{k_{l'}^T} & ... & \vec{q_L}\vec{k_{L'}^T}\end{bmatrix}) \\
+\end{bmatrix} \\
+&= \begin{bmatrix}
+   a_{11} & a_{12} & ... & a_{1l'} & ... & a_{1L'} \\
+   a_{21} & a_{22} & ... & a_{2l'} & ... & a_{2L'} \\
+   & & \vdots \\
+   a_{l1} & a_{l2} & ... & a_{ll'} & ... & a_{lL'} \\
+   & & \vdots \\
+   a_{L1} & a_{L2} & ... & a_{Ll'} & ... & a_{LL'} \\
+\end{bmatrix}
+\end{split}\end{equation}</script>
+</div>
+<p>该矩阵的维度是 <span class="arithmatex"><span class="MathJax_Preview">(L, L')</span><script type="math/tex">(L, L')</script></span>，其中每一行对应的是 query 序列中某个 token 对 key/value 序列中所有 token 的注意力权重。把上述矩阵中的每一行对应的向量用一个符号 <span class="arithmatex"><span class="MathJax_Preview">\vec{a_l}</span><script type="math/tex">\vec{a_l}</script></span> 来表示，那么上述注意力权重矩阵就变为了 <span class="arithmatex"><span class="MathJax_Preview">\begin{bmatrix}
+   \vec{a_1} \\
+   \vec{a_2} \\
+   \vdots \\
+   \vec{a_l} \\
+   \vdots \\
+   \vec{a_L}
+\end{bmatrix}</span><script type="math/tex">\begin{bmatrix}
+   \vec{a_1} \\
+   \vec{a_2} \\
+   \vdots \\
+   \vec{a_l} \\
+   \vdots \\
+   \vec{a_L}
+\end{bmatrix}</script></span>，其中 <span class="arithmatex"><span class="MathJax_Preview">\vec{a_l}</span><script type="math/tex">\vec{a_l}</script></span> 是一个有 <span class="arithmatex"><span class="MathJax_Preview">L'</span><script type="math/tex">L'</script></span> 个元素的向量，该向量是经过softmax之后得到的，即其中的每个值都介于 0～1 之间，且该向量的所有元素之和为1。<span class="arithmatex"><span class="MathJax_Preview">\vec{a_l}</span><script type="math/tex">\vec{a_l}</script></span> 的含义为 query 序列中第 <span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 个 token 对 key/value 序列中所有 token 的注意力权重。</p>
+<h3 id="12-self-attention">1.2 计算 self-attention 最终输出<a class="headerlink" href="#12-self-attention" title="Permanent link">#</a></h3>
+<p>对于矩阵 <span class="arithmatex"><span class="MathJax_Preview">V</span><script type="math/tex">V</script></span>，和矩阵 <span class="arithmatex"><span class="MathJax_Preview">K</span><script type="math/tex">K</script></span> 一样，也是将每一行写成向量的形式，即：<span class="arithmatex"><span class="MathJax_Preview">V = \begin{bmatrix}
+   \vec{v_1} \\
+   \vec{v_2} \\
+   \vdots \\
+   \vec{v_{l'}} \\
+   \vdots \\
+   \vec{v_{L'}}
+\end{bmatrix}</span><script type="math/tex">V = \begin{bmatrix}
+   \vec{v_1} \\
+   \vec{v_2} \\
+   \vdots \\
+   \vec{v_{l'}} \\
+   \vdots \\
+   \vec{v_{L'}}
+\end{bmatrix}</script></span>，接下来就把上述注意力权重矩阵乘上矩阵 <span class="arithmatex"><span class="MathJax_Preview">V</span><script type="math/tex">V</script></span>，得到下式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+\text{att weight matrix} \cdot V &amp;= \begin{bmatrix}
+   a_{11} &amp; a_{12} &amp; ... &amp; a_{1l'} &amp; ... &amp; a_{1L'} \\
+   a_{21} &amp; a_{22} &amp; ... &amp; a_{2l'} &amp; ... &amp; a_{2L'} \\
+   &amp; &amp; \vdots \\
+   a_{l1} &amp; a_{l2} &amp; ... &amp; a_{ll'} &amp; ... &amp; a_{lL'} \\
+   &amp; &amp; \vdots \\
+   a_{L1} &amp; a_{L2} &amp; ... &amp; a_{Ll'} &amp; ... &amp; a_{LL'} \\
+\end{bmatrix} \cdot \begin{bmatrix}
+   \vec{v_1} \\
+   \vec{v_2} \\
+   \vdots \\
+   \vec{v_{l'}} \\
+   \vdots \\
+   \vec{v_{L'}}
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+a_{11}\vec{v_1} + a_{12}\vec{v_2} + ... + a_{1l'}\vec{v_{l'}} + ... + a_{1L'}\vec{v_{L'}} \\
+a_{21}\vec{v_1} + a_{22}\vec{v_2} + ... + a_{2l'}\vec{v_{l'}} + ... + a_{2L'}\vec{v_{L'}} \\
+\vdots \\
+a_{l1}\vec{v_1} + a_{l2}\vec{v_2} + ... + a_{ll'}\vec{v_{l'}} + ... + a_{lL'}\vec{v_{L'}} \\
+\vdots \\
+a_{L1}\vec{v_1} + a_{L2}\vec{v_2} + ... + a_{Ll'}\vec{v_{l'}} + ... + a_{LL'}\vec{v_{L'}}
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+\vec{\text{logits}_1} \\
+\vec{\text{logits}_2} \\
+\vdots \\
+\vec{\text{logits}_l} \\
+\vdots \\
+\vec{\text{logits}_L}
+\end{bmatrix}
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+\text{att weight matrix} \cdot V &= \begin{bmatrix}
+   a_{11} & a_{12} & ... & a_{1l'} & ... & a_{1L'} \\
+   a_{21} & a_{22} & ... & a_{2l'} & ... & a_{2L'} \\
+   & & \vdots \\
+   a_{l1} & a_{l2} & ... & a_{ll'} & ... & a_{lL'} \\
+   & & \vdots \\
+   a_{L1} & a_{L2} & ... & a_{Ll'} & ... & a_{LL'} \\
+\end{bmatrix} \cdot \begin{bmatrix}
+   \vec{v_1} \\
+   \vec{v_2} \\
+   \vdots \\
+   \vec{v_{l'}} \\
+   \vdots \\
+   \vec{v_{L'}}
+\end{bmatrix} \\
+&= \begin{bmatrix}
+a_{11}\vec{v_1} + a_{12}\vec{v_2} + ... + a_{1l'}\vec{v_{l'}} + ... + a_{1L'}\vec{v_{L'}} \\
+a_{21}\vec{v_1} + a_{22}\vec{v_2} + ... + a_{2l'}\vec{v_{l'}} + ... + a_{2L'}\vec{v_{L'}} \\
+\vdots \\
+a_{l1}\vec{v_1} + a_{l2}\vec{v_2} + ... + a_{ll'}\vec{v_{l'}} + ... + a_{lL'}\vec{v_{L'}} \\
+\vdots \\
+a_{L1}\vec{v_1} + a_{L2}\vec{v_2} + ... + a_{Ll'}\vec{v_{l'}} + ... + a_{LL'}\vec{v_{L'}}
+\end{bmatrix} \\
+&= \begin{bmatrix}
+\vec{\text{logits}_1} \\
+\vec{\text{logits}_2} \\
+\vdots \\
+\vec{\text{logits}_l} \\
+\vdots \\
+\vec{\text{logits}_L}
+\end{bmatrix}
+\end{split}\end{equation}</script>
+</div>
+<p>先看上述公式（4）中间那个等号右侧的矩阵，该矩阵总共有 <span class="arithmatex"><span class="MathJax_Preview">L</span><script type="math/tex">L</script></span> 行，对应 <span class="arithmatex"><span class="MathJax_Preview">L</span><script type="math/tex">L</script></span> 个向量，每个向量是 key/value 序列中每个 token 对应的隐向量 <span class="arithmatex"><span class="MathJax_Preview">\vec{v}</span><script type="math/tex">\vec{v}</script></span> 按照注意力权重加权求和得到的。在最开始时就已经定义了 <span class="arithmatex"><span class="MathJax_Preview">L</span><script type="math/tex">L</script></span> 表示的是 query 序列的长度，所以在文本生成任务的背景下，公式（4）计算出的矩阵每行的向量的含义为：在 query 序列中，已知每个 t 时刻的 token，预测下一个 t+1 时刻的 token 时的 logits。也就是说，公式（4）中的 <span class="arithmatex"><span class="MathJax_Preview">\vec{\text{logits}_1}</span><script type="math/tex">\vec{\text{logits}_1}</script></span> 表示给定了 <span class="arithmatex"><span class="MathJax_Preview">t=1</span><script type="math/tex">t=1</script></span> 时刻的 token，预测下一个 <span class="arithmatex"><span class="MathJax_Preview">t=2</span><script type="math/tex">t=2</script></span> 时刻时计算出的 logits；<span class="arithmatex"><span class="MathJax_Preview">\vec{\text{logits}_l}</span><script type="math/tex">\vec{\text{logits}_l}</script></span> 表示给定了 <span class="arithmatex"><span class="MathJax_Preview">t=l</span><script type="math/tex">t=l</script></span> 时刻的 token，预测下一个 <span class="arithmatex"><span class="MathJax_Preview">t=l+1</span><script type="math/tex">t=l+1</script></span> 时刻时计算出的 logits。</p>
+<p>所以可见，常规的 self-attention 的公式会把整个 query 序列中，给定每个 token，预测下一个 token 的所有 logits 都计算出来。对于 clm 任务，这在训练时是没有问题的，因为训练时是希望并行的，一次性把整个序列的 loss 全都计算出来。但是在推理时，我们仅想知道最后一个 token 的下一个 token 是什么，前面的并不想知道，所以除了最后一个 token 对应的 logits 需要计算以外其他的都不需要计算，常规的 self-attention 是有些计算资源的浪费的，不过使用了 KVCache 技术之后这部分浪费基本就被优化掉了。</p>
+<h2 id="2">2、使用代码分析<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>待补充...</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
