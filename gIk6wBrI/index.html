@@ -443,7 +443,32 @@
 </table>
 
 <h3 id="35-reward-model-results">3.5 Reward Model Results<a class="headerlink" href="#35-reward-model-results" title="Permanent link">#</a></h3>
-<p>待补充 TODO</p>
+<p>每次都使用1000条数据作为测试集对 reward model 进行评估。另外 Helpfulness 和 Safety 是两份测试集分别进行评估的，应该是这两份测试集每份都是1000条数据。</p>
+<p>评估时的对比对象如下：</p>
+<ul>
+<li><code>SteamSHP-XL</code>: 以 FLAN-T5-xl 作为基座模型训练的 reward model；</li>
+<li><code>Open Assistant</code>: 以 DeBERTa V3 Large 作为基座模型训练的 reward model；</li>
+<li><code>GPT4</code>: 调用 OpenAI 的 api 使用；</li>
+</ul>
+<p>在做评估时的具体操作为：如果能够拿到模型权重，那么是直接给一条结果预测分值，如果是调用 api，那么一次性传过去两条数据，让接口判断哪条数据更好。</p>
+<blockquote>
+<p>为什么要使用这么两种不同的做法？</p>
+</blockquote>
+<p>评估结果如下图所示，该结果可以看出的结论有：</p>
+<ul>
+<li>本文自己的 reward model 在自己的测试集上效果比其他的模型都要好，这个是应该的；</li>
+<li>GPT-4 在本文的测试集上效果比另外两个模型效果都好，确实厉害</li>
+<li>另外 GPT-4 没有在任何的开源数据集上测试指标，猜测原因是本文作者认为 GPT-4 可能已经在这些数据上训练过了；</li>
+<li>Safety RM 在 Safety 数据集上效果更好一些，Helpfulness RM 在 Helpful 数据集上效果更好一些；这又一次验证了之前的研究，Helpful 与 Safety 这两项能力之间有一个 trade-off 的关系；</li>
+</ul>
+<div align=center><img src="/gIk6wBrI/assets/15.png" width=80% /></div>
+
+<p>上图是在 Helpful 和 Safety 数据集上的整体指标，在 "Data Collection" 小节中已经说过，标注时还会选取两条数据之间的差距，下图就是针对不同的差距的数据的评估结果。可以看出对于那些两个 response 之间差距明显的类别，比如 "significantly better"，那么 reward model 的效果是非常好的。而对于那些两个 response 之间的差距非常小的类别，比如 "negligibly better/unsure"，那么 reward model 的效果是比较差的。</p>
+<blockquote>
+<p>这里每条 prompt 只有两个 response 吧，那么随机选取的话有 50% 的可能性选对，下图中的 "negligibly better/unsure" 的效果仅仅略微高于 50%，这个已经是几乎区分不出来了吧，不确定理解是否正确。</p>
+</blockquote>
+<div align=center><img src="/gIk6wBrI/assets/16.png" width=80% /></div>
+
 <h3 id="36-scaling-trends">3.6 Scaling Trends<a class="headerlink" href="#36-scaling-trends" title="Permanent link">#</a></h3>
 <p>下图是探究"模型尺寸的变化"以及"训练数据量的变化"对 reward model 最终性能的影响，可以看出：模型变大和训练数据量的增多都能够提升 reward model 的性能。另外，从下图的趋势来看继续增加 reward model 的训练数据量，其性能还有一定的提升空间，但是性价比已经比较低了。</p>
 <div align=center><img src="/gIk6wBrI/assets/06.png" width=90% /></div>
