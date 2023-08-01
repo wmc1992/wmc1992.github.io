@@ -224,6 +224,12 @@
 <p>这里所提到的 favoring hallucinations，在 imitation model 中是比较常见的。在技术 imitation model 中，一般来说用于生成指令微调数据的模型是一个具有较多知识的大模型（eg. ChatGPT, GPT4），而使用这些数据进行对齐的模型是一个小模型（eg. LLaMA-7B, ChatGLM-6B）。所以在指令数据集中难免会使用到大模型知道而小模型不知道的知识，小模型在对这部分数据进行学习时由于其没有相应的知识，必然会产生幻觉。</p>
 <p>虽然有研究提出了上述这种问题，但是目前的主流做法依然是用大模型生成指令微调数据集或者RLHF数据集。比如本文中，RLHF 的数据集就是由 70B 的模型生成的。</p>
 </blockquote>
+<p><span></span></p>
+<blockquote>
+<p>在本文的这个位置，这里假设的是 chat model 作为 teacher model，reward model 作为 student model，让 reward model 的大小与 chat model 的大小一致是为了在训练 reward model 时保证其拥有所有 chat model 所已知的知识。</p>
+<p>但是在有了 reward model 之后，使用 RL 策略训练 chat model 时，本文的策略是：所有的 reward model 都是 70B 的 model，对于 7B、13B 的 chat model 都是使用 70B 的 reward model，本文称这个策略为"知识蒸馏"，也是经典的技术。</p>
+<p>个人对这里的疑问主要在于"知识蒸馏"是不是必然会导致偏向幻觉？</p>
+</blockquote>
 <h3 id="31-data-collection">3.1 Data Collection<a class="headerlink" href="#31-data-collection" title="Permanent link">#</a></h3>
 <p>收集人工反馈数据集时使用的是 binary comparison protocol，原因是这种方法能够使收集到的数据具有更好的多样性。</p>
 <blockquote>
