@@ -72,7 +72,7 @@
 <p>PaLM论文链接: <a href="https://arxiv.org/pdf/2204.02311.pdf">https://arxiv.org/pdf/2204.02311.pdf</a></p>
 <p>LLaMA论文链接: <a href="https://arxiv.org/pdf/2302.13971.pdf">https://arxiv.org/pdf/2302.13971.pdf</a></p>
 </blockquote>
-<p>--</p>
+<p><span></span></p>
 <blockquote>
 <p>关于符号的说明：本文对应着两篇论文，一篇是GLU，另一篇是SwiGLU。在下文中描述GLU和SwiGLU时各自使用对应论文中的符号，所以有可能出现符号不一致的问题。</p>
 </blockquote>
@@ -80,7 +80,7 @@
 <blockquote>
 <p>出自2017年的论文 <a href="https://arxiv.org/pdf/1612.08083.pdf">Language Modeling with Gated Convolutional Networks</a></p>
 </blockquote>
-<p>GLU 全称为 Gated Linear Unit，即门控线性单元函数。在原始论文中使用下图来解释该函数，下图是一个完整的网络结构，其中 "Input Sentence"、"Lookup Table" 都是输入层，"Softmax" 是输出层，这两部分都不考虑。接下来主要看的是下图的 "Convolution" 和 "Gating" 这两层，这两层对应的就是 GLU。</p>
+<p>GLU 全称为 Gated Linear Unit，即门控线性单元函数。在原始论文中使用下图1来解释该函数，下图是一个完整的网络结构，其中 "Input Sentence"、"Lookup Table" 都是输入层，"Softmax" 是输出层，这两部分都不考虑。接下来主要看的是下图的 "Convolution" 和 "Gating" 这两层，这两层对应的就是 GLU。</p>
 <p>首先输入向量<span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span>（在下图中使用的符号是<span class="arithmatex"><span class="MathJax_Preview">E</span><script type="math/tex">E</script></span>）经过两个独立的卷积层/MLP层，得到向量<span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span>和向量<span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span>。此时，向量<span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span>和向量<span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span>的公式为：<span class="arithmatex"><span class="MathJax_Preview">A=x \cdot W + b</span><script type="math/tex">A=x \cdot W + b</script></span>，<span class="arithmatex"><span class="MathJax_Preview">B=x \cdot V + c</span><script type="math/tex">B=x \cdot V + c</script></span>。然后向量<span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span>经过一个sigmoid函数之后，<span class="arithmatex"><span class="MathJax_Preview">\sigma(B)</span><script type="math/tex">\sigma(B)</script></span>中的每个元素就都变为了0～1之间的值，就可以起到控制信息是否通过的作用（下图画的是向量<span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span>经过sigmoid函数，这是有点问题的）。</p>
 <p>将向量<span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span>与<span class="arithmatex"><span class="MathJax_Preview">\sigma(B)</span><script type="math/tex">\sigma(B)</script></span>逐个元素相乘之后就得到了GLU层的最终输出结果，把上面描述的整个过程结合起来，GLU的公式如下：</p>
 <div class="arithmatex">
@@ -94,7 +94,18 @@
 \end{split}\end{equation}</script>
 </div>
 <p>在该公式中，<span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 表示输入向量，<span class="arithmatex"><span class="MathJax_Preview">\otimes</span><script type="math/tex">\otimes</script></span> 表示两个向量逐元素相乘，<span class="arithmatex"><span class="MathJax_Preview">\sigma</span><script type="math/tex">\sigma</script></span> 表示sigmoid函数。</p>
-<div align=center><img src="/1fb1JNJ6/assets/01.png" width=50% /></div>
+<table align=center style="width:50%">
+    <thead>
+        <tr>
+            <th>图1</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align="center"><img src="/1fb1JNJ6/assets/01.png" width=100%/></td>
+        </tr>
+    </tbody>
+</table>
 
 <p>公式（1）是原论文中提出的公式形式，当GLU作为激活函数时一般不是上述公式（1）的形式。激活函数 ReLU 的公式为 <span class="arithmatex"><span class="MathJax_Preview">\text{ReLU} = \max(0, x)</span><script type="math/tex">\text{ReLU} = \max(0, x)</script></span>，其含义就是当输入向量 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 的值小于 0 时直接阻断，当时输入向量 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 的值大于 0 值直接通过。参考ReLU激活函数，激活函数GLU的公式为如下公式（2）的形式：</p>
 <div class="arithmatex">
