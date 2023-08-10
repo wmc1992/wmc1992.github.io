@@ -6,17 +6,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/004_GPT%E4%B8%8EBERT/007_GPT/%E7%94%9F%E6%88%90%E5%BC%8F%E4%BB%BB%E5%8A%A1%E8%A7%A3%E7%A0%81%E6%96%B9%E6%B3%95/">
-        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <link rel="canonical" href="https://mingchao.wang/004_GPT%E4%B8%8EBERT/008_%E7%94%9F%E6%88%90%E5%BC%8F%E4%BB%BB%E5%8A%A1%E8%A7%A3%E7%A0%81/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
         <title>Index - 算法工程师笔记</title>
-        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
-        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
-        <link href="../../../css/base.css" rel="stylesheet">
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
-        <link href="../../../css/extra.css" rel="stylesheet">
+        <link href="../../css/extra.css" rel="stylesheet">
 
-        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
-        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
@@ -35,7 +35,7 @@
     <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
                 <!-- Expander button -->
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -71,25 +71,33 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link">生成式任务解码方法</a>
+            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link">生成式任务解码</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#_2" class="nav-link">任务说明</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#_3" class="nav-link">暴力搜索（穷举）</a>
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、任务说明</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#_4" class="nav-link">贪心搜索</a>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、暴力搜索（穷举）</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#beam-search" class="nav-link">beam search（集束搜索）</a>
+            <li class="nav-item" data-level="2"><a href="#3greedy-search" class="nav-link">3、Greedy Search</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#4" class="nav-link">4、解码时各种参数的作用</a>
+            <li class="nav-item" data-level="2"><a href="#4beam-search" class="nav-link">4、beam search（集束搜索）</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#5top-k-sampling" class="nav-link">5、Top-K Sampling</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#6top-p-sampling" class="nav-link">6、Top-p Sampling</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#7" class="nav-link">7、解码时各种参数的作用</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -106,15 +114,15 @@
 
 <p align="right">[<a href="/tFQERKmp_no_toc/">隐藏左侧目录栏</a>][<a href="/tFQERKmp/">显示左侧目录栏</a>]</p>
 
-<h1 id="_1">生成式任务解码方法<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
-<h2 id="_2">任务说明<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
+<h1 id="_1">生成式任务解码<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<h2 id="1">1、任务说明<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
 <p>以机器翻译任务为例，假设待翻译的中文是 "我爱中国"，翻译成的英文是 "I love China"。另外为了简化后续的说明，我们假设英文里面总共就三个单词："I"、"love"、"China"。</p>
 <p>生成式任务的理论公式如下：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">p(x_1, ..., x_n) = \prod_{i=1}^n p(x_i|x_1,...,x_{i-1})</div>
 <script type="math/tex; mode=display">p(x_1, ..., x_n) = \prod_{i=1}^n p(x_i|x_1,...,x_{i-1})</script>
 </div>
-<h2 id="_3">暴力搜索（穷举）<a class="headerlink" href="#_3" title="Permanent link">#</a></h2>
+<h2 id="2">2、暴力搜索（穷举）<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
 <p>这个很容易理解，就是把所有可能的序列都列出来，并且计算出每种可能的联合概率，然后选取联合概率最大的那个序列。按照上面英文中总共有三个单词 "I"、"love"、"China" 假设，所有的序列如下所示，总共是 <span class="arithmatex"><span class="MathJax_Preview">3^3 = 27</span><script type="math/tex">3^3 = 27</script></span>：</p>
 <pre><code>I I I
 I I love
@@ -163,10 +171,10 @@ def solution(arr: List[str]):
     backtrace(arr, [])
     return result
 </code></pre>
-<h2 id="_4">贪心搜索<a class="headerlink" href="#_4" title="Permanent link">#</a></h2>
+<h2 id="3greedy-search">3、Greedy Search<a class="headerlink" href="#3greedy-search" title="Permanent link">#</a></h2>
 <p>贪心搜索也好理解，针对当前的位置，模型会预测出一个 logits，对该 logits 进行 softmax 操作之后，就能够得到整个 vocab 中每个字的概率值，直接选取概率值最大的那个字作为当前位置的预测结果。就是说并不考虑整个序列的联合概率，每个位置直接使用生成那个位置的结果时概率最大的那个字。</p>
 <p>使用贪心搜索不能够保证最终得到的序列是最优的，但是速度会非常的快。</p>
-<h2 id="beam-search">beam search（集束搜索）<a class="headerlink" href="#beam-search" title="Permanent link">#</a></h2>
+<h2 id="4beam-search">4、beam search（集束搜索）<a class="headerlink" href="#4beam-search" title="Permanent link">#</a></h2>
 <p>还是以待翻译的中文是 "我爱中国"，翻译成的英文是 "I love China" 为例，举例说明。假设beam search的束宽（beam size）为k=2。</p>
 <ul>
 <li>
@@ -209,11 +217,19 @@ def solution(arr: List[str]):
 </ul>
 <p>所以，对于beam search算法有：</p>
 <p>定义当前时刻为t，定义beam search的束宽（beam size）为k，待翻译的语言类型中总共有n个字。那么可知，在 t-1 时刻，会筛选出 k 种情况；在 t 时刻，会生成 k*n 种情况的概率，然后在这 k*n 个概率中选出概率最大的 k 个作为当前 t 时刻的预测结果。不断重复这个过程，直到最后一个时刻，直接选取 k*n 种情况中概率最大的那个作为结果。</p>
-<h2 id="4">4、解码时各种参数的作用<a class="headerlink" href="#4" title="Permanent link">#</a></h2>
-<p>温度、topk、topp、do_sample</p>
+<h2 id="5top-k-sampling">5、Top-K Sampling<a class="headerlink" href="#5top-k-sampling" title="Permanent link">#</a></h2>
+<h2 id="6top-p-sampling">6、Top-p Sampling<a class="headerlink" href="#6top-p-sampling" title="Permanent link">#</a></h2>
+<h2 id="7">7、解码时各种参数的作用<a class="headerlink" href="#7" title="Permanent link">#</a></h2>
+<p>温度、do_sample</p>
 <p>链接：<a href="https://www.zhihu.com/question/415657741/answer/2430106609">https://www.zhihu.com/question/415657741/answer/2430106609</a></p>
 <h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
 <ul>
+<li>
+<p><a href="https://huggingface.co/blog/how-to-generate">How to generate text: using different decoding methods for language generation with Transformers</a></p>
+<blockquote>
+<p>上面这篇文章有对应的中文版，链接为：<a href="https://huggingface.co/blog/zh/how-to-generate">如何生成文本: 通过 Transformers 用不同的解码方法生成文本</a>，但是这个中文版的公式显示有点问题。</p>
+</blockquote>
+</li>
 <li>
 <p><a href="https://zhuanlan.zhihu.com/p/82829880">https://zhuanlan.zhihu.com/p/82829880</a></p>
 </li>
@@ -230,13 +246,13 @@ def solution(arr: List[str]):
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
         <script>
-            var base_url = "../../..",
+            var base_url = "../..",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="../../../js/base.js" defer></script>
-        <script src="../../../mathjax-config.js" defer></script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
-        <script src="../../../search/main.js" defer></script>
+        <script src="../../search/main.js" defer></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
