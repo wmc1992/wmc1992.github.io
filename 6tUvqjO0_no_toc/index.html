@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/007_RL/05_PolicyGradient/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/6tUvqjO0_no_toc/">隐藏左侧目录栏</a>][<a href="/6tUvqjO0/">显示左侧目录栏</a>]</p>
+
+<h1 id="policy-gradient">Policy Gradient<a class="headerlink" href="#policy-gradient" title="Permanent link">#</a></h1>
+<h2 id="1">1、基于策略的方法<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<h3 id="11-pipi">1.1 策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span><a class="headerlink" href="#11-pipi" title="Permanent link">#</a></h3>
+<p>策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 是一个参数为 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 的神经网络，输入是 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span>，输出是 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>。这里的 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 是 state，一般是向量或者矩阵；这里的 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 是 action，有可能是连续的，也有可能是离散的。如果 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 是连续的那么这就是一个 regression 任务，如果 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 是离散的那么这就是一个 classification 任务。</p>
+<p>如下图所示，以一个玩游戏的任务为例。最左侧是当前游戏的一个画面，即 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span>，将他输入到神经网络中，输出就是三个可以执行的动作的概率，也就是 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>。中间那部分神经网络就是策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span>。</p>
+<div align=center><img src="/6tUvqjO0/assets/01.png" width=70% /></div>
+
+<h3 id="12-trajectory">1.2 Trajectory<a class="headerlink" href="#12-trajectory" title="Permanent link">#</a></h3>
+<p>从开始时刻，到终止状态，称为一个 episode。在一个 episode 中得到的所有的 state 和 action 的序列称为 trajectory，使用符号 <span class="arithmatex"><span class="MathJax_Preview">\tau</span><script type="math/tex">\tau</script></span> 来表示，其公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\tau = \{s_1, a_1, s_2, a_2, ..., s_T, a_T\}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\tau = \{s_1, a_1, s_2, a_2, ..., s_T, a_T\}\end{equation}</script>
+</div>
+<p>当前策略是一个参数为 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 的神经网络，那么从该马尔科夫决策系统中采样出 <span class="arithmatex"><span class="MathJax_Preview">\tau</span><script type="math/tex">\tau</script></span> 的概率为下述公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+p_{\theta}(\tau) &amp;= p(s_1)p_{\theta}(a_1|s_1)p(s_2|s_1,a_1)p_{\theta}(a_2|s_2)p(s_3|s_2,a_2) \cdots \\
+&amp;= p(s_1) \sum_{t=1}^T p_{\theta}(a_t|s_t)p(s_{t+1}|a_t,s_t)
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+p_{\theta}(\tau) &= p(s_1)p_{\theta}(a_1|s_1)p(s_2|s_1,a_1)p_{\theta}(a_2|s_2)p(s_3|s_2,a_2) \cdots \\
+&= p(s_1) \sum_{t=1}^T p_{\theta}(a_t|s_t)p(s_{t+1}|a_t,s_t)
+\end{split}\end{equation}</script>
+</div>
+<h3 id="13">1.3 奖励<a class="headerlink" href="#13" title="Permanent link">#</a></h3>
+<p><span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 表示的是在 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 时刻的 pair 对 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t)</span><script type="math/tex">(s_t, a_t)</script></span> 所获得的奖励。对于 trajectory 中所有 <span class="arithmatex"><span class="MathJax_Preview">(s, a)</span><script type="math/tex">(s, a)</script></span> 的 pair 对的奖励之和用 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 表示，公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}R(\tau)=\sum_{t=1}^Tr_t\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}R(\tau)=\sum_{t=1}^Tr_t\end{equation}</script>
+</div>
+<p>（在《动手强化学习》中，这个称为回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span>）</p>
+<p>这里的 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 指的是一次采样得到的序列 <span class="arithmatex"><span class="MathJax_Preview">\tau</span><script type="math/tex">\tau</script></span> 的奖励，如果将采样过程一直进行下去，再将每个采样的奖励和加权求和，就得到了奖励和的期望，使用符号 <span class="arithmatex"><span class="MathJax_Preview">\bar{R_{\theta}}</span><script type="math/tex">\bar{R_{\theta}}</script></span>，公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\bar{R}_{\theta} = \sum_{\tau}p_{\theta}(\tau) R(\tau) = E_{\tau \backsim p_{\theta}(\tau)}[R(\tau)]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\bar{R}_{\theta} = \sum_{\tau}p_{\theta}(\tau) R(\tau) = E_{\tau \backsim p_{\theta}(\tau)}[R(\tau)]\end{equation}</script>
+</div>
+<p>到这里就可以来梳理一下了，在上面所描述的强化学习中，外部环境是无法改变的，我们要做的是训练一个尽量好的策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 出来，使其能够在给定的环境中获取到尽量高的分数。也就是说我们要更新参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 使得得分 <span class="arithmatex"><span class="MathJax_Preview">\bar{R_{\theta}}</span><script type="math/tex">\bar{R_{\theta}}</script></span> 越高越好。</p>
+<p>所以最终要优化的目标函数就是 <span class="arithmatex"><span class="MathJax_Preview">\bar{R}_{\theta} = \sum_{\tau}p_{\theta}(\tau) R(\tau)</span><script type="math/tex">\bar{R}_{\theta} = \sum_{\tau}p_{\theta}(\tau) R(\tau)</script></span>，希望其越大越好，那么直接使用梯度上升方法就可以了。这里的参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 对应的是策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span>，我们更新参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 其实就是在学习和更新策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span>，所以该方法也称为基于策略的方法，与另外的基于值函数的方法是区分开的。</p>
+<p>接下来按照常规做法就是求出梯度 <span class="arithmatex"><span class="MathJax_Preview">\nabla \bar{R}_{\theta}</span><script type="math/tex">\nabla \bar{R}_{\theta}</script></span>，然后做梯度上升就可以了。但是这里存在的问题是，这个梯度很难计算，所以后续就出现了多种针对这个梯度的计算方法（当然其中有一些算法是近似计算），这些针对梯度的不同的计算方法也就对应着各种基于策略的方法的变体。</p>
+<h2 id="2policy-gradient">2、Policy Gradient<a class="headerlink" href="#2policy-gradient" title="Permanent link">#</a></h2>
+<h3 id="21">2.1 梯度求解<a class="headerlink" href="#21" title="Permanent link">#</a></h3>
+<p>现在已经知道了目标函数为：<span class="arithmatex"><span class="MathJax_Preview">\bar{R}_{\theta} = \sum_{\tau} p_{\theta}(\tau) R(\tau)</span><script type="math/tex">\bar{R}_{\theta} = \sum_{\tau} p_{\theta}(\tau) R(\tau)</script></span>，接下来就是求解梯度 <span class="arithmatex"><span class="MathJax_Preview">\nabla \bar{R}_{\theta}</span><script type="math/tex">\nabla \bar{R}_{\theta}</script></span> 了，推导过程如下，这个推导过程比较繁琐，这里给每一行都添加一个行号，方便后面做说明。</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{align}
+\nabla \bar{R}_{\theta} &amp;= \sum_{\tau} p_{\theta}(\tau) \cdot R(\tau) \\
+&amp;= \sum_{\tau} p_{\theta}(\tau) \cdot \frac{\nabla p_{\theta}(\tau)}{p_{\theta}(\tau)} \cdot R(\tau) \\
+&amp;= \sum_{\tau} p_{\theta}(\tau) \cdot R(\tau) \cdot \nabla \text{log} p_{\theta}(\tau) \\
+&amp;= E_{\tau \backsim p_{\theta}(\tau)} \Big[ R(\tau) \cdot \nabla \text{log} p_{\theta}(\tau) \Big] \\
+&amp;\approx \frac{1}{N} \sum_{n=1}^N R(\tau^n) \cdot \nabla \text{log} p_{\theta}(\tau^n) \\
+&amp;\rightarrow \frac{1}{N} \sum_{n=1}^T \sum_{t=1}^T R(\tau^n) \cdot \nabla \text{log} p_{\theta} (a_t^n|s_t^n) \\
+&amp;= \frac{1}{N} \sum_{t=1}^T R(\tau^n) \sum_{n=1}^T  \nabla \text{log} p_{\theta} (a_t^n|s_t^n)
+\end{align}</div>
+<script type="math/tex; mode=display">\begin{align}
+\nabla \bar{R}_{\theta} &= \sum_{\tau} p_{\theta}(\tau) \cdot R(\tau) \\
+&= \sum_{\tau} p_{\theta}(\tau) \cdot \frac{\nabla p_{\theta}(\tau)}{p_{\theta}(\tau)} \cdot R(\tau) \\
+&= \sum_{\tau} p_{\theta}(\tau) \cdot R(\tau) \cdot \nabla \text{log} p_{\theta}(\tau) \\
+&= E_{\tau \backsim p_{\theta}(\tau)} \Big[ R(\tau) \cdot \nabla \text{log} p_{\theta}(\tau) \Big] \\
+&\approx \frac{1}{N} \sum_{n=1}^N R(\tau^n) \cdot \nabla \text{log} p_{\theta}(\tau^n) \\
+&\rightarrow \frac{1}{N} \sum_{n=1}^T \sum_{t=1}^T R(\tau^n) \cdot \nabla \text{log} p_{\theta} (a_t^n|s_t^n) \\
+&= \frac{1}{N} \sum_{t=1}^T R(\tau^n) \sum_{n=1}^T  \nabla \text{log} p_{\theta} (a_t^n|s_t^n)
+\end{align}</script>
+</div>
+<p>从第6行到第7行是纯数学推导，这里利用了结论 <span class="arithmatex"><span class="MathJax_Preview">\nabla f(x) = f(x) \cdot \nabla \text{log} f(x)</span><script type="math/tex">\nabla f(x) = f(x) \cdot \nabla \text{log} f(x)</script></span>，至于该结论的证明可以查阅其他资料，这里暂时将其作为已知结论来使用。</p>
+<p>从第7行到第8行是完全等价的，只是符号上的区别，遍历所有可能的 <span class="arithmatex"><span class="MathJax_Preview">\tau</span><script type="math/tex">\tau</script></span>，对其进行加权求和 <span class="arithmatex"><span class="MathJax_Preview">\sum_{\tau} p_{\theta}(\tau)</span><script type="math/tex">\sum_{\tau} p_{\theta}(\tau)</script></span> 得到的最终结果就是期望 <span class="arithmatex"><span class="MathJax_Preview">E_{\tau \backsim p_{\theta}(\tau)}</span><script type="math/tex">E_{\tau \backsim p_{\theta}(\tau)}</script></span></p>
+<p>从第7/8行到第9行是一个近似变换。第7/8行中是每个 <span class="arithmatex"><span class="MathJax_Preview">\tau</span><script type="math/tex">\tau</script></span> 使用自己的概率 <span class="arithmatex"><span class="MathJax_Preview">p_{\theta}(\tau)</span><script type="math/tex">p_{\theta}(\tau)</script></span>，由于该概率不好计算，那么就近似将每个 <span class="arithmatex"><span class="MathJax_Preview">\tau</span><script type="math/tex">\tau</script></span> 置为同等概率就是第9行公式：<span class="arithmatex"><span class="MathJax_Preview">\frac{1}{N} \sum_{n=1}^N</span><script type="math/tex">\frac{1}{N} \sum_{n=1}^N</script></span></p>
+<p>从第9行到第10行并不是严格的数学变换，需要结合该问题分析。在前面已经知道 <span class="arithmatex"><span class="MathJax_Preview">p_{\theta}(\tau)</span><script type="math/tex">p_{\theta}(\tau)</script></span> 的公式为 <span class="arithmatex"><span class="MathJax_Preview">p_{\theta}(\tau) = p(s_1) \sum_{t=1}^T p_{\theta}(a_t|s_t)p(s_{t+1}|a_t,s_t)</span><script type="math/tex">p_{\theta}(\tau) = p(s_1) \sum_{t=1}^T p_{\theta}(a_t|s_t)p(s_{t+1}|a_t,s_t)</script></span>。其中初始状态 <span class="arithmatex"><span class="MathJax_Preview">p(s_1)</span><script type="math/tex">p(s_1)</script></span> 与策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 是无关的，不随着策略的改变而改变；其中的 <span class="arithmatex"><span class="MathJax_Preview">p(s_{t+1}|a_t,s_t)</span><script type="math/tex">p(s_{t+1}|a_t,s_t)</script></span> 部分是由环境决定的，也是与策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 无关的。所以在对策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 使用梯度上升方法，求解其梯度时，可以省略掉公式中的这部分。这就是第9行到第10行的变换过程。</p>
+<p>另外，对于最终推导出来的第10行的结果，也可以很直观的理解。其中 <span class="arithmatex"><span class="MathJax_Preview">p_{\theta}(a_t^n|s_t^n)</span><script type="math/tex">p_{\theta}(a_t^n|s_t^n)</script></span> 表示的是将 <span class="arithmatex"><span class="MathJax_Preview">s_t^n</span><script type="math/tex">s_t^n</script></span> 输入给策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 之后采取 <span class="arithmatex"><span class="MathJax_Preview">a_t^n</span><script type="math/tex">a_t^n</script></span> 的概率，其得到的pair对 <span class="arithmatex"><span class="MathJax_Preview">(s_t^n, a_t^n)</span><script type="math/tex">(s_t^n, a_t^n)</script></span> 是属于 <span class="arithmatex"><span class="MathJax_Preview">\tau^n</span><script type="math/tex">\tau^n</script></span> 中的一部分。这个 <span class="arithmatex"><span class="MathJax_Preview">\tau^n</span><script type="math/tex">\tau^n</script></span> 对应的最终得分 <span class="arithmatex"><span class="MathJax_Preview">R(\tau^n)</span><script type="math/tex">R(\tau^n)</script></span> 越高，那么就给予其每个pair对越高的权重。最终对应到梯度上升也就是朝着 <span class="arithmatex"><span class="MathJax_Preview">p_{\theta}(a_t^n|s_t^n)</span><script type="math/tex">p_{\theta}(a_t^n|s_t^n)</script></span> 的方向优化。当然如果 <span class="arithmatex"><span class="MathJax_Preview">R(\tau^n)</span><script type="math/tex">R(\tau^n)</script></span> 是一个负分，那么其每个pair对对应的 <span class="arithmatex"><span class="MathJax_Preview">p_{\theta}(a_t^n|s_t^n)</span><script type="math/tex">p_{\theta}(a_t^n|s_t^n)</script></span> 自然是朝着尽量降低采用这个 action 的方向优化。</p>
+<h3 id="22">2.2 算法过程说明<a class="headerlink" href="#22" title="Permanent link">#</a></h3>
+<p>下述公式就是最终在 policy gradient 中实际使用的求解梯度的公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta}=\frac{1}{N} \sum_{t=1}^T \sum_{n=1}^T R(\tau^n) \cdot \nabla \text{log} p_{\theta} (a_t^n|s_t^n)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta}=\frac{1}{N} \sum_{t=1}^T \sum_{n=1}^T R(\tau^n) \cdot \nabla \text{log} p_{\theta} (a_t^n|s_t^n)\end{equation}</script>
+</div>
+<p>求解出梯度之后，再使用如下公式做梯度上升就可以了：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\theta \leftarrow \theta + \eta \nabla \bar{R}_{\theta}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\theta \leftarrow \theta + \eta \nabla \bar{R}_{\theta}\end{equation}</script>
+</div>
+<p>但是强化学习和有监督学习的具体训练过程有着不少的区别，下面详细说一下强化学习是如何训练的。下图中左侧蓝色框内展示的就是强化学习中数据集是什么样的。这里在理解时最好是将 <span class="arithmatex"><span class="MathJax_Preview">\tau^1</span><script type="math/tex">\tau^1</script></span> 或者 <span class="arithmatex"><span class="MathJax_Preview">\tau^2</span><script type="math/tex">\tau^2</script></span> 当作是一条样本看待，而不是将 <span class="arithmatex"><span class="MathJax_Preview">(s_1^1, a_1^1)</span><script type="math/tex">(s_1^1, a_1^1)</script></span> 当作一条样本看待。</p>
+<p>整体来说，Policy Gradient 就是先使用策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 采样出一批样本 <span class="arithmatex"><span class="MathJax_Preview">\{\tau^1, \tau^2, ..., \tau^N\}</span><script type="math/tex">\{\tau^1, \tau^2, ..., \tau^N\}</script></span>，然后使用这批采样出的样本根据公式（12）计算出梯度，将梯度更新到策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 的参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 上。然后再使用更新后的策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 采样一批样本，再求梯度更新模型参数，一直重复该过程，直到模型效果达到预期。</p>
+<div align=center><img src="/6tUvqjO0/assets/02.png" width=70% /></div>
+
+<p>前文已经说过策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 就是神经网络，如下图所示。那么每个 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t)</span><script type="math/tex">(s_t, a_t)</script></span> 的pair对都是该网络的一个输入输出对，如下图所示，神经网络输入一个 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span>，输出各个 action 的概率。所以公式（12）中的 <span class="arithmatex"><span class="MathJax_Preview">\nabla \text{log} p_{\theta} (a_t^n|s_t^n)</span><script type="math/tex">\nabla \text{log} p_{\theta} (a_t^n|s_t^n)</script></span> 部分的求解就是一个常规的神经网络求梯度的问题，这个如何求解不再赘述。</p>
+<div align=center><img src="/6tUvqjO0/assets/03.png" width=35% /></div>
+
+<p>如果是有监督学习，除了模型输出一个 action，还会有一个人工标注的 action，计算模型输出结果和标签结果之间的 CE 损失然后就可以对参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 做更新了。 在强化学习这里没有人工标注的 action，这里的梯度是使用公式（12）计算出来的。</p>
+<p>公式中的 <span class="arithmatex"><span class="MathJax_Preview">\nabla \text{log} p_{\theta} (a_t^n|s_t^n)</span><script type="math/tex">\nabla \text{log} p_{\theta} (a_t^n|s_t^n)</script></span> 部分已经会计算了，其中的 <span class="arithmatex"><span class="MathJax_Preview">R(\tau^n)</span><script type="math/tex">R(\tau^n)</script></span> 需要注意一下，它是完成一个 episode 之后所有 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 的奖励之和，这里之所以使用所有奖励和的原因是：当前采取了一个 action，虽然在当前步骤没有得到太高的 reward，但是这个 action 可能对之后产生比较重要的正向的影响，使得最后得到了一个比较高的总分。所以这里 <span class="arithmatex"><span class="MathJax_Preview">R(\tau^n)</span><script type="math/tex">R(\tau^n)</script></span> 是玩完一局游戏之后的最终得分。但是这种想法也是有着自己的问题的，一局游戏中并不是每一步的 action 都是正确的，但是在这种计算方式下一局游戏中每一个 action 都是被同等的奖励或惩罚的，后续会有算法对这里进行优化。</p>
+<p>从上述算法过程可以看出，这里采样出 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 条样本之后，只能用于求解一次梯度，然后用该梯度更新参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 一次，之后就需要再重新采样数据。这个效率是非常低的，之后也会有方法针对该问题进行优化。</p>
+<h2 id="3">3、改进方法<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<h3 id="31">3.1 再看梯度<a class="headerlink" href="#31" title="Permanent link">#</a></h3>
+<p>由第 2.1 小节对梯度的求导可知，梯度可以用下述公式表示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T R(\tau^n) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T R(\tau^n) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n)\end{equation}</script>
+</div>
+<p>也可以用下述公式表示</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = E_{\tau \backsim p_{\theta}(\tau)} \Big[ \sum_{t=1}^T R(\tau) \cdot \nabla \text{log} p_{\theta}(a_t|s_t) \Big]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = E_{\tau \backsim p_{\theta}(\tau)} \Big[ \sum_{t=1}^T R(\tau) \cdot \nabla \text{log} p_{\theta}(a_t|s_t) \Big]\end{equation}</script>
+</div>
+<blockquote>
+<p>其中，公式（14）是公式（15）的一个近似，其假设每个 <span class="arithmatex"><span class="MathJax_Preview">\tau</span><script type="math/tex">\tau</script></span> 的概率 <span class="arithmatex"><span class="MathJax_Preview">p_{\theta}(\tau)</span><script type="math/tex">p_{\theta}(\tau)</script></span> 是相同的。后续的分析可能使用公式（14），也可能使用公式（15），哪个方便就使用哪个，不再做细致的区分。</p>
+</blockquote>
+<p>以公式（15）为例，该梯度公式中主要有两部分需要计算，一部分是 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span>，另一部分是 <span class="arithmatex"><span class="MathJax_Preview">\nabla \text{log} p_{\theta}(a_t|s_t)</span><script type="math/tex">\nabla \text{log} p_{\theta}(a_t|s_t)</script></span>。其中 <span class="arithmatex"><span class="MathJax_Preview">\nabla \text{log} p_{\theta}(a_t|s_t)</span><script type="math/tex">\nabla \text{log} p_{\theta}(a_t|s_t)</script></span> 部分在第 2.2 小节已经说明过了，就是一个神经网络求解梯度的过程，比较简单。下面主要分析一下如何计算 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span>。</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 的定义为 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)=\sum_{t=1}^T r_t</span><script type="math/tex">R(\tau)=\sum_{t=1}^T r_t</script></span>，直接求解该值然后代入到梯度公式中用于梯度上升会有很多问题，下面列举几个：</p>
+<ul>
+<li>
+<p>求解成本太高，像 Policy Gradient 方法中，需要先采样 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 个 <span class="arithmatex"><span class="MathJax_Preview">\tau</span><script type="math/tex">\tau</script></span> 之后才能够对梯度做一次更新。</p>
+</li>
+<li>
+<p>在很多场景下 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 可能都是非负的，比如绝大部分游戏得分都是从0开始逐渐累加，不会出现负分数。而优化时一般希望其有正有负，均值为0是最好的。</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 的方差很大。首先 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 就是一个随机变量，每个 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 又是 <span class="arithmatex"><span class="MathJax_Preview">T</span><script type="math/tex">T</script></span> 个 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 的和，累加起来之后 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 的方差就会很大，方差大训练起来自然就会很苦难。</p>
+</li>
+</ul>
+<p>这里只是列举了其中几个问题，实际使用时还会遇到其他的问题。对于所有基于策略的方法，可以看出，Policy Gradient 是直接使用公式（15）计算梯度，然后通过梯度上升做优化。后续的基于策略的方法都是在公式（15）的基础上，对 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 这部分做优化，以解决或缓解其存在的问题。下一小节会介绍几个比较简单的优化方法。</p>
+<h3 id="32">3.2 改进方法<a class="headerlink" href="#32" title="Permanent link">#</a></h3>
+<p><strong>Tip1：添加一个 Baseline</strong></p>
+<p>该改进主要是针对 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 大部分情况下都是正数的问题，公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ \Big( R(\tau^n) - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ \Big( R(\tau^n) - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</script>
+</div>
+<p>这里的 <span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span> 一般取 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 的均值，这样 <span class="arithmatex"><span class="MathJax_Preview">(R(\tau) - b)</span><script type="math/tex">(R(\tau) - b)</script></span> 这部分就是均值为0了，优化起来更容易一些。</p>
+<p>注意：从理论上来说，不减去 <span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span> 只要采样次数足够多，那么最终得到的值就是正确的期望，但是实际操作时很难保证采样足够多的数据。</p>
+<p><strong>Tip2：每个pair对仅使用当前时刻之后的奖励</strong></p>
+<p>该改进主要是考虑在 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 时刻采取的 action 不会对之前的时刻产生影响，只会对之后的时刻产生影响。改进后的公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ \Big( \sum_{t^\prime=t}^T r_{t^\prime}^n - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ \Big( \sum_{t^\prime=t}^T r_{t^\prime}^n - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</script>
+</div>
+<p><strong>Tip3：对未来时刻的奖励做一个衰减</strong></p>
+<p>该改进主要是考虑到，虽然当前时刻采取的 action 会对之后的时刻产生影响，但是肯定是越近的时刻影响越大，越远的时刻影响越小。如果距离非常远的话，影响基本可以忽略不计了。改进后的公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ \Big( \sum_{t^\prime=t}^T \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ \Big( \sum_{t^\prime=t}^T \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">0&lt;\gamma&lt;1</span><script type="math/tex">0<\gamma<1</script></span>。</p>
+<p>从上面的三个小优化可以看出，公式（14）中的 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 被不断的改进，比如改进为 <span class="arithmatex"><span class="MathJax_Preview">\Big( R(\tau^n) - b \Big)</span><script type="math/tex">\Big( R(\tau^n) - b \Big)</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\Big( \sum_{t^\prime=t}^T r_{t^\prime}^n - b \Big)</span><script type="math/tex">\Big( \sum_{t^\prime=t}^T r_{t^\prime}^n - b \Big)</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\Big( \sum_{t^\prime=t}^T \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big)</span><script type="math/tex">\Big( \sum_{t^\prime=t}^T \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big)</script></span>。下面对这部分再定义一个新的符号，使用 <span class="arithmatex"><span class="MathJax_Preview">A^{\theta}(a_t, s_t)</span><script type="math/tex">A^{\theta}(a_t, s_t)</script></span> 来表示，这个被称为 Advantage Function。这样的话梯度公式就变为了：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ A^{\theta}(a_t^n, s_t^n) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ A^{\theta}(a_t^n, s_t^n) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</script>
+</div>
+<p>在之后会看到对 <span class="arithmatex"><span class="MathJax_Preview">A^{\theta}(a_t, s_t)</span><script type="math/tex">A^{\theta}(a_t, s_t)</script></span> 的更复杂的改进，比如使用一个网络来代替。这里来直观的理解一下 <span class="arithmatex"><span class="MathJax_Preview">A^{\theta}(a_t, s_t)</span><script type="math/tex">A^{\theta}(a_t, s_t)</script></span> 所代表的含义。公式中 <span class="arithmatex"><span class="MathJax_Preview">p_{\theta}(a_t^n|s_t^n)</span><script type="math/tex">p_{\theta}(a_t^n|s_t^n)</script></span> 表示的是输入一个状态 <span class="arithmatex"><span class="MathJax_Preview">s_t</span><script type="math/tex">s_t</script></span> 采取行为 <span class="arithmatex"><span class="MathJax_Preview">a_t</span><script type="math/tex">a_t</script></span> 的概率；<span class="arithmatex"><span class="MathJax_Preview">A^{\theta}(a_t, s_t)</span><script type="math/tex">A^{\theta}(a_t, s_t)</script></span> 表示的是输入一个状态 <span class="arithmatex"><span class="MathJax_Preview">s_t</span><script type="math/tex">s_t</script></span> 采取行为 <span class="arithmatex"><span class="MathJax_Preview">a_t</span><script type="math/tex">a_t</script></span> 这个策略是好的，还是不好的。如果该策略是好的，那么 <span class="arithmatex"><span class="MathJax_Preview">A^{\theta}(a_t, s_t)</span><script type="math/tex">A^{\theta}(a_t, s_t)</script></span> 就给一个正向的分数，就朝着增大这个概率的方向优化；如果是不好的，那么 <span class="arithmatex"><span class="MathJax_Preview">A^{\theta}(a_t, s_t)</span><script type="math/tex">A^{\theta}(a_t, s_t)</script></span> 就给一个负向的分数，就朝着减小这个概率的方向优化。</p>
+<h2 id="4on-policy-off-policy">4、On-policy 和 Off-policy<a class="headerlink" href="#4on-policy-off-policy" title="Permanent link">#</a></h2>
+<p>On-policy 的方法指的是："与环境互动收集数据的model" 和 "要更新的策略对应的model" 是同一个 model。</p>
+<p>Off-policy 的方法指的是： "与环境互动收集数据的model" 和 "要更新的策略对应的model" 不是同一个 model。</p>
+<p>上面提到的 Policy-Gradient 是 On-policy 的方法。之后介绍的 PPO 方式是 Off-policy 的方法。</p>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://www.youtube.com/watch?v=z95ZYgPgXOY&amp;list=PLJV_el3uVTsODxQFgzMzPLa16h6B8kWM_&amp;index=1">https://www.youtube.com/watch?v=z95ZYgPgXOY&amp;list=PLJV_el3uVTsODxQFgzMzPLa16h6B8kWM_&amp;index=1</a></p>
+</li>
+<li>
+<p><a href="https://hrl.boyuai.com/chapter/2/actor-critic%E7%AE%97%E6%B3%95">https://hrl.boyuai.com/chapter/2/actor-critic算法</a></p>
+</li>
+<li>
+<p><a href="https://hrl.boyuai.com/chapter/2/%E7%AD%96%E7%95%A5%E6%A2%AF%E5%BA%A6%E7%AE%97%E6%B3%95">https://hrl.boyuai.com/chapter/2/梯度策略优化</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

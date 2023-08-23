@@ -64,16 +64,17 @@
 
 <p align="right">[<a href="/k3WiNHrR_no_toc/">隐藏左侧目录栏</a>][<a href="/k3WiNHrR/">显示左侧目录栏</a>]</p>
 
-<h1 id="_1">前言<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
-<p>HMM（隐马尔科夫模型）的全部描述分为四部分：</p>
+<h1 id="_1">隐马尔可夫模型<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<h2 id="_2">前言<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
+<p>HMM（隐马尔可夫模型）的全部描述分为四部分：</p>
 <ul>
-<li>问题及模型的说明，包括：模型及符号的说明；马尔科夫链的性质说明</li>
+<li>问题及模型的说明，包括：模型及符号的说明；马尔可夫链的性质说明</li>
 <li>前向算法，后向算法，以及给定模型参数后观测序列的概率求解</li>
 <li>模型的学习，主要是无监督学习</li>
 <li>模型的预测，即维特比算法</li>
 </ul>
-<h1 id="_2">一、问题及模型的说明<a class="headerlink" href="#_2" title="Permanent link">#</a></h1>
-<h2 id="11">1.1 模型定义<a class="headerlink" href="#11" title="Permanent link">#</a></h2>
+<h2 id="_3">一、问题及模型的说明<a class="headerlink" href="#_3" title="Permanent link">#</a></h2>
+<h3 id="11">1.1 模型定义<a class="headerlink" href="#11" title="Permanent link">#</a></h3>
 <p>如图1所示：</p>
 <table>
 <thead>
@@ -107,7 +108,7 @@ y &=\{y_0, y_1, y_2, ... ..., y_T\}
 <p><span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span>为状态转移概率矩阵，<span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span>中的元素记为<span class="arithmatex"><span class="MathJax_Preview">a_{q_t q_{t+1}}</span><script type="math/tex">a_{q_t q_{t+1}}</script></span>。注意，矩阵<span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span>的规模为<span class="arithmatex"><span class="MathJax_Preview">N*N</span><script type="math/tex">N*N</script></span>，它与序列长度<span class="arithmatex"><span class="MathJax_Preview">T</span><script type="math/tex">T</script></span>无关。</p>
 <p><span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span>为发射概率矩阵，<span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span>中的元素记为<span class="arithmatex"><span class="MathJax_Preview">b_{q_t y_t}</span><script type="math/tex">b_{q_t y_t}</script></span>，后文为了书写方便，直接记为<span class="arithmatex"><span class="MathJax_Preview">b_{y_t}</span><script type="math/tex">b_{y_t}</script></span>。矩阵<span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span>的规模为<span class="arithmatex"><span class="MathJax_Preview">N*M</span><script type="math/tex">N*M</script></span>，同样与序列长度<span class="arithmatex"><span class="MathJax_Preview">T</span><script type="math/tex">T</script></span>无关。</p>
 <p><span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span>为初始 <span class="arithmatex"><span class="MathJax_Preview">t=0</span><script type="math/tex">t=0</script></span> 时刻状态序列中的节点取值概率。</p>
-<h2 id="12">1.2 马尔科夫链的性质说明<a class="headerlink" href="#12" title="Permanent link">#</a></h2>
+<h3 id="12">1.2 马尔可夫链的性质说明<a class="headerlink" href="#12" title="Permanent link">#</a></h3>
 <p>这里主要是两个基本假设，以及由这两个假设衍生的后面推导时使用到的性质，都列在这里。</p>
 <p><strong>假设一：</strong>齐次马尔可夫性假设（该假设是对状态序列的假设，即认为当前时刻的状态只与前一时刻有关）</p>
 <div class="arithmatex">
@@ -176,8 +177,8 @@ y &=\{y_0, y_1, y_2, ... ..., y_T\}
 </tr>
 </tbody>
 </table>
-<h1 id="_3">二、前向算法，后向算法，以及给定模型参数后观测序列的概率求解<a class="headerlink" href="#_3" title="Permanent link">#</a></h1>
-<h2 id="21">2.1 给定模型参数后观测序列的概率求解<a class="headerlink" href="#21" title="Permanent link">#</a></h2>
+<h2 id="_4">二、前向算法，后向算法，以及给定模型参数后观测序列的概率求解<a class="headerlink" href="#_4" title="Permanent link">#</a></h2>
+<h3 id="21">2.1 给定模型参数后观测序列的概率求解<a class="headerlink" href="#21" title="Permanent link">#</a></h3>
 <p>已知：<span class="arithmatex"><span class="MathJax_Preview">\lambda (\pi、A、B)</span><script type="math/tex">\lambda (\pi、A、B)</script></span>
 待求解：<span class="arithmatex"><span class="MathJax_Preview">p(y)</span><script type="math/tex">p(y)</script></span></p>
 <div class="arithmatex">
@@ -213,8 +214,8 @@ p(y) &= \sum_q p(y, q) \\
 <blockquote>
 <p>在后续所有的公式推导中 <span class="arithmatex"><span class="MathJax_Preview">q_t</span><script type="math/tex">q_t</script></span> 或 <span class="arithmatex"><span class="MathJax_Preview">y_t</span><script type="math/tex">y_t</script></span> 中的 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 表示的是状态序列或观测序列中的某个时刻，每个时刻状态序列中的节点可取值为 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 个，观测序列中的节点可取值为 <span class="arithmatex"><span class="MathJax_Preview">M</span><script type="math/tex">M</script></span> 个。<span class="arithmatex"><span class="MathJax_Preview">\sum_{q_t}</span><script type="math/tex">\sum_{q_t}</script></span>表示的是对 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 时刻所有可能的状态取值进行求和。</p>
 </blockquote>
-<p>该推导过程使用到了<em>马尔科夫链的性质</em>中的<strong>性质一</strong>和<strong>性质二</strong>。</p>
-<h2 id="22">2.2 引出前向算法和后向算法的定义<a class="headerlink" href="#22" title="Permanent link">#</a></h2>
+<p>该推导过程使用到了<em>马尔可夫链的性质</em>中的<strong>性质一</strong>和<strong>性质二</strong>。</p>
+<h3 id="22">2.2 引出前向算法和后向算法的定义<a class="headerlink" href="#22" title="Permanent link">#</a></h3>
 <div class="arithmatex">
 <div class="MathJax_Preview">
 \begin{aligned}
@@ -248,7 +249,7 @@ p(q_t|y) &= \frac{p(y|q_t)p(q_t)}{p(y)} \\
 \end{aligned}
 </script>
 </div>
-<h2 id="23">2.3 前向算法<a class="headerlink" href="#23" title="Permanent link">#</a></h2>
+<h3 id="23">2.3 前向算法<a class="headerlink" href="#23" title="Permanent link">#</a></h3>
 <h4 id="231-alphaq_talphaq_t">2.3.1 <span class="arithmatex"><span class="MathJax_Preview">\alpha(q_t)</span><script type="math/tex">\alpha(q_t)</script></span>的递推公式<a class="headerlink" href="#231-alphaq_talphaq_t" title="Permanent link">#</a></h4>
 <p>由前述推导可知 <span class="arithmatex"><span class="MathJax_Preview">\alpha(q_t) = p(y_0,y_1,...,y_{t-1},y_t,q_t)</span><script type="math/tex">\alpha(q_t) = p(y_0,y_1,...,y_{t-1},y_t,q_t)</script></span>，则有 <span class="arithmatex"><span class="MathJax_Preview">\alpha(q_{t+1}) = p(y_0,y_1,...,y_{t-1},y_t,y_{t+1},q_{t+1})</span><script type="math/tex">\alpha(q_{t+1}) = p(y_0,y_1,...,y_{t-1},y_t,y_{t+1},q_{t+1})</script></span> 对 <span class="arithmatex"><span class="MathJax_Preview">\alpha(q_{t+1})</span><script type="math/tex">\alpha(q_{t+1})</script></span> 进行推导，看能否得出特殊的性质。</p>
 <div class="arithmatex">
@@ -332,7 +333,7 @@ p(y) &= \sum_{q_0}\sum_{q_1} \cdots \sum_{q_T} \pi_0 \prod^{T-1}_{t=0}a_{q_t q_{
 </script>
 </div>
 <p>即 <span class="arithmatex"><span class="MathJax_Preview">p(y)</span><script type="math/tex">p(y)</script></span> 可由 <span class="arithmatex"><span class="MathJax_Preview">\alpha</span><script type="math/tex">\alpha</script></span> 进行求解。</p>
-<h2 id="24">2.4 后向算法<a class="headerlink" href="#24" title="Permanent link">#</a></h2>
+<h3 id="24">2.4 后向算法<a class="headerlink" href="#24" title="Permanent link">#</a></h3>
 <h4 id="241-betaq_tbetaq_t">2.4.1 <span class="arithmatex"><span class="MathJax_Preview">\beta(q_t)</span><script type="math/tex">\beta(q_t)</script></span>的递推公式<a class="headerlink" href="#241-betaq_tbetaq_t" title="Permanent link">#</a></h4>
 <p>由前述推导有 <span class="arithmatex"><span class="MathJax_Preview">\beta(q_t) = p(y_{t+1},y_{t+2},...,y_T|q_t)</span><script type="math/tex">\beta(q_t) = p(y_{t+1},y_{t+2},...,y_T|q_t)</script></span>，则有 <span class="arithmatex"><span class="MathJax_Preview">\beta(q_{t+1}) = p(y_{t+2},y_{t+3},...,y_T|q_{t+1})</span><script type="math/tex">\beta(q_{t+1}) = p(y_{t+2},y_{t+3},...,y_T|q_{t+1})</script></span>，下面对 <span class="arithmatex"><span class="MathJax_Preview">\beta(q_t)</span><script type="math/tex">\beta(q_t)</script></span> 进行推导。</p>
 <div class="arithmatex">
@@ -411,16 +412,16 @@ p(y) &= \sum_{q_0}\sum_{q_1} \cdots \sum_{q_T} \pi_0 \prod^{T-1}_{t=0}a_{q_t q_{
 </script>
 </div>
 <p>即 <span class="arithmatex"><span class="MathJax_Preview">p(y)</span><script type="math/tex">p(y)</script></span> 可以由 <span class="arithmatex"><span class="MathJax_Preview">\beta</span><script type="math/tex">\beta</script></span> 求解。</p>
-<h1 id="_4">四、模型的预测<a class="headerlink" href="#_4" title="Permanent link">#</a></h1>
+<h2 id="_5">四、模型的预测<a class="headerlink" href="#_5" title="Permanent link">#</a></h2>
 <p>在解决模型的预测问题时，已知条件为：<span class="arithmatex"><span class="MathJax_Preview">\lambda (\pi、A、B)</span><script type="math/tex">\lambda (\pi、A、B)</script></span>、<span class="arithmatex"><span class="MathJax_Preview">y</span><script type="math/tex">y</script></span>；要求解的问题是：求解使得联合概率<span class="arithmatex"><span class="MathJax_Preview">p(y)</span><script type="math/tex">p(y)</script></span>最大的状态序列<span class="arithmatex"><span class="MathJax_Preview">q</span><script type="math/tex">q</script></span>。</p>
-<h2 id="41">4.1 近似法<a class="headerlink" href="#41" title="Permanent link">#</a></h2>
+<h3 id="41">4.1 近似法<a class="headerlink" href="#41" title="Permanent link">#</a></h3>
 <p>在引出前向算法和后向算法的定义时，已经求得了<span class="arithmatex"><span class="MathJax_Preview">p(q_t|y)</span><script type="math/tex">p(q_t|y)</script></span>，用该方法求出所有时刻的状态序列取值，作为整个序列的最优解。</p>
 <p>优缺点：</p>
 <ul>
 <li>该方法只是近似，每个时刻的最优解合起来不一定是整个序列的最优解</li>
 <li>但是该方法简单</li>
 </ul>
-<h2 id="42">4.2 维特比算法原理<a class="headerlink" href="#42" title="Permanent link">#</a></h2>
+<h3 id="42">4.2 维特比算法原理<a class="headerlink" href="#42" title="Permanent link">#</a></h3>
 <h4 id="421">4.2.1 动态规划的条件<a class="headerlink" href="#421" title="Permanent link">#</a></h4>
 <ol>
 <li>原问题可以划分为子问题</li>
@@ -438,7 +439,7 @@ p(y) &= \sum_{q_0}\sum_{q_1} \cdots \sum_{q_T} \pi_0 \prod^{T-1}_{t=0}a_{q_t q_{
 <blockquote>
 <p>《统计学习方法》中在反正法时是证明的后面一段即从<span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span>时刻到<span class="arithmatex"><span class="MathJax_Preview">T</span><script type="math/tex">T</script></span>时刻这部分，不知道为何这么证明，因为我觉得维特比算法中的最优子结构是从前向后，即由<span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span>时刻求解<span class="arithmatex"><span class="MathJax_Preview">t+1</span><script type="math/tex">t+1</script></span>时刻，所以应该证明从<span class="arithmatex"><span class="MathJax_Preview">0</span><script type="math/tex">0</script></span>时刻到<span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span>时刻这部分。</p>
 </blockquote>
-<h2 id="43">4.3 维特比算法<a class="headerlink" href="#43" title="Permanent link">#</a></h2>
+<h3 id="43">4.3 维特比算法<a class="headerlink" href="#43" title="Permanent link">#</a></h3>
 <h4 id="431">4.3.1 求解最优路径对应的概率<a class="headerlink" href="#431" title="Permanent link">#</a></h4>
 <p>定义：</p>
 <div class="arithmatex">
@@ -502,12 +503,12 @@ p(y) &= \sum_{q_0}\sum_{q_1} \cdots \sum_{q_T} \pi_0 \prod^{T-1}_{t=0}a_{q_t q_{
 <p>这样就可以从后向前找到每个时刻的最优取值。</p>
 <h4 id="433">4.3.3 算法流程<a class="headerlink" href="#433" title="Permanent link">#</a></h4>
 <p>略</p>
-<h1 id="hmmcrf">五、HMM与CRF比较链接<a class="headerlink" href="#hmmcrf" title="Permanent link">#</a></h1>
-<p>条件随机场（CRF）和隐马尔科夫模型（HMM）最大区别在哪里？CRF的全局最优体现在哪里？ - 知乎用户的回答 - 知乎</p>
+<h2 id="hmmcrf">五、HMM与CRF比较链接<a class="headerlink" href="#hmmcrf" title="Permanent link">#</a></h2>
+<p>条件随机场（CRF）和隐马尔可夫模型（HMM）最大区别在哪里？CRF的全局最优体现在哪里？ - 知乎用户的回答 - 知乎</p>
 <p><a href="https://www.zhihu.com/question/53458773/answer/169987204">https://www.zhihu.com/question/53458773/answer/169987204</a></p>
 <p>标注偏置问题(Label Bias Problem)和HMM、MEMM、CRF模型比较</p>
 <p><a href="https://blog.csdn.net/lskyne/article/details/8669301">https://blog.csdn.net/lskyne/article/details/8669301</a></p>
-<h2 id="_5">后来补充<a class="headerlink" href="#_5" title="Permanent link">#</a></h2>
+<h2 id="_6">后来补充<a class="headerlink" href="#_6" title="Permanent link">#</a></h2>
 <h4 id="hmm">HMM的整体理解<a class="headerlink" href="#hmm" title="Permanent link">#</a></h4>
 <p>q是状态序列
 y是观测序列</p>
