@@ -198,7 +198,33 @@
 </div>
 <p>首先来直观的理解该公式是在做什么，然后证明该公式得到的结果能够满足 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi^\prime}(s) \geqslant V^{\pi}(s)</span><script type="math/tex">V^{\pi^\prime}(s) \geqslant V^{\pi}(s)</script></span>。上述公式中 <span class="arithmatex"><span class="MathJax_Preview">Q^{\pi}(s, a)</span><script type="math/tex">Q^{\pi}(s, a)</script></span> 表示给定状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 时，如果策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 采取了动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 所能获得的价值。<span class="arithmatex"><span class="MathJax_Preview">\text{argmax}_a Q^{\pi}(s, a)</span><script type="math/tex">\text{argmax}_a Q^{\pi}(s, a)</script></span> 则表示给定状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 时，将所有能够采取的动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 逐个求解一遍 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi(s,a)</span><script type="math/tex">Q^\pi(s,a)</script></span> 的值，选出能够使 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi(s,a)</span><script type="math/tex">Q^\pi(s,a)</script></span> 最大的那个动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>。之后再遇到给定状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 时，就采取该动作。这就是策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span>。</p>
 <h3 id="31-dqn">3.1 DQN 有效性的证明<a class="headerlink" href="#31-dqn" title="Permanent link">#</a></h3>
-<p>待补充...</p>
+<p>这里主要是证明使用公式 <span class="arithmatex"><span class="MathJax_Preview">a=\text{argmax}_a Q^\pi(s, a)</span><script type="math/tex">a=\text{argmax}_a Q^\pi(s, a)</script></span> 得到的 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span> 能够满足 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi^\prime}(s) \geqslant V^\pi(s)</span><script type="math/tex">V^{\pi^\prime}(s) \geqslant V^\pi(s)</script></span>。</p>
+<p>首先有如下公式成立：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}V^\pi(s)=Q^\pi(s, \pi(s)) \leqslant \text{max}_a Q^\pi(s,a) = Q^\pi(s, \pi^\prime(s))\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}V^\pi(s)=Q^\pi(s, \pi(s)) \leqslant \text{max}_a Q^\pi(s,a) = Q^\pi(s, \pi^\prime(s))\end{equation}</script>
+</div>
+<p>基于上述公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+V^\pi(s) &amp;\leqslant Q^\pi(s, \pi^\prime(s)) \\
+&amp;= E\Big[ r_t + V^\pi(s_{t+1})|s_t=s,a_t=\pi^\prime(s_t) \Big] \\
+&amp;\leqslant E\Big[r_t + Q^\pi(s_{t+1}, \pi^\prime(s_{t+1}))|s_t=s,a_t=\pi^\prime(s_t) \Big] \\
+&amp;= E\Big[r_t + t_{t+1} + V^\pi(s_{t+2})| \cdots \Big] \\
+&amp;\leqslant E\Big[r_t + t_{t+1} + Q^\pi(s_{t+2}, \pi^\prime(s_{t+2}))| \cdots \Big] \\
+&amp;\cdots \\
+&amp;\leqslant V^{\pi^\prime}(s)
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+V^\pi(s) &\leqslant Q^\pi(s, \pi^\prime(s)) \\
+&= E\Big[ r_t + V^\pi(s_{t+1})|s_t=s,a_t=\pi^\prime(s_t) \Big] \\
+&\leqslant E\Big[r_t + Q^\pi(s_{t+1}, \pi^\prime(s_{t+1}))|s_t=s,a_t=\pi^\prime(s_t) \Big] \\
+&= E\Big[r_t + t_{t+1} + V^\pi(s_{t+2})| \cdots \Big] \\
+&\leqslant E\Big[r_t + t_{t+1} + Q^\pi(s_{t+2}, \pi^\prime(s_{t+2}))| \cdots \Big] \\
+&\cdots \\
+&\leqslant V^{\pi^\prime}(s)
+\end{split}\end{equation}</script>
+</div>
 <h3 id="32-dqn">3.2 DQN 算法过程<a class="headerlink" href="#32-dqn" title="Permanent link">#</a></h3>
 <p>训练过程如下，在该训练的算法中估计动作价值函数使用的是 TD 算法：</p>
 <blockquote>
