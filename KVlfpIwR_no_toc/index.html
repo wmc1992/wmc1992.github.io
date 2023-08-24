@@ -65,6 +65,7 @@
 <p align="right">[<a href="/KVlfpIwR_no_toc/">隐藏左侧目录栏</a>][<a href="/KVlfpIwR/">显示左侧目录栏</a>]</p>
 
 <h1 id="q-learningdqn-dqn">Q-learning、DQN、以及 DQN 的改进算法<a class="headerlink" href="#q-learningdqn-dqn" title="Permanent link">#</a></h1>
+<p>DQN 的全称是 Deep Q-Network，其中的 Q 就是指 Q-Learning。 从名字上就能看出，该方法指的是把 Q-Learning 和 DNN[Deep Neural Network] 结合起来。所以这两种方法没有本质区别，比如原来是一个(状态, 动作)的概率表，在 DQN 中把其换为了一个神经网络。所以本文不再单独介绍 Q-learning 方法，而是直接介绍 DQN 方法。</p>
 <h2 id="1-vpisvpis">1、估计状态价值函数 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}(s)</span><script type="math/tex">V^{\pi}(s)</script></span><a class="headerlink" href="#1-vpisvpis" title="Permanent link">#</a></h2>
 <blockquote>
 <p>注意：这一小节描述的是如何估计状态价值函数，这里不涉及如何设计策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span>。所以在这一小节中是假设已经有了一个策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 的前提下，讨论如何估计该策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 的状态价值函数。</p>
@@ -120,17 +121,17 @@
 </div>
 <p>策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 每一次跟环境交互得到的 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 就已经是一个随机变量，<span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 又是每个 episode 中所有 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 之和，所以 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的方差是要比 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 的方差是要大的。</p>
 <p>在 TD 中要拟合的是 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span>，<span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 的方差是相对比较小的，这是 TD 相比于 MC 的优点。但是 TD 方法要拟合的公式为 <span class="arithmatex"><span class="MathJax_Preview">V^\pi(s_t) - V^\pi(s_{t+1})=r_t</span><script type="math/tex">V^\pi(s_t) - V^\pi(s_{t+1})=r_t</script></span>，这个拟合公式只能保证 <span class="arithmatex"><span class="MathJax_Preview">V^\pi(s_t)</span><script type="math/tex">V^\pi(s_t)</script></span> 与 <span class="arithmatex"><span class="MathJax_Preview">V^\pi(s_{t+1})</span><script type="math/tex">V^\pi(s_{t+1})</script></span> 的差值是准确的，却无法保证 <span class="arithmatex"><span class="MathJax_Preview">V^\pi(s_t)</span><script type="math/tex">V^\pi(s_t)</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">V^\pi(s_{t+1})</span><script type="math/tex">V^\pi(s_{t+1})</script></span> 各自的值是准确的。所以该方法是有偏的，这是 TD 方法的劣势。</p>
-<p>MC 方法无偏但是方差大，TD 方法方差小但是有偏。有一种改进的 TD 方法可以看作是结合了 TD 和 MC 的优点。想法其实很简单，TD 方法的差分方程是仅用一步估计，也就是下式：</p>
+<p>MC 方法无偏但是方差大，TD 方法方差小但是有偏。有一种改进的多步 TD 方法可以看作是结合了 TD 和 MC 的优点。想法其实很简单，TD 方法是仅采用和环境的一步交互得到的数据为 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t, r_t, s_{t+1})</span><script type="math/tex">(s_t, a_t, r_t, s_{t+1})</script></span>，其差分方程也是仅用一步估计，也就是下式：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}V^{\pi}(s_t) = r_t + V^{\pi}(s_{t+1})\end{equation}</div>
 <script type="math/tex; mode=display">\begin{equation}V^{\pi}(s_t) = r_t + V^{\pi}(s_{t+1})\end{equation}</script>
 </div>
-<p>将其改为下述这种多步估计的形式：</p>
+<p>多步 TD 方法是和环境交互 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 步得到的数据为 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t, r_t, s_{t+1}, a_{t+1}, r_{t+1}, ..., s_{t+N}, a_{t+N}, r_{t+N}, s_{t+N+1})</span><script type="math/tex">(s_t, a_t, r_t, s_{t+1}, a_{t+1}, r_{t+1}, ..., s_{t+N}, a_{t+N}, r_{t+N}, s_{t+N+1})</script></span>，其差分方程也是使用 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 步估计，也就是下式：</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\end{equation}</script>
+<div class="MathJax_Preview">\begin{equation}V^{\pi}(s_t) = \sum_{t^\prime=t}^{t+N} r_{t^\prime} + V^\pi(s_{t+N+1})\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}V^{\pi}(s_t) = \sum_{t^\prime=t}^{t+N} r_{t^\prime} + V^\pi(s_{t+N+1})\end{equation}</script>
 </div>
-<p>在上述公式里，如果多步估计这部分只有一步，那么就是 TD 方法；如果多步估计这里一直到 episode 结束，那么就是 MC 方法。上述公式是 MC 方法与 TD 方法的折衷。</p>
+<p>在上述公式里，如果 <span class="arithmatex"><span class="MathJax_Preview">N=1</span><script type="math/tex">N=1</script></span>，那么就是 TD 方法；如果 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 是一直到 episode 结束，那么就是 MC 方法。上述公式是 MC 方法与 TD 方法的 balance。</p>
 <h2 id="2-qpis-aqpis-a">2、估计动作价值函数 <span class="arithmatex"><span class="MathJax_Preview">Q^{\pi}(s, a)</span><script type="math/tex">Q^{\pi}(s, a)</script></span><a class="headerlink" href="#2-qpis-aqpis-a" title="Permanent link">#</a></h2>
 <blockquote>
 <p>注意：这一小节描述的是如何估计动作价值函数，这里不涉及如何设计策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span>。所以在这一小节中是假设已经有了一个策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 的前提下，讨论如何估计该策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 的动作价值函数。</p>
