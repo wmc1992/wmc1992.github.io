@@ -106,7 +106,7 @@
 </code></pre>
 <p>上述三条数据都是最后一个 assistant 作为模型要学习的片段，前面的部分不产生 loss。</p>
 <h3 id="_3">方法二<a class="headerlink" href="#_3" title="Permanent link">#</a></h3>
-<p>第二种方法是一组对话只作为一条样本进行训练，然后通过 mask 控制所有的 assistant 部分计算 loss，所有的 user 部分不计算 loss（如果有 system prompt 的话也不计算 loss）。如下图所示，target_mask 中为 1 的表示要参与计算 loss，为 0 的表示不参与计算 loss。（下图中添加 </s> 字符的方式不是这里的讨论重点）</p>
+<p>第二种方法是一组对话只作为一条样本进行训练，然后通过 mask 控制所有的 assistant 部分计算 loss，所有的 user 部分不计算 loss（如果有 system prompt 的话也不计算 loss）。如下图所示，target_mask 中为 1 的表示要参与计算 loss，为 0 的表示不参与计算 loss。（下图中添加 &lt;/s> 字符的方式不是这里的讨论重点）</p>
 <div align=center><img src="/HovgwRfA/assets/01.png" width=90% /></div>
 
 <h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
