@@ -155,7 +155,7 @@
 </div>
 <p>这个公式就是结合了"基于策略的算法"与"基于值的算法"之后的结果。</p>
 <h3 id="22">2.2 一个改进<a class="headerlink" href="#22" title="Permanent link">#</a></h3>
-<p>公式（6）里面为了用到了两个价值函数：<span class="arithmatex"><span class="MathJax_Preview">Q^\pi</span><script type="math/tex">Q^\pi</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">V^\pi</span><script type="math/tex">V^\pi</script></span>，也就对应着两个模型。再加上 actor 对应的模型，总共需要训练三个模型。模型越多，系统越复杂，也就越难以训练，所以这里考虑对两个价值函数变形，最终使用一个价值函数实现。</p>
+<p>公式（6）里面用到了两个价值函数：<span class="arithmatex"><span class="MathJax_Preview">Q^\pi</span><script type="math/tex">Q^\pi</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">V^\pi</span><script type="math/tex">V^\pi</script></span>，也就对应着两个模型。再加上 actor 对应的模型，总共需要训练三个模型。模型越多，系统越复杂，也就越难以训练，所以这里考虑对两个价值函数变形，最终使用一个价值函数实现。</p>
 <p>上一小节里面的公式（5）是动作价值函数与状态价值函数之间的转换关系，在这里主要是利用该公式。利用该公式将公式（6）中的 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi(s_t^n, a_t^n)</span><script type="math/tex">Q^\pi(s_t^n, a_t^n)</script></span> 部分做如下的一些转换：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}\begin{split}
@@ -167,14 +167,14 @@ Q^\pi(s_t^n, a_t^n) &= E \Big[ r_t^n + V^\pi (s_{t+1}^n) \Big] \\
 &\rightarrow r_t^n + V^\pi (s_{t+1}^n)
 \end{split}\end{equation}</script>
 </div>
-<p>上述公式中的第一行就是由公式（5）得到的，这个不需要解释。第二行就不是恒等变换了，所以上面使用箭头来表示。箭头的左侧是一个期望，箭头的右侧是直接把期望去掉了，等于是某次采样值。使用单词采样值替换掉原来的期望值从理论上来说是近似相等的，它带来的问题是原来的期望值是比较稳定的，而采样值则是随机变量，相比起期望值就没有那么的稳定了。使用期望值的话，方差可以看作是0，而使用随机变量的话，方差肯定是大于0的。</p>
+<p>上述公式中的第一行就是由公式（5）得到的，这个不需要解释。第二行就不是恒等变换了，所以上面使用箭头来表示。箭头的左侧是一个期望，箭头的右侧是直接把期望符号去掉了，等于是某次采样值。使用单次采样值替换掉原来的期望值从理论上来说是近似相等的，它带来的问题是原来的期望值是比较稳定的，而采样值则是随机变量，相比起期望值就没有那么的稳定了。使用期望值的话，方差可以看作是0，而使用随机变量的话，方差肯定是大于0的。</p>
 <p>将公式（7）带入到公式（6）里面之后得到新的梯度计算公式：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ r_t^n + V^\pi (s_{t+1}^n) - V^\pi(s_t^n) \Big] \nabla \text{log} p_{\theta}(a_t^n|s_t^n)\end{equation}</div>
 <script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ r_t^n + V^\pi (s_{t+1}^n) - V^\pi(s_t^n) \Big] \nabla \text{log} p_{\theta}(a_t^n|s_t^n)\end{equation}</script>
 </div>
-<p>使用该公式就只需要一个模型用来估计价值函数，以及一个 actor 对应的模型，总共需要训练两个模型，比之前少了一个。</p>
-<p>关于这个改进，但从理论上来说，它的优点是将原来需要训练3个模型的系统简化为了需要训练2个模型的系统；它的缺点是将原来的期望变为了随机变量，也就是公式（7），这增加了训练的难度。所以从理论上来看不能完全说该改进一定有效。但是实验结果胜于理论，经过大量实验证明，经过该改进之后，最终训练出来的模型的效果是要明显优于改进之前的。</p>
+<p>使用该公式就只需要一个模型来估计价值函数，以及一个 actor 对应的模型，总共需要训练两个模型，比之前少了一个。</p>
+<p>关于这个改进，单从理论上来说，它的优点是将原来需要训练3个模型的系统简化为了需要训练2个模型的系统；它的缺点是将原来的期望变为了随机变量，也就是公式（7），这增加了训练的难度。所以从理论上来看不能完全说该改进一定有效。但是实验结果胜于理论，经过大量实验证明，经过该改进之后，最终训练出来的模型的效果是要明显优于改进之前的。</p>
 <h3 id="23">2.3 一些其他说明<a class="headerlink" href="#23" title="Permanent link">#</a></h3>
 <p>上面在介绍 Actor-Critic 方法时，是在"基于策略的算法"上引出来的。首先，有一个基于策略的方法，比如 policy gradient，该方法的梯度公式中需要求解回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的期望，该值不容易直接求解，于是使用一个模型来估计该值。从这个角度来看，Actor-Critic 更像是一个基于策略的方法。</p>
 <p>其实 Actor-Critic 还可以从另一个角度进行理解。首先，有一个基于值的算法，比如 DQN，该方法能够估计出一个动作价值函数。有了动作价值函数之后，只需要按照公式 <span class="arithmatex"><span class="MathJax_Preview">a=\text{argmax}_a Q^\pi(s, a)</span><script type="math/tex">a=\text{argmax}_a Q^\pi(s, a)</script></span> 就可以获得策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 了，但是这个公式直接求解不好求，于是使用一个模型来对该式进行求解。从这个角度来看，Actor-Critic 更像是一个基于值的方法。</p>
