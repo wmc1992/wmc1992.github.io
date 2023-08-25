@@ -104,8 +104,8 @@
 <script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ Q^\pi(s_t^n, a_t^n) - V^\pi(s_t^n) \Big] \nabla \text{log} p_{\theta}(a_t^n|s_t^n)\end{equation}</script>
 </div>
 <p>这个公式就是结合了"基于策略的算法"与"基于值的算法"之后的结果。</p>
-<h3 id="22">2.2 一个改进<a class="headerlink" href="#22" title="Permanent link">#</a></h3>
-<p>公式（6）里面用到了两个价值函数：<span class="arithmatex"><span class="MathJax_Preview">Q^\pi</span><script type="math/tex">Q^\pi</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">V^\pi</span><script type="math/tex">V^\pi</script></span>，也就对应着两个模型。再加上 actor 对应的模型，总共需要训练三个模型。模型越多，系统越复杂，也就越难以训练，所以这里考虑对两个价值函数变形，最终使用一个价值函数实现。</p>
+<h3 id="22-a2c">2.2 A2C<a class="headerlink" href="#22-a2c" title="Permanent link">#</a></h3>
+<p>A2C 的全称为 Advantage Actor-Critic，就是 Actor-Critic 的改进版。公式（6）里面用到了两个价值函数：<span class="arithmatex"><span class="MathJax_Preview">Q^\pi</span><script type="math/tex">Q^\pi</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">V^\pi</span><script type="math/tex">V^\pi</script></span>，也就对应着两个模型。再加上 actor 对应的模型，总共需要训练三个模型。模型越多，系统越复杂，也就越难以训练，所以这里考虑对两个价值函数变形，最终使用一个价值函数实现。</p>
 <p>上一小节里面的公式（5）是动作价值函数与状态价值函数之间的转换关系，在这里主要是利用该公式。利用该公式将公式（6）中的 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi(s_t^n, a_t^n)</span><script type="math/tex">Q^\pi(s_t^n, a_t^n)</script></span> 部分做如下的一些转换：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}\begin{split}
@@ -131,7 +131,14 @@ Q^\pi(s_t^n, a_t^n) &= E \Big[ r_t^n + V^\pi (s_{t+1}^n) \Big] \\
 <p>总体来说，Actor-Critic 是结合了基于策略的算法和基于值的算法的，是目前来说效果最好的强化学习方案。</p>
 <h3 id="24-actor-critic">2.4 Actor-Critic 算法过程<a class="headerlink" href="#24-actor-critic" title="Permanent link">#</a></h3>
 <h2 id="3a3c">3、A3C<a class="headerlink" href="#3a3c" title="Permanent link">#</a></h2>
-<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2></div>
+<p>A3C 的全称为 Asynchronous Advantage Actor-Critic，这里的 Asynchronous 是异步的意思。如下图所示，首先有一个 global network，然后有多个 worker。每个 worker 把所有的模型的权重从 global network 那里拷贝出来一份，然后自己就开始进行训练流程：自己采样数据，自己计算梯度。当 worker 计算出来梯度之后，就把这个梯度传给 global network，然后 global network 就使用这个梯度更新自己的模型的权重，更新完成之后，worker 再从 global network 这里拷贝所有的模型的权重，如此往复。</p>
+<p>注意，worker 是有多个的，所以对于某一个 worker 来说，它一开始拷贝了一份模型的权重出来，等到计算出梯度之后已经过去一段时间了，此时 global network 的权重可能已经被其他的 worker 回传的梯度更新过了，但是没有关系，不用管这个，还是将 worker 计算出的梯度直接作用到当前的 global network 的参数上。猜测这种操作的原因：一个原因是这样操作简单，另一个原因估计还是为了增加多样性。</p>
+<div align=center><img src="/e4cm9Wnp/assets/01.png" width=70% /></div>
+
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=j82QLgfhFiY&amp;list=PLJV_el3uVTsODxQFgzMzPLa16h6B8kWM_&amp;index=6">https://www.youtube.com/watch?v=j82QLgfhFiY&amp;list=PLJV_el3uVTsODxQFgzMzPLa16h6B8kWM_&amp;index=6</a></li>
+</ul></div>
             </div>
         </div>
 
