@@ -179,8 +179,7 @@ p_{\theta}(\tau) &= p(s_1)p_{\theta}(a_1|s_1)p(s_2|s_1,a_1)p_{\theta}(a_2|s_2)p(
 &amp;= \sum_{\tau} p_{\theta}(\tau) \cdot R(\tau) \cdot \nabla \text{log} p_{\theta}(\tau) \\
 &amp;= E_{\tau \backsim p_{\theta}(\tau)} \Big[ R(\tau) \cdot \nabla \text{log} p_{\theta}(\tau) \Big] \\
 &amp;\approx \frac{1}{N} \sum_{n=1}^N R(\tau^n) \cdot \nabla \text{log} p_{\theta}(\tau^n) \\
-&amp;\rightarrow \frac{1}{N} \sum_{n=1}^T \sum_{t=1}^T R(\tau^n) \cdot \nabla \text{log} p_{\theta} (a_t^n|s_t^n) \\
-&amp;= \frac{1}{N} \sum_{t=1}^T R(\tau^n) \sum_{n=1}^T  \nabla \text{log} p_{\theta} (a_t^n|s_t^n)
+&amp;\rightarrow \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} R(\tau^n) \cdot \nabla \text{log} p_{\theta} (a_t^n|s_t^n)
 \end{align}</div>
 <script type="math/tex; mode=display">\begin{align}
 \nabla \bar{R}_{\theta} &= \sum_{\tau} p_{\theta}(\tau) \cdot R(\tau) \\
@@ -188,8 +187,7 @@ p_{\theta}(\tau) &= p(s_1)p_{\theta}(a_1|s_1)p(s_2|s_1,a_1)p_{\theta}(a_2|s_2)p(
 &= \sum_{\tau} p_{\theta}(\tau) \cdot R(\tau) \cdot \nabla \text{log} p_{\theta}(\tau) \\
 &= E_{\tau \backsim p_{\theta}(\tau)} \Big[ R(\tau) \cdot \nabla \text{log} p_{\theta}(\tau) \Big] \\
 &\approx \frac{1}{N} \sum_{n=1}^N R(\tau^n) \cdot \nabla \text{log} p_{\theta}(\tau^n) \\
-&\rightarrow \frac{1}{N} \sum_{n=1}^T \sum_{t=1}^T R(\tau^n) \cdot \nabla \text{log} p_{\theta} (a_t^n|s_t^n) \\
-&= \frac{1}{N} \sum_{t=1}^T R(\tau^n) \sum_{n=1}^T  \nabla \text{log} p_{\theta} (a_t^n|s_t^n)
+&\rightarrow \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} R(\tau^n) \cdot \nabla \text{log} p_{\theta} (a_t^n|s_t^n)
 \end{align}</script>
 </div>
 <p>从第6行到第7行是纯数学推导，这里利用了结论 <span class="arithmatex"><span class="MathJax_Preview">\nabla f(x) = f(x) \cdot \nabla \text{log} f(x)</span><script type="math/tex">\nabla f(x) = f(x) \cdot \nabla \text{log} f(x)</script></span>，至于该结论的证明可以查阅其他资料，这里暂时将其作为已知结论来使用。</p>
@@ -200,8 +198,8 @@ p_{\theta}(\tau) &= p(s_1)p_{\theta}(a_1|s_1)p(s_2|s_1,a_1)p_{\theta}(a_2|s_2)p(
 <h3 id="22">2.2 算法过程说明<a class="headerlink" href="#22" title="Permanent link">#</a></h3>
 <p>下述公式就是最终在 policy gradient 中实际使用的求解梯度的公式：</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta}=\frac{1}{N} \sum_{t=1}^T \sum_{n=1}^T R(\tau^n) \cdot \nabla \text{log} p_{\theta} (a_t^n|s_t^n)\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta}=\frac{1}{N} \sum_{t=1}^T \sum_{n=1}^T R(\tau^n) \cdot \nabla \text{log} p_{\theta} (a_t^n|s_t^n)\end{equation}</script>
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta}=\frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} R(\tau^n) \cdot \nabla \text{log} p_{\theta} (a_t^n|s_t^n)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta}=\frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} R(\tau^n) \cdot \nabla \text{log} p_{\theta} (a_t^n|s_t^n)\end{equation}</script>
 </div>
 <p>求解出梯度之后，再使用如下公式做梯度上升就可以了：</p>
 <div class="arithmatex">
@@ -209,21 +207,21 @@ p_{\theta}(\tau) &= p(s_1)p_{\theta}(a_1|s_1)p(s_2|s_1,a_1)p_{\theta}(a_2|s_2)p(
 <script type="math/tex; mode=display">\begin{equation}\theta \leftarrow \theta + \eta \nabla \bar{R}_{\theta}\end{equation}</script>
 </div>
 <p>但是强化学习和有监督学习的具体训练过程有着不少的区别，下面详细说一下强化学习是如何训练的。下图中左侧蓝色框内展示的就是强化学习中数据集是什么样的。这里在理解时最好是将 <span class="arithmatex"><span class="MathJax_Preview">\tau^1</span><script type="math/tex">\tau^1</script></span> 或者 <span class="arithmatex"><span class="MathJax_Preview">\tau^2</span><script type="math/tex">\tau^2</script></span> 当作是一条样本看待，而不是将 <span class="arithmatex"><span class="MathJax_Preview">(s_1^1, a_1^1)</span><script type="math/tex">(s_1^1, a_1^1)</script></span> 当作一条样本看待。</p>
-<p>整体来说，Policy Gradient 就是先使用策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 采样出一批样本 <span class="arithmatex"><span class="MathJax_Preview">\{\tau^1, \tau^2, ..., \tau^N\}</span><script type="math/tex">\{\tau^1, \tau^2, ..., \tau^N\}</script></span>，然后使用这批采样出的样本根据公式（12）计算出梯度，将梯度更新到策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 的参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 上。然后再使用更新后的策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 采样一批样本，再求梯度更新模型参数，一直重复该过程，直到模型效果达到预期。</p>
-<div align=center><img src="/6tUvqjO0/assets/02.png" width=70% /></div>
+<p>整体来说，Policy Gradient 就是先使用策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 采样出一批样本 <span class="arithmatex"><span class="MathJax_Preview">\{\tau^1, \tau^2, ..., \tau^N\}</span><script type="math/tex">\{\tau^1, \tau^2, ..., \tau^N\}</script></span>，然后使用这批采样出的样本根据公式（11）计算出梯度，将梯度更新到策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 的参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 上。然后再使用更新后的策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 采样一批样本，再求梯度更新模型参数，一直重复该过程，直到模型效果达到预期。</p>
+<div align=center><img src="/6tUvqjO0/assets/02.png" width=60% /></div>
 
-<p>前文已经说过策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 就是神经网络，如下图所示。那么每个 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t)</span><script type="math/tex">(s_t, a_t)</script></span> 的pair对都是该网络的一个输入输出对，如下图所示，神经网络输入一个 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span>，输出各个 action 的概率。所以公式（12）中的 <span class="arithmatex"><span class="MathJax_Preview">\nabla \text{log} p_{\theta} (a_t^n|s_t^n)</span><script type="math/tex">\nabla \text{log} p_{\theta} (a_t^n|s_t^n)</script></span> 部分的求解就是一个常规的神经网络求梯度的问题，这个如何求解不再赘述。</p>
+<p>前文已经说过策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 就是神经网络，如下图所示。那么每个 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t)</span><script type="math/tex">(s_t, a_t)</script></span> 的pair对都是该网络的一个输入输出对，如下图所示，神经网络输入一个 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span>，输出各个 action 的概率。所以公式（11）中的 <span class="arithmatex"><span class="MathJax_Preview">\nabla \text{log} p_{\theta} (a_t^n|s_t^n)</span><script type="math/tex">\nabla \text{log} p_{\theta} (a_t^n|s_t^n)</script></span> 部分的求解就是一个常规的神经网络求梯度的问题，这个如何求解不再赘述。</p>
 <div align=center><img src="/6tUvqjO0/assets/03.png" width=35% /></div>
 
-<p>如果是有监督学习，除了模型输出一个 action，还会有一个人工标注的 action，计算模型输出结果和标签结果之间的 CE 损失然后就可以对参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 做更新了。 在强化学习这里没有人工标注的 action，这里的梯度是使用公式（12）计算出来的。</p>
+<p>如果是有监督学习，除了模型输出一个 action，还会有一个人工标注的 action，计算模型输出结果和标签结果之间的 CE 损失然后就可以对参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 做更新了。 在强化学习这里没有人工标注的 action，这里的梯度是使用公式（11）计算出来的。</p>
 <p>公式中的 <span class="arithmatex"><span class="MathJax_Preview">\nabla \text{log} p_{\theta} (a_t^n|s_t^n)</span><script type="math/tex">\nabla \text{log} p_{\theta} (a_t^n|s_t^n)</script></span> 部分已经会计算了，其中的 <span class="arithmatex"><span class="MathJax_Preview">R(\tau^n)</span><script type="math/tex">R(\tau^n)</script></span> 需要注意一下，它是完成一个 episode 之后所有 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 的奖励之和，这里之所以使用所有奖励和的原因是：当前采取了一个 action，虽然在当前步骤没有得到太高的 reward，但是这个 action 可能对之后产生比较重要的正向的影响，使得最后得到了一个比较高的总分。所以这里 <span class="arithmatex"><span class="MathJax_Preview">R(\tau^n)</span><script type="math/tex">R(\tau^n)</script></span> 是玩完一局游戏之后的最终得分。但是这种想法也是有着自己的问题的，一局游戏中并不是每一步的 action 都是正确的，但是在这种计算方式下一局游戏中每一个 action 都是被同等的奖励或惩罚的，后续会有算法对这里进行优化。</p>
 <p>从上述算法过程可以看出，这里采样出 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 条样本之后，只能用于求解一次梯度，然后用该梯度更新参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 一次，之后就需要再重新采样数据。这个效率是非常低的，之后也会有方法针对该问题进行优化。</p>
 <h2 id="3">3、改进方法<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
 <h3 id="31">3.1 再看梯度<a class="headerlink" href="#31" title="Permanent link">#</a></h3>
 <p>由第 2.1 小节对梯度的求导可知，梯度可以用下述公式表示：</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T R(\tau^n) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n)\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T R(\tau^n) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n)\end{equation}</script>
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} R(\tau^n) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} R(\tau^n) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n)\end{equation}</script>
 </div>
 <p>也可以用下述公式表示</p>
 <div class="arithmatex">
@@ -231,9 +229,9 @@ p_{\theta}(\tau) &= p(s_1)p_{\theta}(a_1|s_1)p(s_2|s_1,a_1)p_{\theta}(a_2|s_2)p(
 <script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = E_{\tau \backsim p_{\theta}(\tau)} \Big[ \sum_{t=1}^T R(\tau) \cdot \nabla \text{log} p_{\theta}(a_t|s_t) \Big]\end{equation}</script>
 </div>
 <blockquote>
-<p>其中，公式（14）是公式（15）的一个近似，其假设每个 <span class="arithmatex"><span class="MathJax_Preview">\tau</span><script type="math/tex">\tau</script></span> 的概率 <span class="arithmatex"><span class="MathJax_Preview">p_{\theta}(\tau)</span><script type="math/tex">p_{\theta}(\tau)</script></span> 是相同的。后续的分析可能使用公式（14），也可能使用公式（15），哪个方便就使用哪个，不再做细致的区分。</p>
+<p>其中，公式（13）是公式（14）的一个近似，其假设每个 <span class="arithmatex"><span class="MathJax_Preview">\tau</span><script type="math/tex">\tau</script></span> 的概率 <span class="arithmatex"><span class="MathJax_Preview">p_{\theta}(\tau)</span><script type="math/tex">p_{\theta}(\tau)</script></span> 是相同的。后续的分析可能使用公式（13），也可能使用公式（14），哪个方便就使用哪个，不再做细致的区分。</p>
 </blockquote>
-<p>以公式（15）为例，该梯度公式中主要有两部分需要计算，一部分是 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span>，另一部分是 <span class="arithmatex"><span class="MathJax_Preview">\nabla \text{log} p_{\theta}(a_t|s_t)</span><script type="math/tex">\nabla \text{log} p_{\theta}(a_t|s_t)</script></span>。其中 <span class="arithmatex"><span class="MathJax_Preview">\nabla \text{log} p_{\theta}(a_t|s_t)</span><script type="math/tex">\nabla \text{log} p_{\theta}(a_t|s_t)</script></span> 部分在第 2.2 小节已经说明过了，就是一个神经网络求解梯度的过程，比较简单。下面主要分析一下如何计算 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span>。</p>
+<p>以公式（14）为例，该梯度公式中主要有两部分需要计算，一部分是 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span>，另一部分是 <span class="arithmatex"><span class="MathJax_Preview">\nabla \text{log} p_{\theta}(a_t|s_t)</span><script type="math/tex">\nabla \text{log} p_{\theta}(a_t|s_t)</script></span>。其中 <span class="arithmatex"><span class="MathJax_Preview">\nabla \text{log} p_{\theta}(a_t|s_t)</span><script type="math/tex">\nabla \text{log} p_{\theta}(a_t|s_t)</script></span> 部分在第 2.2 小节已经说明过了，就是一个神经网络求解梯度的过程，比较简单。下面主要分析一下如何计算 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span>。</p>
 <p><span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 的定义为 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)=\sum_{t=1}^T r_t</span><script type="math/tex">R(\tau)=\sum_{t=1}^T r_t</script></span>，直接求解该值然后代入到梯度公式中用于梯度上升会有很多问题，下面列举几个：</p>
 <ul>
 <li>
@@ -243,36 +241,36 @@ p_{\theta}(\tau) &= p(s_1)p_{\theta}(a_1|s_1)p(s_2|s_1,a_1)p_{\theta}(a_2|s_2)p(
 <p>在很多场景下 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 可能都是非负的，比如绝大部分游戏得分都是从0开始逐渐累加，不会出现负分数。而优化时一般希望其有正有负，均值为0是最好的。</p>
 </li>
 <li>
-<p><span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 的方差很大。首先 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 就是一个随机变量，每个 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 又是 <span class="arithmatex"><span class="MathJax_Preview">T</span><script type="math/tex">T</script></span> 个 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 的和，累加起来之后 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 的方差就会很大，方差大训练起来自然就会很苦难。</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 的方差很大。首先 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 就是一个随机变量，每个 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 又是 <span class="arithmatex"><span class="MathJax_Preview">T</span><script type="math/tex">T</script></span> 个 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 的和，累加起来之后 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 的方差就会很大，方差大训练起来自然就会很困难。</p>
 </li>
 </ul>
-<p>这里只是列举了其中几个问题，实际使用时还会遇到其他的问题。对于所有基于策略的方法，可以看出，Policy Gradient 是直接使用公式（15）计算梯度，然后通过梯度上升做优化。后续的基于策略的方法都是在公式（15）的基础上，对 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 这部分做优化，以解决或缓解其存在的问题。下一小节会介绍几个比较简单的优化方法。</p>
+<p>这里只是列举了其中几个问题，实际使用时还会遇到其他的问题。对于所有基于策略的方法，可以看出，Policy Gradient 是直接使用公式（14）计算梯度，然后通过梯度上升做优化。后续的基于策略的方法都是在公式（14）的基础上，对 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 这部分做优化，以解决或缓解其存在的问题。下一小节会介绍几个比较简单的优化方法。</p>
 <h3 id="32">3.2 改进方法<a class="headerlink" href="#32" title="Permanent link">#</a></h3>
 <p><strong>Tip1：添加一个 Baseline</strong></p>
 <p>该改进主要是针对 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 大部分情况下都是正数的问题，公式如下：</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ \Big( R(\tau^n) - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ \Big( R(\tau^n) - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</script>
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ \Big( R(\tau^n) - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ \Big( R(\tau^n) - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</script>
 </div>
 <p>这里的 <span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span> 一般取 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 的均值，这样 <span class="arithmatex"><span class="MathJax_Preview">(R(\tau) - b)</span><script type="math/tex">(R(\tau) - b)</script></span> 这部分就是均值为0了，优化起来更容易一些。</p>
 <p>注意：从理论上来说，不减去 <span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span> 只要采样次数足够多，那么最终得到的值就是正确的期望，但是实际操作时很难保证采样足够多的数据。</p>
 <p><strong>Tip2：每个pair对仅使用当前时刻之后的奖励</strong></p>
 <p>该改进主要是考虑在 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 时刻采取的 action 不会对之前的时刻产生影响，只会对之后的时刻产生影响。改进后的公式如下：</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ \Big( \sum_{t^\prime=t}^T r_{t^\prime}^n - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ \Big( \sum_{t^\prime=t}^T r_{t^\prime}^n - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</script>
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ \Big( \sum_{t^\prime=t}^T r_{t^\prime}^n - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ \Big( \sum_{t^\prime=t}^T r_{t^\prime}^n - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</script>
 </div>
 <p><strong>Tip3：对未来时刻的奖励做一个衰减</strong></p>
 <p>该改进主要是考虑到，虽然当前时刻采取的 action 会对之后的时刻产生影响，但是肯定是越近的时刻影响越大，越远的时刻影响越小。如果距离非常远的话，影响基本可以忽略不计了。改进后的公式如下：</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ \Big( \sum_{t^\prime=t}^T \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ \Big( \sum_{t^\prime=t}^T \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</script>
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ \Big( \sum_{t^\prime=t}^T \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ \Big( \sum_{t^\prime=t}^T \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</script>
 </div>
 <p>其中 <span class="arithmatex"><span class="MathJax_Preview">0&lt;\gamma&lt;1</span><script type="math/tex">0<\gamma<1</script></span>。</p>
-<p>从上面的三个小优化可以看出，公式（14）中的 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 被不断的改进，比如改进为 <span class="arithmatex"><span class="MathJax_Preview">\Big( R(\tau^n) - b \Big)</span><script type="math/tex">\Big( R(\tau^n) - b \Big)</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\Big( \sum_{t^\prime=t}^T r_{t^\prime}^n - b \Big)</span><script type="math/tex">\Big( \sum_{t^\prime=t}^T r_{t^\prime}^n - b \Big)</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\Big( \sum_{t^\prime=t}^T \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big)</span><script type="math/tex">\Big( \sum_{t^\prime=t}^T \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big)</script></span>。下面对这部分再定义一个新的符号，使用 <span class="arithmatex"><span class="MathJax_Preview">A^{\theta}(a_t, s_t)</span><script type="math/tex">A^{\theta}(a_t, s_t)</script></span> 来表示，这个被称为 Advantage Function。这样的话梯度公式就变为了：</p>
+<p>从上面的三个小优化可以看出，公式（13）中的 <span class="arithmatex"><span class="MathJax_Preview">R(\tau)</span><script type="math/tex">R(\tau)</script></span> 被不断的改进，比如改进为 <span class="arithmatex"><span class="MathJax_Preview">\Big( R(\tau^n) - b \Big)</span><script type="math/tex">\Big( R(\tau^n) - b \Big)</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\Big( \sum_{t^\prime=t}^T r_{t^\prime}^n - b \Big)</span><script type="math/tex">\Big( \sum_{t^\prime=t}^T r_{t^\prime}^n - b \Big)</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\Big( \sum_{t^\prime=t}^T \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big)</span><script type="math/tex">\Big( \sum_{t^\prime=t}^T \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big)</script></span>。下面对这部分再定义一个新的符号，使用 <span class="arithmatex"><span class="MathJax_Preview">A^{\theta}(a_t, s_t)</span><script type="math/tex">A^{\theta}(a_t, s_t)</script></span> 来表示，这个被称为 Advantage Function。这样的话梯度公式就变为了：</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ A^{\theta}(a_t^n, s_t^n) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \Big[ A^{\theta}(a_t^n, s_t^n) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</script>
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ A^{\theta}(a_t^n, s_t^n) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ A^{\theta}(a_t^n, s_t^n) \cdot \nabla \text{log} p_{\theta}(a_t^n|s_t^n) \Big]\end{equation}</script>
 </div>
 <p>在之后会看到对 <span class="arithmatex"><span class="MathJax_Preview">A^{\theta}(a_t, s_t)</span><script type="math/tex">A^{\theta}(a_t, s_t)</script></span> 的更复杂的改进，比如使用一个网络来代替。这里来直观的理解一下 <span class="arithmatex"><span class="MathJax_Preview">A^{\theta}(a_t, s_t)</span><script type="math/tex">A^{\theta}(a_t, s_t)</script></span> 所代表的含义。公式中 <span class="arithmatex"><span class="MathJax_Preview">p_{\theta}(a_t^n|s_t^n)</span><script type="math/tex">p_{\theta}(a_t^n|s_t^n)</script></span> 表示的是输入一个状态 <span class="arithmatex"><span class="MathJax_Preview">s_t</span><script type="math/tex">s_t</script></span> 采取行为 <span class="arithmatex"><span class="MathJax_Preview">a_t</span><script type="math/tex">a_t</script></span> 的概率；<span class="arithmatex"><span class="MathJax_Preview">A^{\theta}(a_t, s_t)</span><script type="math/tex">A^{\theta}(a_t, s_t)</script></span> 表示的是输入一个状态 <span class="arithmatex"><span class="MathJax_Preview">s_t</span><script type="math/tex">s_t</script></span> 采取行为 <span class="arithmatex"><span class="MathJax_Preview">a_t</span><script type="math/tex">a_t</script></span> 这个策略是好的，还是不好的。如果该策略是好的，那么 <span class="arithmatex"><span class="MathJax_Preview">A^{\theta}(a_t, s_t)</span><script type="math/tex">A^{\theta}(a_t, s_t)</script></span> 就给一个正向的分数，就朝着增大这个概率的方向优化；如果是不好的，那么 <span class="arithmatex"><span class="MathJax_Preview">A^{\theta}(a_t, s_t)</span><script type="math/tex">A^{\theta}(a_t, s_t)</script></span> 就给一个负向的分数，就朝着减小这个概率的方向优化。</p>
 <h2 id="4on-policy-off-policy">4、On-policy 和 Off-policy<a class="headerlink" href="#4on-policy-off-policy" title="Permanent link">#</a></h2>

@@ -321,7 +321,7 @@ Var_{x \backsim q(x)}[f(x)\frac{p(x)}{q(x)}] &= E_{x \backsim q(x)}\Big[ \big(f(
 <li>
 <p>LOOP：</p>
 <ul>
-<li>使用参数为 <span class="arithmatex"><span class="MathJax_Preview">\theta^k</span><script type="math/tex">\theta^k</script></span> 的模型与环境互动采样 <span class="arithmatex"><span class="MathJax_Preview">\{s_t, a_t\}</span><script type="math/tex">\{s_t, a_t\}</script></span>，并且根据下述公式计算出 <span class="arithmatex"><span class="MathJax_Preview">A^{\theta^k}(s_t, a_t)</span><script type="math/tex">A^{\theta^k}(s_t, a_t)</script></span>：</li>
+<li>使用参数为 <span class="arithmatex"><span class="MathJax_Preview">\theta^k</span><script type="math/tex">\theta^k</script></span> 的模型与环境互动采样 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t, r_t, s_{t+1})</span><script type="math/tex">(s_t, a_t, r_t, s_{t+1})</script></span>，并且根据下述公式计算出 <span class="arithmatex"><span class="MathJax_Preview">A^{\theta^k}(s_t, a_t)</span><script type="math/tex">A^{\theta^k}(s_t, a_t)</script></span>：</li>
 </ul>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}A^{\theta^k}(a_t, s_t) = \sum_{t^\prime=t}^T \gamma^{t^\prime - t} r_{t^\prime} - b\end{equation}</div>
