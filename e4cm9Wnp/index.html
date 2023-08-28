@@ -91,7 +91,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#24-actor-critic" class="nav-link">2.4 Actor-Critic 算法过程</a>
+            <li class="nav-item" data-level="3"><a href="#24-a2c" class="nav-link">2.4 A2C 算法过程</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -177,12 +177,34 @@ Q^\pi(s_t^n, a_t^n) &= E \Big[ r_t^n + V^\pi (s_{t+1}^n) \Big] \\
 <p>关于这个改进，单从理论上来说，它的优点是将原来需要训练3个模型的系统简化为了需要训练2个模型的系统；它的缺点是将原来的期望变为了随机变量，也就是公式（7），这增加了训练的难度。所以从理论上来看不能完全说该改进一定有效。但是实验结果胜于理论，经过大量实验证明，经过该改进之后，最终训练出来的模型的效果是要明显优于改进之前的。</p>
 <h3 id="23">2.3 一些其他说明<a class="headerlink" href="#23" title="Permanent link">#</a></h3>
 <p>上面在介绍 Actor-Critic 方法时，是在"基于策略的算法"上引出来的。首先，有一个基于策略的方法，比如 policy gradient，该方法的梯度公式中需要求解回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的期望，该值不容易直接求解，于是使用一个模型来估计该值。从这个角度来看，Actor-Critic 更像是一个基于策略的方法。</p>
-<p>其实 Actor-Critic 还可以从另一个角度进行理解。首先，有一个基于值的算法，比如 DQN，该方法能够估计出一个动作价值函数。有了动作价值函数之后，只需要按照公式 <span class="arithmatex"><span class="MathJax_Preview">a=\text{argmax}_a Q^\pi(s, a)</span><script type="math/tex">a=\text{argmax}_a Q^\pi(s, a)</script></span> 就可以获得策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 了，但是这个公式直接求解不好求，于是使用一个模型来对该式进行求解。从这个角度来看，Actor-Critic 更像是一个基于值的方法。</p>
+<p>其实 Actor-Critic 还可以从另一个角度进行理解。首先，有一个基于值的算法，比如 DQN，该方法能够估计出一个动作价值函数。有了动作价值函数之后，只需要按照公式 <span class="arithmatex"><span class="MathJax_Preview">a=\text{argmax}_a Q^\pi(s, a)</span><script type="math/tex">a=\text{argmax}_a Q^\pi(s, a)</script></span> 就可以获得策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 了，但是这个公式直接求解不好求，于是使用一个模型（也就是 actor 模型）来对该式进行求解。从这个角度来看，Actor-Critic 更像是一个基于值的方法。</p>
 <p>总体来说，Actor-Critic 是结合了基于策略的算法和基于值的算法的，是目前来说效果最好的强化学习方案。</p>
-<h3 id="24-actor-critic">2.4 Actor-Critic 算法过程<a class="headerlink" href="#24-actor-critic" title="Permanent link">#</a></h3>
+<h3 id="24-a2c">2.4 A2C 算法过程<a class="headerlink" href="#24-a2c" title="Permanent link">#</a></h3>
+<p>算法过程简述如下：</p>
+<ul>
+<li>
+<p>使用策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span>（也就是 actor 模型）与环境互动采样数据；</p>
+</li>
+<li>
+<p>使用上一步采样到的数据 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t, r_t, s_{t+1})</span><script type="math/tex">(s_t, a_t, r_t, s_{t+1})</script></span> 训练更新 critic 模型；</p>
+</li>
+<li>
+<p>使用 critic 模型计算出的 advantage 训练更新 actor 模型；</p>
+</li>
+</ul>
+<p>这里记录几个之前一直存在疑惑的点：</p>
+<ul>
+<li>
+<p>critic 模型训练时的监督信号是由环境提供的。无论策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 选出来的策略是好的还是坏的，环境对其的反馈 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 是完全准确的，critic 模型拟合的是这个 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span>。所以，在训练 critic 模型时，策略 <span class="arithmatex"><span class="MathJax_Preview">pi</span><script type="math/tex">pi</script></span> 仅提供一个动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>，至于这个策略是否是最优的，从理论上来说对于 critic 模型的训练是没有影响的；</p>
+</li>
+<li>
+<p>actor 模型训练时的监督信号是由 critic 模型提供的。</p>
+</li>
+</ul>
+<p>总体来说：环境提供监督信号用于训练 critic 模型，然后 critic 模型提供监督信号用于训练 actor 模型。</p>
 <h2 id="3a3c">3、A3C<a class="headerlink" href="#3a3c" title="Permanent link">#</a></h2>
 <p>A3C 的全称为 Asynchronous Advantage Actor-Critic，这里的 Asynchronous 是异步的意思。如下图所示，首先有一个 global network，然后有多个 worker。每个 worker 把所有的模型的权重从 global network 那里拷贝出来一份，然后自己就开始进行训练流程：自己采样数据，自己计算梯度。当 worker 计算出来梯度之后，就把这个梯度传给 global network，然后 global network 就使用这个梯度更新自己的模型的权重，更新完成之后，worker 再从 global network 这里拷贝所有的模型的权重，如此往复。</p>
-<p>注意，worker 是有多个的，所以对于某一个 worker 来说，它一开始拷贝了一份模型的权重出来，等到计算出梯度之后已经过去一段时间了，此时 global network 的权重可能已经被其他的 worker 回传的梯度更新过了，但是没有关系，不用管这个，还是将 worker 计算出的梯度直接作用到当前的 global network 的参数上。猜测这种操作的原因：一个原因是这样操作简单，另一个原因估计还是为了增加多样性。</p>
+<p>注意，worker 是有多个的，所以对于某一个 worker 来说，它一开始拷贝了一份模型的权重出来，等到计算出梯度之后已经过去一段时间了，此时 global network 的权重可能已经被其他的 worker 回传的梯度更新过了，但是没有关系，不用管这个，还是将 worker 计算出的梯度直接作用到当前的 global network 的参数上。猜测这种操作的原因：一个原因是这样操作简单，另一个原因估计还是为了增加多样性和鲁棒性。</p>
 <div align=center><img src="/e4cm9Wnp/assets/01.png" width=70% /></div>
 
 <h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
