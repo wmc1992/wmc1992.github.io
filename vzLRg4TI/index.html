@@ -82,7 +82,26 @@
 
 <p align="right">[<a href="/vzLRg4TI_no_toc/">隐藏左侧目录栏</a>][<a href="/vzLRg4TI/">显示左侧目录栏</a>]</p>
 
-<h1 id="_1">时序差分法估计价值函数<a class="headerlink" href="#_1" title="Permanent link">#</a></h1></div>
+<h1 id="_1">时序差分法估计价值函数<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<p>之前的文章 <a href="/dXeWfe7n/">马尔可夫随机过程、奖励过程、决策过程</a> 中的贝尔曼方程是当前时刻与下一时刻的递推关系。时序差分算法也是利用当前时刻与下一时刻之间的关系进行迭代求解。这种只需要知道当前时刻和下一时刻就可以迭代的算法要比那些必须等整个 episode 结束之后才能运算的方法在实际操作时要简单上许多。</p>
+<p>时序差分算法的公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">V(s_t) \leftarrow V(s_t) + \alpha [r_t + \gamma V(s_{t+1}) - V(s_t)]</div>
+<script type="math/tex; mode=display">V(s_t) \leftarrow V(s_t) + \alpha [r_t + \gamma V(s_{t+1}) - V(s_t)]</script>
+</div>
+<p>在该公式中：</p>
+<ul>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">\alpha</span><script type="math/tex">\alpha</script></span> 是步长，在实际使用时类似于学习率。</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">\gamma</span><script type="math/tex">\gamma</script></span> 是折扣因子。</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">r_t + \gamma V(s_{t+1}) - V(s_t)</span><script type="math/tex">r_t + \gamma V(s_{t+1}) - V(s_t)</script></span> 是时序差分误差。在这里，使用当前状态获得的奖励加上下一个状态的价值估计来作为当前状态会获得的回报，使用公式表示就是：<span class="arithmatex"><span class="MathJax_Preview">G_t = r_t + \gamma V(S_{t+1})</span><script type="math/tex">G_t = r_t + \gamma V(S_{t+1})</script></span>。</p>
+</li>
+</ul>
+<p>这个公式的整体意思就是：通过迭代的方式利用当前时刻和下一时刻的信息更新状态价值函数 <span class="arithmatex"><span class="MathJax_Preview">V(s_t)</span><script type="math/tex">V(s_t)</script></span>，最终估计出状态价值函数。</p></div>
             </div>
         </div>
 
