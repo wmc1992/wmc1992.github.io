@@ -145,7 +145,7 @@ Q^\pi(s_t^n, a_t^n) &= E \Big[ r_t^n + V^\pi (s_{t+1}^n) \Big] \\
 <p>这里记录几个之前一直存在疑惑的点：</p>
 <ul>
 <li>
-<p>critic 模型训练时的监督信号是由环境提供的。无论策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 选出来的策略是好的还是坏的，环境对其的反馈 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 是完全准确的，critic 模型拟合的是这个 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span>。所以，在训练 critic 模型时，策略 <span class="arithmatex"><span class="MathJax_Preview">pi</span><script type="math/tex">pi</script></span> 仅提供一个动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>，至于这个策略是否是最优的，从理论上来说对于 critic 模型的训练是没有影响的；</p>
+<p>critic 模型训练时的监督信号是由环境提供的。无论策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 选出来的策略是好的还是坏的，环境对其的反馈 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 是完全准确的，critic 模型拟合的是这个 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span>。所以，在训练 critic 模型时，策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 仅提供一个动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>，至于这个策略是否是最优的，从理论上来说对于 critic 模型的训练是没有影响的；</p>
 </li>
 <li>
 <p>actor 模型训练时的监督信号是由 critic 模型提供的。</p>
