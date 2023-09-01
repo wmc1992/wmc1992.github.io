@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/002_%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83/011_WizardCoder/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/KJazB2Ku_no_toc/">隐藏左侧目录栏</a>][<a href="/KJazB2Ku/">显示左侧目录栏</a>]</p>
+
+<h1 id="wizardcoder-evol-instruct">WizardCoder: Evol-Instruct<a class="headerlink" href="#wizardcoder-evol-instruct" title="Permanent link">#</a></h1>
+<blockquote>
+<p>原文链接: <a href="https://arxiv.org/pdf/2304.12244.pdf">https://arxiv.org/pdf/2304.12244.pdf</a></p>
+<p>github链接: <a href="https://github.com/nlpxucan/WizardLM">https://github.com/nlpxucan/WizardLM</a></p>
+</blockquote>
+<p>关于指令进化部分，在 WizardLM 中的进化指令基础上做了如下改变：</p>
+<ul>
+<li>改善进化指令；</li>
+<li>简化进化指令的形式；</li>
+<li>增加上代码调试和时间空间复杂度的约束；</li>
+</ul>
+<p>使用上述方式获得到微调数据集之后微调模型，使用的基座模型为 StarCoder（然后在其 github 中可以看到，目前最新的进度是也在 llama2 做了微调，并且 llama2-13b 的效果比 StarCoder-15b 要好一些）。训练完成之后的模型在四个基准上进行测试：HumanEval、HumanEval+、MBPP、MBPP。对比对象包括目前主流的所有的开源和闭源模型。</p>
+<h2 id="1">1、指令进化的具体操作<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>在 WizardLM 中的进化指令基础上的修改具体有：</p>
+<ul>
+<li>
+<p>原来的 WizardLM 中的进化指令有5个深度进化指令：add constraints、deepening、concretizing、increase reasoning steps、complicate input，和一个广度进化指令。本文在其基础上去除掉以下三个类型的进化指令：deepening、complicating input、in-breadth evolving。所以在本文中进化指令有：add constraints、concretizing、increase reasoning steps。</p>
+</li>
+<li>
+<p>将上述3个进化指令使用统一的模板，这个在后面会有具体的指令说明；</p>
+</li>
+<li>
+<p>针对代码的特点，增加两个进化指令，分别是：code debugging、code time-space complexity constraints；</p>
+</li>
+</ul>
+<p>综上，本文中总共有5个进化指令，并且这5个进化指令使用统一的模板。这个统一的模板如下所示，其中 <code>{question}</code> 是需要做进化的种子指令。<code>{method}</code> 这里是放5个不同的进化指令。</p>
+<pre><code class="language-text">Please increase the difficulty of the given programming test question a bit.
+
+You can increase the difficulty using, but not limited to, the following methods:
+
+{method}
+
+{question}
+</code></pre>
+<p>上述的5个不同的进化指令具体如下。下面这5个指令的类型分别为：add constraints、concretizing、increase reasoning steps、code debugging、code time-space complexity constraints。实际使用时就是直接把下述内容替换掉上面所说的 <code>{method}</code> 即可。</p>
+<pre><code class="language-text">Add new constraints and requirements to the original problem, adding approximately 10 additional words.
+
+Replace a commonly used requirement in the programming task with a less common and more specific one.
+
+If the original problem can be solved with only a few logical steps, please add more reasoning steps.
+
+Provide a piece of erroneous code as a reference to increase misdirection.
+
+Propose higher time or space complexity requirements, but please refrain from doing so frequently.
+</code></pre>
+<h2 id="2">2、实验结果<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>闭源的模型有：GTP3.5、GPT4、Code-Davinci-002、Code-Cushman-001、Codex、Bard、PaLM、PaLM2、LaMDA、AlphaCode、Claude；</p>
+<p>开源的模型有：StarCoder、LLaMa、CodeGen、CodeGeeX、CodeT5+、InCoder、StarCoder-GPTeacher、Instruct-Codegen-16B、Guanaco-65B、Guanaco-65B；</p>
+<p>在 HumanEval 和 HumanEval+ 两个数据集上，与闭源模型比较的评估结果如下图，本文提出的模型 WizardCoder 排名第三：</p>
+<div align=center><img src="/KJazB2Ku/assets/01.png" width=90% /></div>
+
+<p>下表是对开源模型和闭源模型，在 HumanEval 和 MBPP 两个测试集上的评估结果。可以看出本能的模型 WizardCoder 比所有的开源模型效果都要好；同时与已经经过微调的模型，比如 InstructCodeT5+ 等模型，效果也是最优的：</p>
+<div align=center><img src="/KJazB2Ku/assets/02.png" width=60% /></div>
+
+<p>在数据集 DS-1000 上的评估效果如下图，也是优秀非常明显：</p>
+<div align=center><img src="/KJazB2Ku/assets/03.png" width=80% /></div>
+
+<h2 id="3">3、消融实验<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<p>这个不太像是消融实验，更像是如何选择进行几轮指令进化的策略。如下图中所示，总共对指令进行了4轮进化，然后对比每一轮进化的模型在数据集 HumanEval 上的指标，发现第3轮进化之后得到的指令训练出来的模型效果最好，于是保留了第3轮进化的指令训练的模型作为最终的模型。</p>
+<div align=center><img src="/KJazB2Ku/assets/04.png" width=100% /></div>
+
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://arxiv.org/pdf/2304.12244.pdf">WizardCoder: Empowering Code Large Language Models with Evol-Instruct</a></p>
+</li>
+<li>
+<p><a href="https://github.com/nlpxucan/WizardLM">https://github.com/nlpxucan/WizardLM</a></p>
+</li>
+<li>
+<p><a href="https://arxiv.org/abs/2305.06161">StarCoder: may the source be with you!</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

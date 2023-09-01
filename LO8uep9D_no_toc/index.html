@@ -66,7 +66,8 @@
 
 <h1 id="wizardlm-evol-instruct">WizardLM: Evol-Instruct<a class="headerlink" href="#wizardlm-evol-instruct" title="Permanent link">#</a></h1>
 <blockquote>
-<p>原文链接：<a href="https://arxiv.org/pdf/2304.12244.pdf">https://arxiv.org/pdf/2304.12244.pdf</a></p>
+<p>原文链接: <a href="https://arxiv.org/pdf/2304.12244.pdf">https://arxiv.org/pdf/2304.12244.pdf</a></p>
+<p>github链接: <a href="https://github.com/nlpxucan/WizardLM">https://github.com/nlpxucan/WizardLM</a></p>
 </blockquote>
 <p>本文的指令进化分为深度进化和广度进化。深度进化有以下五种：add constraints, deepening, concretizing, increase reasoning steps, complicate input。广度进化为：mutation，比如：基于给定的指令生成全新的指令。广度进化的目的是解决指令数据集中主题缺乏多样性的问题，增加数据集的丰富度。</p>
 <p>指令的进化是调用 LLM 来进行的，所以新生成的指令有可能是有问题的，所以对于生成的指令还会进行一个进化消除（Elimination Evolving）的操作，目的是去掉那些新生成的有问题的指令。</p>
