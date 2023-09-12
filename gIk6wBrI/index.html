@@ -189,19 +189,15 @@
             </li>
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#appendix" class="nav-link">Appendix</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
             <li class="nav-item" data-level="2"><a href="#_1" class="nav-link">总结</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
+            <li class="nav-item" data-level="2"><a href="#_2" class="nav-link">其他零散记录</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#_2" class="nav-link">零散记录</a>
+            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -496,9 +492,9 @@
 <p>这里的 <span class="arithmatex"><span class="MathJax_Preview">m(r)</span><script type="math/tex">m(r)</script></span> 的取值在本文中采用了两种策略（Margin Small 和 Margin Large）分别进行训练，这两种策略中 <span class="arithmatex"><span class="MathJax_Preview">m(r)</span><script type="math/tex">m(r)</script></span> 的取值如下表。至于以下两种策略中哪种策略更好，则是通过实验进行验证。</p>
 <div align=center><img src="/gIk6wBrI/assets/02.png" width=70% /></div>
 
-<blockquote>
-<p>这两种策略各自取得的效果等会需要补充 TODO</p>
-</blockquote>
+<p>实验对比结果如下，包括不使用margin、small margin、large margin三个情况下的结果：</p>
+<div align=center><img src="/gIk6wBrI/assets/30.png" width=70% /></div>
+
 <h3 id="34-training-setup">3.4 Training Setup<a class="headerlink" href="#34-training-setup" title="Permanent link">#</a></h3>
 <p>训练 reward model 的超参数设置如下表所示。其中 epoch 为 1 的原因是：在之前的实验中发现做更多训练的话，reward model 会过拟合。</p>
 <table align=center style="width:auto">
@@ -585,11 +581,103 @@
 <p>这里有一个问题，本文作者是如何评判出 RLHFV3 的能力相比于 RLHFV2 出现了回归的？这种对模型的评估也是一个难点。</p>
 </blockquote>
 <h3 id="41-rejection-sampling">4.1 Rejection Sampling<a class="headerlink" href="#41-rejection-sampling" title="Permanent link">#</a></h3>
+<p>在本论文中并没有详细说明拒绝采样（RS）是如何训练的，比如 "损失函数是什么" 等内容都没有提及。RS 第一次出现印象中是在 openai 的 <a href="https://arxiv.org/abs/2112.09332">WebGPT</a> 中提到的，不过在 WebGPT 中的 RS 并没有对模型参数进行更新，在那篇文章中 RS 的做法为：使用模型对同一个指令生成多个 response，然后使用 reward model 对这多个 response 进行打分，挑选一个分数最高的作为最终结果进行输出。</p>
+<p>对于本文中，先使用 SFT model 对一个指令生成多个 response，再使用 reward model 对多个 response 进行打分，挑选出得分最高的那个 response，这部分的操作是没有任何疑问的，有疑问的地方在于得到该数据之后如何进行训练。下图是 <a href="https://substack.com/@natolambert">Nathan Lambert</a> 的文章 <a href="https://www.interconnects.ai/p/llama-2-part-2?utm_source=profile&amp;utm_medium=reader2">Llama 2 follow-up: too much RLHF, GPU sizing, technical details</a> 对这部分的解析，对该解析还是比较认同的。其认为本文中得到了指令和得分最高的那个 respones 之后，直接使用本文第2章节中提到的 SFT 方法进行训练。</p>
+<div align=center><img src="/gIk6wBrI/assets/28.png" width=80% /></div>
+
+<blockquote>
+<p>至此，记录一下个人对 RLHF 这个阶段的理解：在 NLP 中的 RLHF 阶段并不仅仅是将 RL 方法应用到 NLP 中，而是通过人与模型相互交互的方式尽量释放模型的能力。</p>
+<p>比如，这里的 RS 方法，其训练时就没有使用之前的 RL 方法。另外更进一步的，连 reward model 也可以不训练。在 SFT 阶段的训练数据都是人工写 prompt，人工写 response。其实当 SFT model 有了一定的能力之后，完全可以改为人工写 prompt，模型生成多个 response，然后人工挑选一个最佳的 response。这样：成本上比直接人工写 response 要低很多，效果上只要生成的多个 response 中最佳的那一个达到人工水平即可与人工标注保持持平，如果最佳的那个高于了人工水平那么就能达到比纯粹的人工标注更高的效果。</p>
+</blockquote>
 <p>下图横坐标表示对于同一个 prompt 采样的 response 的数量，橙色线表示使用 reward model 对多个 response 打分之后的平均分，蓝色线表示使用 reward model 对多个 response 打分之后的最高分。由于策略 Rejection Sampling 是对同一个 prompt 采样多个 response 然后仅使用得分最高的 response 优化 chat model，所以下图中的三角区域部分就是使用策略 Rejection Sampling 的收益。</p>
 <div align=center><img src="/gIk6wBrI/assets/13.png" width=60% /></div>
 
 <h3 id="42-ppo">4.2 PPO<a class="headerlink" href="#42-ppo" title="Permanent link">#</a></h3>
-<p>待补充 TODO</p>
+<p>目标函数：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}\text{argmax}_\pi \mathbb{E}_{p \backsim \cal{D}, g \backsim \pi}[R(g|p)]\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}\text{argmax}_\pi \mathbb{E}_{p \backsim \cal{D}, g \backsim \pi}[R(g|p)]\end{split}\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}R(g|p)=\tilde{R}_{c}(g|p) - \beta \cal{D}_{KL}(\pi_{\theta}(g|p) || \pi_{0}(g|p))\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}R(g|p)=\tilde{R}_{c}(g|p) - \beta \cal{D}_{KL}(\pi_{\theta}(g|p) || \pi_{0}(g|p))\end{split}\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}R_c(g|p) = \begin{cases}
+R_s(g|p) &amp; \text{if is_safety(p) or } R_s(g|p) &lt; 0.15 \\
+R_h(g|p) &amp; \text{otherwise }
+\end{cases}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}R_c(g|p) = \begin{cases}
+R_s(g|p) & \text{if is_safety(p) or } R_s(g|p) < 0.15 \\
+R_h(g|p) & \text{otherwise }
+\end{cases}\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\tilde{R}_{c}(g|p) = \text{whiten}(\text{logit}(R_c(g|p)))\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\tilde{R}_{c}(g|p) = \text{whiten}(\text{logit}(R_c(g|p)))\end{equation}</script>
+</div>
+<p>公式（5）中的 <span class="arithmatex"><span class="MathJax_Preview">\text{is_safety(p)}</span><script type="math/tex">\text{is_safety(p)}</script></span> 表示该指令是否为 safety 中的指令。该公式的含义，举个例子说明：如果问题为“如何非法获取一把枪支？”，如果response非常详细的说明了如何非法获取枪支，那么 helpfulness RM 会给一个较高的分数，safety RM 会给一个较低的分数，此时只要 safety RM 给出的分数小于 0.15，就使用 safety RM 给出的分数，目的是让模型学习到不要输出该 response。</p>
+<p>公式（6）是对最终的线性层做白化，以稳定 PPO 的训练，这个 trick 具体的操作不太清楚。</p>
+<p>常规超参数：</p>
+<table align=center style="width:auto">
+    <thead style="font-size: 0.6rem">
+        <tr>
+            <th>超参数</th>
+            <th>值</th>
+            <th>超参数</th>
+            <th>值</th>
+            <th>超参数</th>
+            <th>值</th>
+            <th>超参数</th>
+            <th>值</th>
+        </tr>
+    </thead>
+    <tbody style="font-size: 0.6rem">
+        <tr>
+            <td>optimizer</td>
+            <td>AdamW<br>
+                <span><script type="math/tex" id="MathJax-Element-2">\beta_1=0.9</script></span><br>
+                <span><script type="math/tex" id="MathJax-Element-2">\beta_2=0.95</script></span><br>
+                <span><script type="math/tex" id="MathJax-Element-2">\text{eps}=10^{-5}</script></span><br>
+            </td>
+            <td>lr</td>
+            <td><span><script type="math/tex" id="MathJax-Element-2">10^{-6}</script></span></td>
+            <td>gradient clipping</td>
+            <td>1.0</td>
+            <td>weight decay</td>
+            <td>0.1</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>PPO超参数：</p>
+<table align=center style="width:auto">
+    <thead style="font-size: 0.6rem">
+        <tr>
+            <th>超参数</th>
+            <th>值</th>
+            <th>超参数</th>
+            <th>值</th>
+            <th>超参数</th>
+            <th>值</th>
+            <th>超参数</th>
+            <th>值</th>
+        </tr>
+    </thead>
+    <tbody style="font-size: 0.6rem">
+        <tr>
+            <td>batch_size</td>
+            <td>512</td>
+            <td>PPO clip threshold</td>
+            <td>0.2</td>
+            <td>mini-batch size</td>
+            <td>64</td>
+            <td><span><script type="math/tex" id="MathJax-Element-2">\beta</script></span></td>
+            <td>7b和13b模型：0.01<br>34b和70b模型：0.005</td>
+        </tr>
+    </tbody>
+</table>
+
 <h3 id="43-temperature">4.3 采样时 temperature 的影响<a class="headerlink" href="#43-temperature" title="Permanent link">#</a></h3>
 <p>对 chat model 生成的结果进行采样并进行数据标注，这里自然希望采样出来的都是尽量更高质量的生成结果，所以在采样时对能够影响 chat model 生成结果质量的各个超参数做了探索，本小节是说明一下 temperature 对采样结果的影响。</p>
 <p>在生成 response 时参数 temperature 肯定会对生成的结果有影响，下图是探究不同的 temperature 对采样结果的影响。下图中横坐标是对于同一个 prompt 采样的 response 的数量，纵坐标表示 reward model 给出的分值，该图中每个点都是多个 response 中得分最高的那个分值。左图的模型是 SFT 得到的模型，右图的模型是 RLHF 得到的模型。可以看到不同 temperature 对生成的 response 影响是比较大的。所以在做 RL 时，选取什么样的 temperature 需要先在较大的范围内搜索一下最佳的范围，并且不同迭代阶段模型的最佳 temperature 范围也不一样，每次都需要重新搜索。</p>
@@ -608,13 +696,27 @@
 <div align=center><img src="/gIk6wBrI/assets/18.png" width=70% /></div>
 
 <h2 id="5multi-turn-consistency">5、Multi-Turn Consistency<a class="headerlink" href="#5multi-turn-consistency" title="Permanent link">#</a></h2>
-<p>假设多轮对话数据为 [u1,a1,...,un,an]，定义一条指令（inst），使得整个对话过程中都遵守该指令，然后将该指令综合连接到对话的所有用户消息，构造为 [inst+u1,a1,...,inst+un,an]。为了避免语句不匹配的问题，在训练过程中，保留第一轮的提示，并将中间轮数的损失置为0。</p>
-<p>1、在用户的每次对话中添加任务指令，从而使得模型能够更好的遵循指令。
-2、训练时，由于每一步都加入了指令，改变了原来的分布，因此，训练时将之前对话的损失设置为0，不贡献梯度
-3、使用lamma2-chat构造指令数据
-我理解讲了这三块内容吧</p>
-<p>多轮对话训练时应该是只有第一轮添加了指令，后续轮次drop掉吧。（Instead of
-augmenting all context-dialogue turns with the instruction, we can drop it in all but the first turn）。并且是有指令的第一轮次不贡献梯度</p>
+<p>对于系统指令，经常出现的问题是经过几轮对话之后，模型就忘记了系统指令了。本文提出了一个 GAtt Method 的方法解决该问题，下图是效果对比：</p>
+<div align=center><img src="/gIk6wBrI/assets/29.png" width=70% /></div>
+
+<p>GAtt Method 的具体做法说明如下：</p>
+<ul>
+<li>
+<p>生成更加丰富的系统指令，会在系统指令中设置 Hobbies（如：你喜欢打网球）、Language（如：使用法语回答）、Public Figure（如：请扮演拿破仑）等；为了使得指令更加复杂，会对多个约束进行随机组合；</p>
+</li>
+<li>
+<p>最初有一批对话数据，假设一条多轮对话数据为 [u1,a1,...,un,an]，定义一条指令（inst），使得整个对话过程中都遵守该指令，然后将该指令综合连接到对话的所有用户消息，构造为 [inst+u1,a1,...,inst+un,an]；</p>
+</li>
+<li>
+<p>使用 chat model 生成对话数据，生成对话数据时每个用户消息前都拼接了系统指令；</p>
+</li>
+<li>
+<p>在训练时仅保留第一句中的系统指令，并且中间轮次的对话不计算损失，只计算最后一轮对话的损失；</p>
+</li>
+</ul>
+<blockquote>
+<p>上述 GAtt Method 的做法是根据对论文的理解和一些自己的猜测得到的结果。原论文中对这部分的描述实在不清晰，网上的解读也是各说各的。</p>
+</blockquote>
 <h2 id="6model-eval-results">6、Model Eval Results<a class="headerlink" href="#6model-eval-results" title="Permanent link">#</a></h2>
 <p>想要对训练出来的 chat model 的性能做评估，目前主流的方法有两种：通过模型进行评估、通过人工进行评估。模型评估的优点是成本低、速度快，缺点是模型评估的可靠性不能保证；人工评估的优点是准确性高，缺点是成本高、速度慢；本文是两种方法都使用。</p>
 <p>在迭代微调阶段中，有多次迭代，并且每次迭代都还有不同的需要消融的策略，考虑成本和速度问题，在这个阶段使用模型评估。对于模型评估筛选出来的最终模型再使用人工评估。</p>
@@ -697,30 +799,6 @@ augmenting all context-dialogue turns with the instruction, we can drop it in al
 <p>对于有用性和安全性的平衡方面，在训练该模型时有一点过于倾向于安全性，导致使用时模型可能会拒绝部分请求，或者输出比较多的安全方面的细节。下图是该现象的例子：</p>
 <div align=center><img src="/gIk6wBrI/assets/26.png" width=70% /></div>
 
-<h2 id="appendix">Appendix<a class="headerlink" href="#appendix" title="Permanent link">#</a></h2>
-<ul>
-<li>
-<p>A.3.1 Detailed Statistics of Meta Human Preference Data</p>
-</li>
-<li>
-<p>A.3.2 Curriculum Strategy for Meta Human Preference Data</p>
-</li>
-<li>
-<p>A.3.3 Ablation on Ranking Loss with Preference Rating-based Margin for Reward Modeling</p>
-</li>
-<li>
-<p>A.3.4 Ablation on Ranking Loss with Safety Auxiliary Loss for Reward Modeling</p>
-</li>
-<li>
-<p>A.3.5 Additional Results for GAtt</p>
-</li>
-<li>
-<p>A.3.6 How Far Can Model-Based Evaluation Go?</p>
-</li>
-<li>
-<p>A.3.7 Human Evaluation</p>
-</li>
-</ul>
 <h2 id="_1">总结<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
 <p>本文几个非常有意思的点，总结如下：</p>
 <ul>
@@ -729,6 +807,16 @@ augmenting all context-dialogue turns with the instruction, we can drop it in al
 <li>在 RLHF 阶段中，reward model 非常重要（在原论文 RLHF 那一小节有 2/3 在讲 reward model）；</li>
 <li>reward model 所应该学习的是自己的 chat model 的输出分布，而不是其他模型的；</li>
 </ul>
+<h2 id="_2">其他零散记录<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
+<p>整个 RLHF 的过程就是在让 chat model 按照 RM 的偏好输出，那么如果最终得到的 chat model 效果一般要如何优化：</p>
+<ol>
+<li>
+<p>RM 本身是不完善的；- 构造更加完善的 RM，或者改变现在这种对 RM 的使用方法；</p>
+</li>
+<li>
+<p>在 RLHF 的训练过程中缺乏更完善的自动化评估技术，比如 LLaMA2 这篇论文中在训练的中间过程是使用 RM 做的评估；</p>
+</li>
+</ol>
 <h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
 <ul>
 <li>
@@ -740,13 +828,7 @@ augmenting all context-dialogue turns with the instruction, we can drop it in al
 <li>
 <p><a href="https://zhuanlan.zhihu.com/p/644671690">Llama2技术细节&amp;开源影响 - 刘聪NLP 知乎</a></p>
 </li>
-</ul>
-<h2 id="_2">零散记录<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
-<p>整个 RLHF 的过程就是在让 chat model 按照 RM 的偏好输出，那么如果最终得到的 chat model 效果一般要如何优化：</p>
-<pre><code>1）RM 本身是不完善的；- 构造更加完善的 RM，或者改变现在这种对 RM 的使用方法；
-
-2）在 RLHF 的训练过程中缺乏更完善的自动化评估技术，比如 LLaMA2 这篇论文中在训练的中间过程是使用 RM 做的评估；
-</code></pre></div>
+</ul></div>
             </div>
         </div>
 
