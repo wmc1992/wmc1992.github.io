@@ -67,8 +67,16 @@
 <h1 id="zj05">zj05. 替换空格<a class="headerlink" href="#zj05" title="Permanent link">#</a></h1>
 <p><a href="https://leetcode.cn/problems/ti-huan-kong-ge-lcof/">https://leetcode.cn/problems/ti-huan-kong-ge-lcof/</a></p>
 <h2 id="1">1、题目描述<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
-<div align=center><img src="/EBcTOI0n/assets/01.png" width=50% /></div>
-
+<p>请实现一个函数，把字符串 s 中的每个空格替换成"%20"。</p>
+<p>示例 1：</p>
+<blockquote>
+<p>输入：s = "We are happy."</p>
+<p>输出："We%20are%20happy."</p>
+</blockquote>
+<p>限制：</p>
+<ul>
+<li>0 &lt;= s 的长度 &lt;= 10000</li>
+</ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
 <p>这个题目比较简单，就是创建一个新链表，遍历原始的字符串，遇到非空格直接添加到链表中，遇到空格则向链表中添加一个 "%20" 字符。</p>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>

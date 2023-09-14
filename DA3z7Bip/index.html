@@ -96,8 +96,23 @@
 
 <h1 id="344">344. 反转字符串<a class="headerlink" href="#344" title="Permanent link">#</a></h1>
 <h2 id="1">1、题目描述<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
-<div align=center><img src="/DA3z7Bip/assets/01.png" width=80% /></div>
-
+<p>编写一个函数，其作用是将输入的字符串反转过来。输入字符串以字符数组 s 的形式给出。</p>
+<p>不要给另外的数组分配额外的空间，你必须原地修改输入数组、使用 O(1) 的额外空间解决这一问题。</p>
+<p>示例 1：</p>
+<blockquote>
+<p>输入：s = ["h","e","l","l","o"]</p>
+<p>输出：["o","l","l","e","h"]</p>
+</blockquote>
+<p>示例 2：</p>
+<blockquote>
+<p>输入：s = ["H","a","n","n","a","h"]</p>
+<p>输出：["h","a","n","n","a","H"]</p>
+</blockquote>
+<p>提示：</p>
+<ul>
+<li>1 &lt;= s.length &lt;= 105</li>
+<li>s[i] 都是 ASCII 码表中的可打印字符</li>
+</ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
 <p>使用双指针，从两头向中间移动。并且每次启动前交换两个指针位置对应的字符就可以了。</p>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>

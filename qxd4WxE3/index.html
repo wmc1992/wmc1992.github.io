@@ -71,7 +71,7 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link">最长回文子串</a>
+            <li class="nav-item" data-level="1"><a href="#5" class="nav-link">5. 最长回文子串</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、题目描述</a>
               <ul class="nav flex-column">
@@ -94,11 +94,27 @@
 
 <p align="right">[<a href="/qxd4WxE3_no_toc/">隐藏左侧目录栏</a>][<a href="/qxd4WxE3/">显示左侧目录栏</a>]</p>
 
-<h1 id="_1">最长回文子串<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<h1 id="5">5. 最长回文子串<a class="headerlink" href="#5" title="Permanent link">#</a></h1>
 <p>链接: <a href="https://leetcode.cn/problems/longest-palindromic-substring/">https://leetcode.cn/problems/longest-palindromic-substring/</a></p>
 <h2 id="1">1、题目描述<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
-<div align=center><img src="/qxd4WxE3/assets/01.png" width=60% /></div>
-
+<p>给你一个字符串 s，找到 s 中最长的回文子串。</p>
+<p>如果字符串的反序与原始字符串相同，则该字符串称为回文字符串。</p>
+<p>示例 1：</p>
+<blockquote>
+<p>输入：s = "babad"</p>
+<p>输出："bab"</p>
+<p>解释："aba" 同样是符合题意的答案。</p>
+</blockquote>
+<p>示例 2：</p>
+<blockquote>
+<p>输入：s = "cbbd"</p>
+<p>输出："bb"</p>
+</blockquote>
+<p>提示：</p>
+<ul>
+<li>1 &lt;= s.length &lt;= 1000</li>
+<li>s 仅由数字和英文字母组成</li>
+</ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
 <h4 id="21">2.1 回文串题目共同点<a class="headerlink" href="#21" title="Permanent link">#</a></h4>
 <p>回文串相关的题目最主要的一点就是判断字符串是否为回文串。像这个题目，无论是使用动态规划求解，还是使用双指针求解，判断字符串是否是回文串的核心递归过程为：</p>
