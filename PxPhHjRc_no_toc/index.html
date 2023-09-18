@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/008_algorithm/001_%E6%95%B0%E7%BB%84/%E4%B8%AD%E7%AD%89/1004_%E6%9C%80%E5%A4%A7%E8%BF%9E%E7%BB%AD1%E7%9A%84%E4%B8%AA%E6%95%B0III/">
+        <link rel="shortcut icon" href="../../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/PxPhHjRc_no_toc/">隐藏左侧目录栏</a>][<a href="/PxPhHjRc/">显示左侧目录栏</a>]</p>
+
+<h1 id="1004-1-iii">1004. 最大连续1的个数 III<a class="headerlink" href="#1004-1-iii" title="Permanent link">#</a></h1>
+<p>链接: <a href="https://leetcode.cn/problems/max-consecutive-ones-iii/">https://leetcode.cn/problems/max-consecutive-ones-iii/</a></p>
+<h2 id="1">1、题目描述<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>给定一个二进制数组 nums 和一个整数 k，如果可以翻转最多 k 个 0 ，则返回 数组中连续 1 的最大个数 。</p>
+<p>示例 1：</p>
+<blockquote>
+<p>输入：nums = [1,1,1,0,0,0,1,1,1,1,0], K = 2</p>
+<p>输出：6</p>
+<p>解释：[1,1,1,0,0,1,1,1,1,1,1]</p>
+<p>粗体数字从 0 翻转到 1，最长的子数组长度为 6。</p>
+</blockquote>
+<p>示例 2：</p>
+<blockquote>
+<p>输入：nums = [0,0,1,1,0,0,1,1,1,0,1,1,0,0,0,1,1,1,1], K = 3</p>
+<p>输出：10</p>
+<p>解释：[0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1]</p>
+<p>粗体数字从 0 翻转到 1，最长的子数组长度为 10。</p>
+</blockquote>
+<p>提示：</p>
+<ul>
+<li>1 &lt;= nums.length &lt;= 105</li>
+<li>nums[i] 不是 0 就是 1</li>
+<li>0 &lt;= k &lt;= nums.length</li>
+</ul>
+<h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>这个题目使用滑动窗口解决，主要是要想通如何该题目与滑动窗口之间的联系。整体思路：有一个滑动窗口，当滑动窗口内的 0 的个数小于 K 时，该窗口内就可以看做是全为 1 了。也就是说判断该窗口是否满足条件就是判断该窗口中 0 的个数是否小于 K。</p>
+<p>明确了上面的如何将该题目转化为滑动窗口之后，剩下的就简单了，直接看代码。</p>
+<h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<pre><code class="language-python">from typing import List
+
+class Solution:
+
+    def longestOnes(self, nums: List[int], k: int) -&gt; int:
+        max_len = 0
+        zero_num = 0
+
+        l, r = 0, 0  # 左闭右开
+
+        while r &lt; len(nums):
+            if nums[r] == 0:
+                zero_num += 1
+            r += 1
+            curr_len = r - l
+
+            # 如果此时窗口内 0 的个数小于等于 k，那么该窗口就是满足条件的，就可以判断长度了
+            if zero_num &lt;= k:
+                if curr_len &gt; max_len:
+                    max_len = curr_len
+
+            # 如果此时窗口内的 0 的个数大于 k，那么此时要向右移动左指针，来减少窗口内 0 的个数
+            while zero_num &gt; k:
+                if nums[l] == 0:
+                    zero_num -= 1
+                l += 1
+                curr_len -= 1
+
+        return max_len
+</code></pre></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../../js/base.js" defer></script>
+        <script src="../../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
