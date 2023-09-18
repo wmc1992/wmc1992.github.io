@@ -119,8 +119,44 @@
 <li>s 由小写英文字母组成</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>使用动态规划解决该问题。dp 数组含义为：dp[i][j] 表示 s[i:j] 是否为回文串。这样，该问题就变为了只要遍历填充完整个 dp 数组之后，统计一下 dp 数组中的为回文串的数量就可以了。</p>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python">def process(s):
+    n = len(s)
+
+    # dp数据的含义：dp[i][j] 是否回文子串
+    # 对于该题目，只要将这个 dp 全部填充一遍，然后统计其中为1的数量即可
+    dp = [[0 for _ in range(n)] for _ in range(n)]
+
+    # 对于回文子串，迭代过程为 s[i:j] &lt;- s[i+1:j-1]
+    # 所以 i 是从大到小遍历，j 是从小到大遍历
+    for i in range(n - 1, -1, -1):
+        for j in range(i, n, 1):
+
+            # 单个字符肯定是回文串            
+            if i == j:
+                dp[i][j] = 1
+
+            # 相邻两个字符也是回文串
+            elif j - i == 1:
+                dp[i][j] = 1
+
+            # 超过两个字符之后就按照递归条件判断
+            else:
+                if s[i] != s[j]:
+                    dp[i][j] = 0
+                else:
+                    if dp[i+1][j-1] == 1:
+                        dp[i][j] = 1
+                    else:
+                        dp[i][j] = 0
+
+    counter = 0
+    for i in range(0, n, 1):
+        for j in range(i, n, 1):
+            if dp[i][j] == 1:
+                counter += 1
+    return counter
 </code></pre></div>
             </div>
         </div>

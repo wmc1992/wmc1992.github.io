@@ -123,7 +123,36 @@
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python">def get_area(grid, i, j):
+    if i &lt; 0 or i &gt;= len(grid) or j &lt; 0 or j &gt;= len(grid[0]):
+        return 0
+    if grid[i][j] == 0:
+        return 0
+
+    area = 1
+    grid[i][j] = 0
+    # 上
+    area += get_area(grid, i - 1, j)
+    # 下
+    area += get_area(grid, i + 1, j)
+    # 左
+    area += get_area(grid, i, j - 1)
+    # 右
+    area += get_area(grid, i, j + 1)
+
+    return area
+
+
+def process(grid):
+    m, n = len(grid), len(grid[0])
+
+    max_area = 0
+    for i in range(m):
+        for j in range(n):
+            area = get_area(grid, i, j)
+            if area &gt; max_area:
+                max_area = area
+    return max_area
 </code></pre></div>
             </div>
         </div>

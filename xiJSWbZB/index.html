@@ -6,17 +6,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/008_algorithm/">
-        <link rel="shortcut icon" href="../img/favicon.ico">
+        <link rel="canonical" href="https://mingchao.wang/008_algorithm/007_%E5%9B%9E%E6%BA%AF/%E4%B8%AD%E7%AD%89/0078_%E5%AD%90%E9%9B%86/">
+        <link rel="shortcut icon" href="../../../../img/favicon.ico">
         <title>Index - 算法工程师笔记</title>
-        <link href="../css/bootstrap.min.css" rel="stylesheet">
-        <link href="../css/font-awesome.min.css" rel="stylesheet">
-        <link href="../css/base.css" rel="stylesheet">
+        <link href="../../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
-        <link href="../css/extra.css" rel="stylesheet">
+        <link href="../../../../css/extra.css" rel="stylesheet">
 
-        <script src="../js/jquery-1.10.2.min.js" defer></script>
-        <script src="../js/bootstrap.min.js" defer></script>
+        <script src="../../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../../js/bootstrap.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
@@ -35,7 +35,7 @@
     <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="..">算法工程师笔记</a>
+                <a class="navbar-brand" href="../../../..">算法工程师笔记</a>
                 <!-- Expander button -->
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -60,165 +60,65 @@
 
         <div class="container">
             <div class="row">
-                    <div class="col-md-12" role="main">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
 
-<p align="right">[<a href="/JUjkOEVR_no_toc/">隐藏左侧目录栏</a>][<a href="/JUjkOEVR/">显示左侧目录栏</a>]</p>
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#78" class="nav-link">78. 子集</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、题目描述</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、思路说明</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、代码</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
 
-<h2 id="_1">数组<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
+<p align="right">[<a href="/xiJSWbZB_no_toc/">隐藏左侧目录栏</a>][<a href="/xiJSWbZB/">显示左侧目录栏</a>]</p>
+
+<h1 id="78">78. 子集<a class="headerlink" href="#78" title="Permanent link">#</a></h1>
+<p>链接: <a href="https://leetcode.cn/problems/subsets/">https://leetcode.cn/problems/subsets/</a></p>
+<h2 id="1">1、题目描述<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>给你一个整数数组 nums ，数组中的元素 互不相同 。返回该数组所有可能的子集（幂集）。</p>
+<p>解集 不能 包含重复的子集。你可以按 任意顺序 返回解集。</p>
+<p>示例 1：</p>
+<blockquote>
+<p>输入：nums = [1,2,3]</p>
+<p>输出：[[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]</p>
+</blockquote>
+<p>示例 2：</p>
+<blockquote>
+<p>输入：nums = [0]</p>
+<p>输出：[[],[0]]</p>
+</blockquote>
+<p>提示：</p>
 <ul>
-<li>
-<p>简单：</p>
-<ul>
-<li><a href="/3SicFiF9/">88. 合并两个有序数组</a> - 双指针之快慢指针</li>
+<li>1 &lt;= nums.length &lt;= 10</li>
+<li>-10 &lt;= nums[i] &lt;= 10</li>
+<li>nums 中的所有元素 互不相同</li>
 </ul>
-</li>
-<li>
-<p>中等：</p>
-<ul>
-<li>
-<p><a href="/yR4SmjJ8/">53. 最大子数组和</a> - 双指针之快慢指针，也称滑动窗口</p>
-</li>
-<li>
-<p><a href="/4ip7x8NL/">215. 数组中的第K个最大元素</a> - 快排思路</p>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="_2">字符串<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
-<ul>
-<li>
-<p>简单：</p>
-<ul>
-<li>
-<p><a href="/DA3z7Bip/">344. 反转字符串</a> - 双指针之头尾指针</p>
-</li>
-<li>
-<p><a href="/om8L4a8D/">541. 反转字符串 II</a></p>
-</li>
-<li>
-<p><a href="/EBcTOI0n/">剑指Offer 05. 替换空格</a></p>
-</li>
-</ul>
-</li>
-<li>
-<p>中等：</p>
-<ul>
-<li>
-<p><a href="/SOO3O11H/">3. 无重复字符的最长子串</a> - 双指针之快慢指针，也称滑动窗口</p>
-</li>
-<li>
-<p><a href="/qxd4WxE3/">5. 最长回文子串</a> - 动态规划</p>
-</li>
-<li>
-<p><a href="/TQ6iQ5x6/">516. 最长回文子序列</a> - 动态规划</p>
-</li>
-<li>
-<p><a href="/WpkwPXhe/">567. 字符串的排列</a> - 双指针之快慢指针，也称滑动窗口</p>
-</li>
-<li>
-<p><a href="/AjuFxuhy/">647. 回文子串</a></p>
-</li>
-</ul>
-</li>
-<li>
-<p>困难：</p>
-<ul>
-<li>
-<p><a href="/pIQKOTpZ/">76. 最小覆盖子串</a> - 双指针之快慢指针，也称滑动窗口</p>
-</li>
-<li>
-<p><a href="/WSPXNI48/">30. 串联所有单词的子串</a></p>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="_3">堆栈<a class="headerlink" href="#_3" title="Permanent link">#</a></h2>
-<ul>
-<li>
-<p>简单：</p>
-<ul>
-<li><a href="/B2lyUkvj/">20. 有效的括号</a></li>
-</ul>
-</li>
-</ul>
-<h2 id="_4">回溯<a class="headerlink" href="#_4" title="Permanent link">#</a></h2>
-<ul>
-<li>
-<p>中等：</p>
-<ul>
-<li>
-<p><a href="/VCHJPr4a/">39. 组合总和</a></p>
-</li>
-<li>
-<p><a href="/0vLNdLAK/">46. 全排列</a></p>
-</li>
-<li>
-<p><a href="/hU9FeafW/">47. 全排列2</a></p>
-</li>
-<li>
-<p><a href="/epGQ2Xed/">77. 组合</a></p>
-</li>
-<li>
-<p><a href="/xiJSWbZB/">78. 子集</a></p>
-</li>
-<li>
-<p><a href="/CwEqQfTV/">90. 子集2</a></p>
-</li>
-<li>
-<p><a href="/GQGw17zs/">200. 岛屿数量</a></p>
-</li>
-<li>
-<p><a href="/8gVtKNAM/">695. 岛屿的最大面积</a></p>
-</li>
-<li>
-<p><a href="/mkCLgYjE/">1254. 统计封闭岛屿的数目</a></p>
-</li>
-<li>
-<p><a href="/oeqnYL7x/">1905. 统计子岛屿</a></p>
-</li>
-</ul>
-</li>
-<li>
-<p>困难：</p>
-<ul>
-<li><a href="/j2l81Gp4/">51. N 皇后</a></li>
-</ul>
-</li>
-</ul>
-<h2 id="_5">动态规划<a class="headerlink" href="#_5" title="Permanent link">#</a></h2>
-<ul>
-<li>
-<p>简单：</p>
-<ul>
-<li>
-<p><a href="/Ti7km9ix/">70. 爬楼梯</a></p>
-</li>
-<li>
-<p><a href="/D1R08lRG/">121. 买卖股票的最佳时机</a></p>
-</li>
-<li>
-<p><a href="/w1nsZZjV/">509. 斐波那契数</a></p>
-</li>
-<li>
-<p><a href="/l39s4biH/">746. 使用最小花费爬楼梯</a></p>
-</li>
-</ul>
-</li>
-<li>
-<p>中等：</p>
-<ul>
-<li>
-<p><a href="/RNDGRwSb/">62. 不同路径</a></p>
-</li>
-<li>
-<p><a href="/bKzGQbGt/">63. 不同路径2</a></p>
-</li>
-<li>
-<p><a href="/G2dcckwB/">343. 整数拆分</a></p>
-</li>
-</ul>
-</li>
-</ul></div>
+<h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<pre><code class="language-python">
+</code></pre></div>
             </div>
         </div>
 
@@ -228,13 +128,13 @@
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
         <script>
-            var base_url = "..",
+            var base_url = "../../../..",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="../js/base.js" defer></script>
-        <script src="../mathjax-config.js" defer></script>
+        <script src="../../../../js/base.js" defer></script>
+        <script src="../../../../mathjax-config.js" defer></script>
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
-        <script src="../search/main.js" defer></script>
+        <script src="../../../../search/main.js" defer></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

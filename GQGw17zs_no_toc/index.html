@@ -99,7 +99,35 @@
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python">def fill_solid(grid, i, j):
+    if i &lt; 0 or i &gt;= len(grid) or j &lt; 0 or j &gt;= len(grid[0]):
+        return
+
+    if grid[i][j] == 0:
+        return
+
+    grid[i][j] = 0
+    # 上
+    fill_solid(grid, i - 1, j)
+    # 下
+    fill_solid(grid, i + 1, j)
+    # 左
+    fill_solid(grid, i, j - 1)
+    # 右
+    fill_solid(grid, i, j + 1)
+
+
+def process(grid):
+    # 1 为陆地，0 为水
+    m, n = len(grid), len(grid[0])
+
+    counter = 0
+    for i in range(m):
+        for j in range(n):
+            if grid[i][j] == 1:
+                counter += 1
+                fill_solid(grid, i, j)
+    return counter
 </code></pre></div>
             </div>
         </div>
