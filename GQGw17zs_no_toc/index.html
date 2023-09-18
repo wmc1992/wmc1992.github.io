@@ -98,6 +98,8 @@
 <li>grid[i][j] 的值为 '0' 或 '1'</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>两层for循环遍历整个grid矩阵，遇到一个岛屿计数器加1，并通过 fillSolid 函数将这整个岛屿都修改为海水；</p>
+<p>函数 fillSolid 是通过 DFS 的方式将整个岛屿修改为海水；</p>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
 <pre><code class="language-python">def fill_solid(grid, i, j):
     if i &lt; 0 or i &gt;= len(grid) or j &lt; 0 or j &gt;= len(grid[0]):

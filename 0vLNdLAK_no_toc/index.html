@@ -90,8 +90,59 @@
 <li>nums 中的所有整数 互不相同</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>使用回溯树解决该问题。需要注意的有：</p>
+<ul>
+<li>
+<p>回溯的终止条件：索引遍历完自然就终止了；</p>
+</li>
+<li>
+<p>该问题的返回结果中 [1,2] 和 [2,1] 是不同的结果；</p>
+</li>
+</ul>
+<p>对于该问题，[1,2] 和 [2,1] 是不同的结果，所以该问题的代码模版为：</p>
+<pre><code class="language-python">def backtrace(nums, ..., pos_cache_set):
+    ...
+    for i in range(len(nums)):
+        if i in pos_cache_set:
+            continue
+        ...
+</code></pre>
+<p>而对于那些返回结果中 [1,2] 和 [2,1] 是同一个结果的问题，其代码模版为：</p>
+<pre><code class="language-python">def backtrace(nums, ..., pos_start):
+    ...
+    for i in range(pos_start, len(nums), 1):
+        ...
+</code></pre>
+<p>举个例子说明这两个代码模版的区别，对于 <code>nums = [1,2,3,4,5]</code>，当在回溯树的第一层遍历元素 <code>3</code> 时，如果使用第一个代码模版，那么第二层中 <code>1,2,4,5</code> 都可以使用；如果使用第二个代码模版，那么第二层中只有 <code>4,5</code> 可以使用。</p>
+<p>最后有一个需要注意的小点为，用于保存结果的 combination 必须是更新该对象中的元素，而不能更新该对象本身，即用法 <code>combination = combination[:-1]</code> 是错误的，用法 <code>combination.pop()</code> 是正确的。</p>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python">import copy
+from typing import List
+
+
+class Solution:
+    result = list()
+
+    def backtrace(self, nums, combination, pos_cache_set):
+        if len(nums) == len(combination):
+            self.result.append(copy.deepcopy(combination))
+            return
+        for i in range(len(nums)):
+            if i in pos_cache_set:
+                continue
+            combination.append(nums[i])
+            pos_cache_set.add(i)
+            self.backtrace(nums, combination, pos_cache_set)
+
+            combination.pop()
+            pos_cache_set.remove(i)
+
+    def permute(self, nums: List[int]) -&gt; List[List[int]]:
+        self.result = list()
+        combination = list()
+        pos_cache_set = set()
+        self.backtrace(nums, combination, pos_cache_set)
+        return self.result
 </code></pre></div>
             </div>
         </div>

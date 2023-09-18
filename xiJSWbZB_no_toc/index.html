@@ -87,7 +87,25 @@
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python">import copy
+from typing import List
+
+
+class Solution:
+    result = list()
+
+    def backtrace(self, nums, subset, pos_start):
+        for i in range(pos_start, len(nums), 1):
+            subset.append(nums[i])
+            self.result.append(copy.deepcopy(subset))
+            self.backtrace(nums, subset, i + 1)
+            subset.pop()
+
+    def subsets(self, nums: List[int]) -&gt; List[List[int]]:
+        self.result = [[]]
+        subset = list()
+        self.backtrace(nums, subset, 0)
+        return self.result
 </code></pre></div>
             </div>
         </div>

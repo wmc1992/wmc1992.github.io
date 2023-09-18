@@ -127,8 +127,50 @@
 <li>1 &lt;= target &lt;= 40</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>使用回溯树解决该问题。需要注意的有：</p>
+<ul>
+<li>
+<p>该问题的返回结果中 [1,2] 和 [2,1] 不能同时出现，它们是同一个结果。所以在遍历时只能从当前位置向后遍历，前面的部分不能重复遍历。</p>
+</li>
+<li>
+<p>回溯的终止条件，由于每个数字可以重复使用，所以遍历的索引不是终止条件。该题目的数组中所有的元素都是正的，只要已经遍历的所有元素之和超过了目标值，就不需要继续回溯了。</p>
+</li>
+</ul>
+<p>最后有一个需要注意的小点为，用于保存结果的 combination 必须是更新该对象中的元素，而不能更新该对象本身，即用法 <code>combination = combination[:-1]</code> 是错误的，用法 <code>combination.pop()</code> 是正确的。</p>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python">import copy
+from typing import List
+
+class Solution:
+    result = list()
+
+    def backtrace(self, candidates, target, combination, cache_sum, pos_start):
+        for i in range(pos_start, len(candidates), 1):
+            combination.append(candidates[i])
+            cache_sum += candidates[i]
+
+            if cache_sum == target:
+                self.result.append(copy.deepcopy(combination))
+            elif cache_sum &gt; target:
+                pass  # 数组中都是正数，超过之后就不需要再回溯了
+            else:
+                # 由于每个数字可以重复使用，所以每次回溯并不是从下一个位置开始，而是从当前位置开始
+                self.backtrace(candidates, target, combination, cache_sum, i)
+
+            combination.pop()
+            cache_sum -= candidates[i]
+
+    def combinationSum(self, candidates: List[int], target: int) -&gt; List[List[int]]:
+        combination = list()
+        cache_sum = 0
+        self.result = list()
+
+        &quot;&quot;&quot;
+        该题目就需要注意，返回的结果中 [1,2] 和 [2,1] 不能同时出现，它们是同一个结果。所以在遍历时只能从当前位置向后遍历，前面的部分不能重复遍历。
+        &quot;&quot;&quot;
+
+        self.backtrace(candidates, target, combination, cache_sum, 0)
+        return self.result
 </code></pre></div>
             </div>
         </div>

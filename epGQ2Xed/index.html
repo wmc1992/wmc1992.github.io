@@ -123,8 +123,38 @@
 <li>1 &lt;= k &lt;= n</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>将前面的 <a href="/VCHJPr4a/">39. 组合总和</a>、<a href="/0vLNdLAK/">46. 全排列</a>、<a href="/hU9FeafW/">47 全排列2</a> 都刷完之后该题目就简单了。</p>
+<p>该题目由于在返回值中 [1,2] 和 [2,1] 是同一个结果，不能同时包含，所以代码框架为：</p>
+<pre><code class="language-python">def bachtrace(nums, ..., pos_start):
+    ...
+    for i in range(pos_start, len(nums), 1):
+        ...
+        self.backtrace(nums, ..., i + 1)
+        ...
+</code></pre>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python">import copy
+from typing import List
+
+
+class Solution:
+    result = list()
+
+    def backtrace(self, nums, k, arr, pos_start):
+        if len(arr) == k:
+            self.result.append(copy.deepcopy(arr))
+            return
+        for i in range(pos_start, len(nums), 1):
+            arr.append(nums[i])
+            self.backtrace(nums, k, arr, i + 1)
+            arr.pop()
+
+    def combine(self, n: int, k: int) -&gt; List[List[int]]:
+        self.result = list()
+        nums = [i + 1 for i in range(n)]  # [1, 2, ..., n]
+        arr = list()
+        self.backtrace(nums, k, arr, 0)
+        return self.result
 </code></pre></div>
             </div>
         </div>

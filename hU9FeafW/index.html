@@ -117,8 +117,78 @@
 <li>-10 &lt;= nums[i] &lt;= 10</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>整体思路与 <a href="/0vLNdLAK/">46. 全排列</a> 类似，变化的部分主要是在该题目中原始数据中有重复的数字，于是在回溯树中就要求 "在回溯树的同一层中不能够出现相同的元素"。</p>
+<p>在题目 <a href="/0vLNdLAK/">46. 全排列</a> 提出的代码模版如下：</p>
+<pre><code class="language-python">def backtrace(nums, ..., pos_cache_set):
+    ...
+    for i in range(len(nums)):
+        if i in pos_cache_set:
+            continue
+        ...
+</code></pre>
+<p>该题目需要在上述代码模版的基础上，在增加一个每层每个元素的计数器，以此保证 "在回溯树的同一层中不能够出现相同的元素"，代码模版如下：</p>
+<pre><code class="language-python">def backtrace(nums, .., pos_cache_set):
+    ...
+    num_counter = {x: 0 for x in nums}
+    for i in range(len(nums)):
+        if i in pos_cache_set:
+            continue
+        if num_counter[nums[i]] &gt;= 1:
+            continue
+        num_counter[nums[i]] += 1
+        ...
+</code></pre>
+<p>要注意，一般来说经常会写错的代码如下所示，这个代码是有问题的。其问题在于它不仅不允许同一层中不能出现相同的元素，它同时也不允许从根节点到叶子节点这样的每条链路上有相同的元素。这就有问题了。</p>
+<pre><code class="language-python">def backtrace(nums, .., pos_cache_set):
+    ...
+    for i in range(len(nums)):
+        if i in pos_cache_set:
+            continue
+        if 0 &lt; i and nums[i-1] == nums[i]:
+            continue
+        ...
+</code></pre>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python">import copy
+from typing import List
+
+
+class Solution:
+    result = list()
+
+    def backtrace(self, nums, combinations, pos_cache_set):
+        &quot;&quot;&quot;
+        要实现的目标是：同一层中不能出现相同的元素。如何实现该功能？
+        &quot;&quot;&quot;
+        if len(nums) == len(combinations):
+            self.result.append(copy.deepcopy(combinations))
+            return
+
+        # 在同一层中，搞一个计数器给每个数值进行计数，保证同一层中每个数值只出现一次
+        num_counter = {x: 0 for x in nums}
+        for i in range(len(nums)):
+            if i in pos_cache_set:
+                continue
+            if num_counter[nums[i]] &gt;= 1:
+                continue
+            num_counter[nums[i]] += 1
+
+            combinations.append(nums[i])
+            pos_cache_set.add(i)
+
+            self.backtrace(nums, combinations, pos_cache_set)
+
+            combinations.pop()
+            pos_cache_set.remove(i)
+
+    def permuteUnique(self, nums: List[int]) -&gt; List[List[int]]:
+        self.result = list()
+        combinations = list()
+        pos_cache_set = set()
+
+        nums = sorted(nums)
+        self.backtrace(nums, combinations, pos_cache_set)
+        return self.result
 </code></pre></div>
             </div>
         </div>

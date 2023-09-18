@@ -122,6 +122,8 @@
 <li>grid[i][j] 为 0 或 1</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>先用两个for循环遍历整个 grid，每遇到一个陆地，都使用函数 fillSolid 将该陆地修改为海水，同时在 fillSold 中统计该陆地的面积；</p>
+<p>函数 fillSolid 是采用 DFS 遍历整个岛屿；</p>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
 <pre><code class="language-python">def get_area(grid, i, j):
     if i &lt; 0 or i &gt;= len(grid) or j &lt; 0 or j &gt;= len(grid[0]):
