@@ -91,8 +91,43 @@
 <li>-1000 &lt;= Node.val &lt;= 1000</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>这种二叉树的层序遍历，使用先进先出的队列实现。</p>
+<p>该题目唯一需要注意的是返回值中每层是一个独立的 list，其他的都比较简单，详情见代码。</p>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python">from typing import List, Optional
+from queue import Queue
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Solution:
+
+    def levelOrder(self, root: Optional[TreeNode]) -&gt; List[List[int]]:
+        if root is None:
+            return []
+
+        result = list()
+        q = Queue()
+        q.put(root)
+
+        while not q.empty():
+            q_size = q.qsize()
+            one_level_result = list()  # 二叉树的一层的所有节点
+
+            for _ in range(q_size):
+                node = q.get()
+                if node.left is not None:
+                    q.put(node.left)
+                if node.right is not None:
+                    q.put(node.right)
+                one_level_result.append(node.val)
+
+            result.append(one_level_result)  # 把当前层的所有节点保存一下
+        return result
 </code></pre></div>
             </div>
         </div>

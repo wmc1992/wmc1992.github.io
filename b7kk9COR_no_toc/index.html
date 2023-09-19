@@ -99,8 +99,99 @@
 <li>p 和 q 均存在于给定的二叉树中。</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>像该类题目需要先知道子节点的情况，才能判断该父节点是否满足要求时，一版都是使用后序遍历（左右中），后续遍历的过程就刚好是先遍历左右孩子，最后遍历父节点。</p>
+<p>注意，在该题目有两个非常重要的条件，正是这两个条件才使得最终写出来的代码少判断很多种额外的情况：</p>
+<ul>
+<li>节点 p 和节点 q 不是同一个节点；</li>
+<li>节点 p 和节点 q 一定存在于给定的二叉树中；</li>
+</ul>
+<p>这两个情况保证了最终肯定要返回一个节点，不用判断为空的情况，也不用判断两个节点是同一个节点的情况。</p>
+<p><br></p>
+<p>对于该题目，在一次遍历中满足条件的情况有：</p>
+<ul>
+<li>左孩子中找到一个节点，右孩子中找到一个节点，那么当前节点就是最近公共祖先；</li>
+<li>左孩子或者右孩子中找到一个节点，然后当前节点本身是另一个节点，那么当前节点也是最近公共祖先；</li>
+</ul>
+<p>在一次遍历中不满足条件的情况有：</p>
+<ul>
+<li>左孩子或者右孩子中找到一个节点，然后当前节点并不是另一个节点，那么此时只找到一个节点，不满足情况；</li>
+<li>左孩子和右孩子都没有找到任何节点，当前节点是其中的一个节点，那么此时只找到一个节点，不满足情况；</li>
+<li>左孩子和右孩子都没有找到任何节点，当前节点也不是其中的任何一个节点，那么此时没有找到任何一个节点，不满足情况；</li>
+</ul>
+<p><br></p>
+<p>针对该题目，在实际写代码时上述的这些情况不会都判断清楚，有着很多隐藏的逻辑在里面，比如下述两种情况：</p>
+<ul>
+<li>左孩子中找到一节点，右孩子中未找到节点，当前节点也不是另一个节点，那么此时总共只找到一个节点，此时返回左孩子中找到的节点；</li>
+<li>左孩子中找到一个节点，右孩子中找到一个节点，那么此时找到了两个节点，此时返回当前节点；</li>
+</ul>
+<p>对于上述两种情况，其中一个情况是只找到一个节点，另一个情况是找到了两个节点，但它们都是返回了一个节点，所以在上一层的递归调用时那么具体是找到了一个节点还是找到了两个节点这个信息已经丢失了。但是针对该题目，丢失了该信息并不会有问题，因为在该题目中不存在 p 或者 q 不在二叉树中的问题，并且该二叉树中所有的节点都不相同，最终能够找到的有仅仅有一个节点。</p>
+<p><br></p>
+<p>另外关于二叉树的后续遍历时，什么时候进行返回的问题，有如下两种模版。在第一种模版中，只要找到了满足条件的那个分支之后就直接返回了，剩余的分支就不再继续遍历了。而在第二个模版中，必然会把整棵树都遍历一遍。</p>
+<pre><code class="language-python">def recursive(root):
+    ...
+
+    left_result = recursive(root.left)
+    if left_result:
+        ...
+        return
+
+    right_result = recursive(root.right)
+    if right_result:
+        ...
+        return
+
+    ...
+    return
+</code></pre>
+<pre><code class="language-python">def recursive(root):
+    ...
+
+    left_result = recursive(root.left)
+    right_result = recursive(root.right)
+    ...
+    return
+</code></pre>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python"># Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, x):
+        self.val = x
+        self.left = None
+        self.right = None
+
+class Solution:
+
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -&gt; 'TreeNode':
+        &quot;&quot;&quot;
+
+        在一次遍历中满足条件的情况有：
+
+            （1）左孩子中找到一个节点，右孩子中找到一个节点，那么当前节点就是最近公共祖先
+            （2）左孩子或者右孩子中找到一个节点，然后当前节点本身是另一个节点，那么当前节点也是最近公共祖先
+
+        &quot;&quot;&quot;
+        if root is None:
+            return None
+
+        left = self.lowestCommonAncestor(root.left, p, q)
+        right = self.lowestCommonAncestor(root.right, p, q)
+
+        if left is not None and right is not None:
+            return root
+
+        if (left is not None or right is not None) and (root == p or root == q):
+            return root
+
+        if left is not None:
+            return left
+
+        if right is not None:
+            return right
+
+        if root == p or root == q:
+            return root
+
+        return None
 </code></pre></div>
             </div>
         </div>

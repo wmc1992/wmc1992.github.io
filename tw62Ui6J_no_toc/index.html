@@ -91,9 +91,53 @@
 <li>-100 &lt;= Node.val &lt;= 100</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<h4 id="1_1">思路1<a class="headerlink" href="#1_1" title="Permanent link">#</a></h4>
+<p>先来个抖机灵的思路，这个题目的本意是想要一行从左到右遍历，下一行从右到左遍历这种代码。但是单就实现这个题目来说，还有一种方式，就是每行都是从左到右遍历，然后对部分行的结果反序一下就可以了，详情见代码1。</p>
+<h4 id="2_1">思路2<a class="headerlink" href="#2_1" title="Permanent link">#</a></h4>
+<p>思路1的方法终究还是没有按照题目想要考察的那样，真正实现一行从左到右遍历，另一行从右到左遍历，该思路中真正实现该操作。</p>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
-</code></pre></div>
+<h4 id="1_2">代码1<a class="headerlink" href="#1_2" title="Permanent link">#</a></h4>
+<pre><code class="language-python">from typing import Optional, List
+from queue import Queue
+
+# Definition for a binary tree node.
+class TreeNode:
+
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Solution:
+
+    def zigzagLevelOrder(self, root: Optional[TreeNode]) -&gt; List[List[int]]:
+        if root is None:
+            return []
+
+        result = list()
+        q = Queue()
+        q.put(root)
+        is_left_to_right = True
+
+        while not q.empty():
+            q_size = q.qsize()
+            one_level_result = list()  # 一层的所有节点
+
+            for _ in range(q_size):
+                node = q.get()
+                if node.left is not None:
+                    q.put(node.left)
+                if node.right is not None:
+                    q.put(node.right)
+                one_level_result.append(node.val)
+
+            if not is_left_to_right:
+                one_level_result = one_level_result[::-1]
+            result.append(one_level_result)
+            is_left_to_right = not is_left_to_right
+        return result
+</code></pre>
+<h4 id="2_2">代码2<a class="headerlink" href="#2_2" title="Permanent link">#</a></h4></div>
             </div>
         </div>
 
