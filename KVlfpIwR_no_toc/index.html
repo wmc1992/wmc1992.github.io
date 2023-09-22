@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/007_RL/07_Q-learning/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/KVlfpIwR_no_toc/">隐藏左侧目录栏</a>][<a href="/KVlfpIwR/">显示左侧目录栏</a>]</p>
+
+<h1 id="q-learningdqn-dqn">Q-learning、DQN、以及 DQN 的改进算法<a class="headerlink" href="#q-learningdqn-dqn" title="Permanent link">#</a></h1>
+<p>DQN 的全称是 Deep Q-Network，其中的 Q 就是指 Q-Learning。 从名字上就能看出，该方法指的是把 Q-Learning 和 DNN[Deep Neural Network] 结合起来。所以这两种方法没有本质区别，比如原来是一个(状态, 动作)的概率表，在 DQN 中把其换为了一个神经网络。所以本文不再单独介绍 Q-learning 方法，而是直接介绍 DQN 方法。</p>
+<h2 id="1-vpisvpis">1、估计状态价值函数 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}(s)</span><script type="math/tex">V^{\pi}(s)</script></span><a class="headerlink" href="#1-vpisvpis" title="Permanent link">#</a></h2>
+<blockquote>
+<p>注意：这一小节描述的是如何估计状态价值函数，这里不涉及如何设计策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span>。所以在这一小节中是假设已经有了一个策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 的前提下，讨论如何估计该策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 的状态价值函数。</p>
+</blockquote>
+<p>状态价值函数的公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}V^\pi(s)=E_{\pi}(G_t|S_t=s)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}V^\pi(s)=E_{\pi}(G_t|S_t=s)\end{equation}</script>
+</div>
+<h3 id="11-mc">1.1 MC 方法<a class="headerlink" href="#11-mc" title="Permanent link">#</a></h3>
+<p>MC 全称为 Monte-Carlo。蒙特卡洛方法使用策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 跟环境做互动，收集每个状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 和其对应的回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的数据对 <span class="arithmatex"><span class="MathJax_Preview">(s, G)</span><script type="math/tex">(s, G)</script></span>，使用收集到的这些数据和下图的神经网络就可以估计出状态价值函数 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}(s)</span><script type="math/tex">V^{\pi}(s)</script></span>：</p>
+<table align=center style="width:40%">
+    <thead>
+        <tr>
+            <th>图1</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align="center"><img src="/KVlfpIwR/assets/01.png" width=100%/></td>
+        </tr>
+    </tbody>
+</table>
+
+<p>上图中的神经网络 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}</span><script type="math/tex">V^{\pi}</script></span> 就是状态价值函数，它的输入是状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span>，输出是 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}(s)</span><script type="math/tex">V^{\pi}(s)</script></span>，标签是 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span>，要学习的目标是让输出值 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}</span><script type="math/tex">V^{\pi}</script></span> 与标签 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 相同。其中 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}</span><script type="math/tex">V^{\pi}</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 都是标量，按照 regression 任务训练即可。</p>
+<p>该方法的缺点很明显，需要完成整个 episode 才能收集到一条样本 <span class="arithmatex"><span class="MathJax_Preview">(s, G)</span><script type="math/tex">(s, G)</script></span>，有些任务完成整个 episode 耗时是比较长的，所以该方法收集数据的成本很高。</p>
+<h3 id="12-td">1.2 TD 方法<a class="headerlink" href="#12-td" title="Permanent link">#</a></h3>
+<p>TD 全称为 Temporal-Difference。相比于蒙特卡洛方法需要完成整个 episode 之后才能收集到一条数据，时序差分方法则是策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 每一次与环境互动都可以收集到一条数据。时序差分方法会利用到时序差分公式，如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}V^{\pi}(s_t) = r_t + V^{\pi}(s_{t+1})\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}V^{\pi}(s_t) = r_t + V^{\pi}(s_{t+1})\end{equation}</script>
+</div>
+<p>使用策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 与环境互动一步，可以得到数据：<span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t, r_t, s_{t+1})</span><script type="math/tex">(s_t, a_t, r_t, s_{t+1})</script></span>，收集多条样本数据，按照下图所示的结构进行训练：</p>
+<table align=center style="width:60%">
+    <thead>
+        <tr>
+            <th>图2</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align="center"><img src="/KVlfpIwR/assets/02.png" width=100%/></td>
+        </tr>
+    </tbody>
+</table>
+
+<p>上图中的神经网络 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}</span><script type="math/tex">V^{\pi}</script></span> 就是状态价值函数，上图中两个 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}</span><script type="math/tex">V^{\pi}</script></span> 是同一个模型。给该模型输入 <span class="arithmatex"><span class="MathJax_Preview">s_t</span><script type="math/tex">s_t</script></span> 其输出值为 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}(s_t)</span><script type="math/tex">V^{\pi}(s_t)</script></span>，给该模型输入 <span class="arithmatex"><span class="MathJax_Preview">s_{t+1}</span><script type="math/tex">s_{t+1}</script></span> 其输出值为 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}(s_{t+1})</span><script type="math/tex">V^{\pi}(s_{t+1})</script></span>。按照时序差分公式可以知道 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}(s_t)</span><script type="math/tex">V^{\pi}(s_t)</script></span> 与 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}(s_{t+1})</span><script type="math/tex">V^{\pi}(s_{t+1})</script></span> 之间差了一个 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span>，所以上述模型的学习目标是让 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}(s_t) - V^{\pi}(s_{t+1})</span><script type="math/tex">V^{\pi}(s_t) - V^{\pi}(s_{t+1})</script></span> 与标签 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 相同。其中 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi}(s_t) - V^{\pi}(s_{t+1})</span><script type="math/tex">V^{\pi}(s_t) - V^{\pi}(s_{t+1})</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 都是标量，也是按照 regression 任务训练即可。</p>
+<h3 id="13-mc-vs-td">1.3 MC vs TD<a class="headerlink" href="#13-mc-vs-td" title="Permanent link">#</a></h3>
+<p>在 MC 方法中，它要学习的标签是 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span>，而 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的方差是比较大的，它的公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}G=\sum_{t=0}^\infty \gamma^t r_t\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}G=\sum_{t=0}^\infty \gamma^t r_t\end{equation}</script>
+</div>
+<p>策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 每一次跟环境交互得到的 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 就已经是一个随机变量，<span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 又是每个 episode 中所有 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 之和，所以 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的方差是要比 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 的方差是要大的。</p>
+<p>在 TD 中要拟合的是 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span>，<span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 的方差是相对比较小的，这是 TD 相比于 MC 的优点。但是 TD 方法要拟合的公式为 <span class="arithmatex"><span class="MathJax_Preview">V^\pi(s_t) - V^\pi(s_{t+1})=r_t</span><script type="math/tex">V^\pi(s_t) - V^\pi(s_{t+1})=r_t</script></span>，这个拟合公式只能保证 <span class="arithmatex"><span class="MathJax_Preview">V^\pi(s_t)</span><script type="math/tex">V^\pi(s_t)</script></span> 与 <span class="arithmatex"><span class="MathJax_Preview">V^\pi(s_{t+1})</span><script type="math/tex">V^\pi(s_{t+1})</script></span> 的差值是准确的，却无法保证 <span class="arithmatex"><span class="MathJax_Preview">V^\pi(s_t)</span><script type="math/tex">V^\pi(s_t)</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">V^\pi(s_{t+1})</span><script type="math/tex">V^\pi(s_{t+1})</script></span> 各自的值是准确的。所以该方法是有偏的，这是 TD 方法的劣势。</p>
+<p>MC 方法无偏但是方差大，TD 方法方差小但是有偏。有一种改进的多步 TD 方法可以看作是结合了 TD 和 MC 的优点。想法其实很简单，TD 方法是仅采用和环境的一步交互得到的数据为 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t, r_t, s_{t+1})</span><script type="math/tex">(s_t, a_t, r_t, s_{t+1})</script></span>，其差分方程也是仅用一步估计，也就是下式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}V^{\pi}(s_t) = r_t + V^{\pi}(s_{t+1})\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}V^{\pi}(s_t) = r_t + V^{\pi}(s_{t+1})\end{equation}</script>
+</div>
+<p>多步 TD 方法是和环境交互 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 步得到的数据为 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t, r_t, s_{t+1}, a_{t+1}, r_{t+1}, ..., s_{t+N}, a_{t+N}, r_{t+N}, s_{t+N+1})</span><script type="math/tex">(s_t, a_t, r_t, s_{t+1}, a_{t+1}, r_{t+1}, ..., s_{t+N}, a_{t+N}, r_{t+N}, s_{t+N+1})</script></span>，其差分方程也是使用 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 步估计，也就是下式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}V^{\pi}(s_t) = \sum_{t^\prime=t}^{t+N} r_{t^\prime} + V^\pi(s_{t+N+1})\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}V^{\pi}(s_t) = \sum_{t^\prime=t}^{t+N} r_{t^\prime} + V^\pi(s_{t+N+1})\end{equation}</script>
+</div>
+<p>在上述公式里，如果 <span class="arithmatex"><span class="MathJax_Preview">N=1</span><script type="math/tex">N=1</script></span>，那么就是 TD 方法；如果 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 是一直到 episode 结束，那么就是 MC 方法。上述公式是 MC 方法与 TD 方法的 balance。</p>
+<h2 id="2-qpis-aqpis-a">2、估计动作价值函数 <span class="arithmatex"><span class="MathJax_Preview">Q^{\pi}(s, a)</span><script type="math/tex">Q^{\pi}(s, a)</script></span><a class="headerlink" href="#2-qpis-aqpis-a" title="Permanent link">#</a></h2>
+<blockquote>
+<p>注意：这一小节描述的是如何估计动作价值函数，这里不涉及如何设计策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span>。所以在这一小节中是假设已经有了一个策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 的前提下，讨论如何估计该策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 的动作价值函数。</p>
+</blockquote>
+<p>动作价值函数的公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}Q^\pi(s,a)=E_\pi(G_t|S_t=s,A_t=a)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}Q^\pi(s,a)=E_\pi(G_t|S_t=s,A_t=a)\end{equation}</script>
+</div>
+<h3 id="21-mc">2.1 MC 方法<a class="headerlink" href="#21-mc" title="Permanent link">#</a></h3>
+<p>在估计动作价值函数时的模型结构一般有如下图的两种设计。左图的输入是状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 和动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>，输出是 dependent 这个 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 的价值。右图输入是状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span>，输出是在动作 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 下分别采取每个动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 时的价值。注意右图这种设计只有在动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 为离散时才可以使用这种模型结构。</p>
+<table align=center style="width:auto">
+    <thead>
+        <tr>
+            <th>图3</th>
+            <th>图4</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align="center"><img src="/KVlfpIwR/assets/03.png" width=100%/></td>
+            <td align="center"><img src="/KVlfpIwR/assets/04.png" width=100%/></td>
+        </tr>
+    </tbody>
+</table>
+
+<p>使用策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 跟环境做互动，收集在每个状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 下，策略采取不同的动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 所获取的回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span>。</p>
+<p>如果采用上图中左图的模型结构，那么输入是状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 和动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>，输出为 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi(s,a)</span><script type="math/tex">Q^\pi(s,a)</script></span>，标签为 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span>，其中 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi(s,a)</span><script type="math/tex">Q^\pi(s,a)</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 都是标量，按照 regression 任务处理即可。</p>
+<p>如果采用上图中右图的模型结构，那么输入是状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span>，输出是不同动作下的价值 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi</span><script type="math/tex">Q^\pi</script></span>，标签是不同动作下的回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span>，也是按照 regression 任务处理即可。</p>
+<h3 id="22-td">2.2 TD 方法<a class="headerlink" href="#22-td" title="Permanent link">#</a></h3>
+<p>使用 TD 方法估计动作价值函数的模型结构如下图，与估计状态价值函数是非常相似的，模型结构就不再说明了。差分公式中有一项需要注意，如下公式（7）是估计动作价值函数时使用的差分公式。注意在 <span class="arithmatex"><span class="MathJax_Preview">t+1</span><script type="math/tex">t+1</script></span> 时刻，模型 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi</span><script type="math/tex">Q^\pi</script></span> 的输入不是 <span class="arithmatex"><span class="MathJax_Preview">a_{t+1}</span><script type="math/tex">a_{t+1}</script></span>，而是 <span class="arithmatex"><span class="MathJax_Preview">\pi(s_{t+1})</span><script type="math/tex">\pi(s_{t+1})</script></span>。原因是给定状态 <span class="arithmatex"><span class="MathJax_Preview">s_{t+1}</span><script type="math/tex">s_{t+1}</script></span> 之后策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 不一定采取动作 <span class="arithmatex"><span class="MathJax_Preview">a_{t+1}</span><script type="math/tex">a_{t+1}</script></span>，它可能采取任何的动作，在下述公式中加号右侧的这一项是要估计给定状态 <span class="arithmatex"><span class="MathJax_Preview">s_{t+1}</span><script type="math/tex">s_{t+1}</script></span> 之后，采取所有可能的动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 的价值的期望。这里使用符号 <span class="arithmatex"><span class="MathJax_Preview">\pi(s_{t+1})</span><script type="math/tex">\pi(s_{t+1})</script></span> 就是表示这里可能是任何的动作。</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}Q^{\pi}(s_t, a_t) = r_t + Q^{\pi}(s_{t+1}, \pi(s_{t+1}))\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}Q^{\pi}(s_t, a_t) = r_t + Q^{\pi}(s_{t+1}, \pi(s_{t+1}))\end{equation}</script>
+</div>
+<table align=center style="width:80%">
+    <thead>
+        <tr>
+            <th>图5</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align="center"><img src="/KVlfpIwR/assets/05.png" width=100%/></td>
+        </tr>
+    </tbody>
+</table>
+
+<h2 id="3dqn">3、DQN 算法<a class="headerlink" href="#3dqn" title="Permanent link">#</a></h2>
+<blockquote>
+<p>在该小节中假设所有的 action 都是离散的，至于连续的 action 如何处理在之后的内容中讨论。</p>
+</blockquote>
+<p>在上一小节中已经有方法能够估计出动作价值函数 <span class="arithmatex"><span class="MathJax_Preview">Q^{\pi}(s, a)</span><script type="math/tex">Q^{\pi}(s, a)</script></span>，有了动作价值函数 <span class="arithmatex"><span class="MathJax_Preview">Q^{\pi}(s, a)</span><script type="math/tex">Q^{\pi}(s, a)</script></span> 之后就可以基于其进行强化学习了。总体的思路是：先有一个不是那么好的策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span>，比如可以随机初始化一个策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span>。估计出这个策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 相应的动作价值函数 <span class="arithmatex"><span class="MathJax_Preview">Q^{\pi}(s, a)</span><script type="math/tex">Q^{\pi}(s, a)</script></span>，然后可以使用 "某个方法" 从 <span class="arithmatex"><span class="MathJax_Preview">Q^{\pi}(s, a)</span><script type="math/tex">Q^{\pi}(s, a)</script></span> 得到一个新的策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span>，并且该方法可以保证新得到的策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span> 是比之前的策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 更优的。这样使用新策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span> 替换原来的策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 之后再重复上述过程，每次都能够得到一个更优的策略，就能够一直迭代训练下去了。后面就介绍这里提到的 "某个方法" 具体是如何操作的。</p>
+<p>首先给出该方法所能达到的功能：该方法可以从 <span class="arithmatex"><span class="MathJax_Preview">Q^{\pi}(s, a)</span><script type="math/tex">Q^{\pi}(s, a)</script></span> 中得到一个策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span>，并且能够保证这个新的策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span> 要比之前的策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 更优。</p>
+<p>对于 "策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span> 比策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 更优" 这种说法，给出一个严格的公式定义，当策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span> 和策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 满足下述公式时，就说策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span> 是比策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 更优的。这个公式可以直观的理解为：给定状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 之后，策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span> 所选取的动作能够比策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 所选取的动作获取更高的回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span>。</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}V^{\pi^\prime}(s) \geqslant V^{\pi}(s)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}V^{\pi^\prime}(s) \geqslant V^{\pi}(s)\end{equation}</script>
+</div>
+<p>接下来给出该方法具体是如何操作的。</p>
+<p>从 <span class="arithmatex"><span class="MathJax_Preview">Q^{\pi}(s, a)</span><script type="math/tex">Q^{\pi}(s, a)</script></span> 中得到策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span> 的公式如下所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\pi^\prime = \text{argmax}_a Q^{\pi}(s, a)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\pi^\prime = \text{argmax}_a Q^{\pi}(s, a)\end{equation}</script>
+</div>
+<p>首先来直观的理解该公式是在做什么，然后在 3.1 小节中证明该公式得到的结果能够满足 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi^\prime}(s) \geqslant V^{\pi}(s)</span><script type="math/tex">V^{\pi^\prime}(s) \geqslant V^{\pi}(s)</script></span>。上述公式中 <span class="arithmatex"><span class="MathJax_Preview">Q^{\pi}(s, a)</span><script type="math/tex">Q^{\pi}(s, a)</script></span> 表示给定状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 时，如果策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 采取了动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 所能获得的价值。<span class="arithmatex"><span class="MathJax_Preview">\text{argmax}_a Q^{\pi}(s, a)</span><script type="math/tex">\text{argmax}_a Q^{\pi}(s, a)</script></span> 则表示给定状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 时，将所有能够采取的动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 逐个求解一遍 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi(s,a)</span><script type="math/tex">Q^\pi(s,a)</script></span> 的值，选出能够使 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi(s,a)</span><script type="math/tex">Q^\pi(s,a)</script></span> 最大的那个动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>。之后再遇到给定状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 时，就采取该动作。这就是策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span>。</p>
+<h3 id="31-dqn">3.1 DQN 有效性的证明<a class="headerlink" href="#31-dqn" title="Permanent link">#</a></h3>
+<p>这里主要是证明使用公式 <span class="arithmatex"><span class="MathJax_Preview">a=\text{argmax}_a Q^\pi(s, a)</span><script type="math/tex">a=\text{argmax}_a Q^\pi(s, a)</script></span> 得到的 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span> 能够满足 <span class="arithmatex"><span class="MathJax_Preview">V^{\pi^\prime}(s) \geqslant V^\pi(s)</span><script type="math/tex">V^{\pi^\prime}(s) \geqslant V^\pi(s)</script></span>。</p>
+<p>首先有如下公式成立：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}V^\pi(s)=Q^\pi(s, \pi(s)) \leqslant \text{max}_a Q^\pi(s,a) = Q^\pi(s, \pi^\prime(s))\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}V^\pi(s)=Q^\pi(s, \pi(s)) \leqslant \text{max}_a Q^\pi(s,a) = Q^\pi(s, \pi^\prime(s))\end{equation}</script>
+</div>
+<p>基于上述公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+V^\pi(s) &amp;\leqslant Q^\pi(s, \pi^\prime(s)) \\
+&amp;= E\Big[ r_t + V^\pi(s_{t+1})|s_t=s,a_t=\pi^\prime(s_t) \Big] \\
+&amp;\leqslant E\Big[r_t + Q^\pi(s_{t+1}, \pi^\prime(s_{t+1}))|s_t=s,a_t=\pi^\prime(s_t) \Big] \\
+&amp;= E\Big[r_t + t_{t+1} + V^\pi(s_{t+2})| \cdots \Big] \\
+&amp;\leqslant E\Big[r_t + t_{t+1} + Q^\pi(s_{t+2}, \pi^\prime(s_{t+2}))| \cdots \Big] \\
+&amp;\cdots \\
+&amp;\leqslant V^{\pi^\prime}(s)
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+V^\pi(s) &\leqslant Q^\pi(s, \pi^\prime(s)) \\
+&= E\Big[ r_t + V^\pi(s_{t+1})|s_t=s,a_t=\pi^\prime(s_t) \Big] \\
+&\leqslant E\Big[r_t + Q^\pi(s_{t+1}, \pi^\prime(s_{t+1}))|s_t=s,a_t=\pi^\prime(s_t) \Big] \\
+&= E\Big[r_t + t_{t+1} + V^\pi(s_{t+2})| \cdots \Big] \\
+&\leqslant E\Big[r_t + t_{t+1} + Q^\pi(s_{t+2}, \pi^\prime(s_{t+2}))| \cdots \Big] \\
+&\cdots \\
+&\leqslant V^{\pi^\prime}(s)
+\end{split}\end{equation}</script>
+</div>
+<h3 id="32-dqn">3.2 DQN 算法过程<a class="headerlink" href="#32-dqn" title="Permanent link">#</a></h3>
+<p>训练过程如下，在该训练的算法中估计动作价值函数使用的是 TD 算法：</p>
+<blockquote>
+<ul>
+<li>
+<p>初始化 Q-function 的模型，记为 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span></p>
+</li>
+<li>
+<p>循环遍历多个 episode，对于每个 episode：</p>
+<ul>
+<li>
+<p>遍历每个时刻 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span>：</p>
+<ul>
+<li>给定状态 <span class="arithmatex"><span class="MathJax_Preview">s_t</span><script type="math/tex">s_t</script></span>，使用模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span>，依照下述策略选出动作 <span class="arithmatex"><span class="MathJax_Preview">a_t</span><script type="math/tex">a_t</script></span>：</li>
+</ul>
+<div class="arithmatex">
+<div class="MathJax_Preview">a_t = \text{argmax}_a Q(s_t, a_t)</div>
+<script type="math/tex; mode=display">a_t = \text{argmax}_a Q(s_t, a_t)</script>
+</div>
+<ul>
+<li>
+<p>有了 <span class="arithmatex"><span class="MathJax_Preview">s_t</span><script type="math/tex">s_t</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">a_t</span><script type="math/tex">a_t</script></span> 之后，跟环境做交互可以得到 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">s_{t+1}</span><script type="math/tex">s_{t+1}</script></span>；输入到模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 中可以得到 <span class="arithmatex"><span class="MathJax_Preview">Q(s_t, a_t)</span><script type="math/tex">Q(s_t, a_t)</script></span>；</p>
+</li>
+<li>
+<p>给定状态 <span class="arithmatex"><span class="MathJax_Preview">s_{t+1}</span><script type="math/tex">s_{t+1}</script></span>，使用模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 依照下述公式遍历所有可能的动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>，计算出要拟合的目标：</p>
+</li>
+</ul>
+<div class="arithmatex">
+<div class="MathJax_Preview">y = r_t + \text{max}_a Q(s_{t+1}, a)</div>
+<script type="math/tex; mode=display">y = r_t + \text{max}_a Q(s_{t+1}, a)</script>
+</div>
+<ul>
+<li>最后就是 <span class="arithmatex"><span class="MathJax_Preview">Q(s_t, a_t)</span><script type="math/tex">Q(s_t, a_t)</script></span> 作为 logits，<span class="arithmatex"><span class="MathJax_Preview">y</span><script type="math/tex">y</script></span> 作为 label，按照 regression 任务对模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 进行优化就可以了；</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p>推理过程比训练过程简单许多，如下：</p>
+<blockquote>
+<ul>
+<li>给定状态 <span class="arithmatex"><span class="MathJax_Preview">s_t</span><script type="math/tex">s_t</script></span>，使用训练好的模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span>，依照下述策略选出动作 <span class="arithmatex"><span class="MathJax_Preview">a_t</span><script type="math/tex">a_t</script></span>：</li>
+</ul>
+<div class="arithmatex">
+<div class="MathJax_Preview">a_t = \text{argmax}_a Q(s_t, a_t)</div>
+<script type="math/tex; mode=display">a_t = \text{argmax}_a Q(s_t, a_t)</script>
+</div>
+<ul>
+<li>
+<p>有了 <span class="arithmatex"><span class="MathJax_Preview">s_t</span><script type="math/tex">s_t</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">a_t</span><script type="math/tex">a_t</script></span> 之后，与环境交互能够得到 <span class="arithmatex"><span class="MathJax_Preview">s_{t+1}</span><script type="math/tex">s_{t+1}</script></span>；</p>
+</li>
+<li>
+<p>重复上述两步，直到生成整个 episode；</p>
+</li>
+</ul>
+</blockquote>
+<h2 id="4dqn">4、DQN 的改进<a class="headerlink" href="#4dqn" title="Permanent link">#</a></h2>
+<h3 id="41-target-network">4.1 Target Network<a class="headerlink" href="#41-target-network" title="Permanent link">#</a></h3>
+<p>原始的 DQN 使用的是图5的模型结构，将其换一下形式，改成下图6的形式。输入为 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t)</span><script type="math/tex">(s_t, a_t)</script></span> 时输出为 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi(s_t, a_t)</span><script type="math/tex">Q^\pi(s_t, a_t)</script></span>；输入为 <span class="arithmatex"><span class="MathJax_Preview">(s_{t+1}, \pi(s_{t+1}))</span><script type="math/tex">(s_{t+1}, \pi(s_{t+1}))</script></span> 时输出为 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi(s_{t+1}, \pi(s_{t+1}))</span><script type="math/tex">Q^\pi(s_{t+1}, \pi(s_{t+1}))</script></span>。将右侧的 model 称为 Target Netword，也就是把 <span class="arithmatex"><span class="MathJax_Preview">r_t + Q^\pi(s_{t+1}, \pi(s_{t+1}))</span><script type="math/tex">r_t + Q^\pi(s_{t+1}, \pi(s_{t+1}))</script></span> 当作标签。在原始的 DQN 中由于下图中左右两个模型 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi</span><script type="math/tex">Q^\pi</script></span> 是同一个模型，每一次迭代更新该模型都会变化，所以标签所属的分布也是在随着模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 不断变化的。当标签所属的分布在不断变化时，就会变得非常难以训练。</p>
+<p>Target Network 方法所提出的改进就是：在训练左侧的模型 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi</span><script type="math/tex">Q^\pi</script></span> 时，先将右侧的模型冻住不更新，待左侧的模型更新一定的次数之后，使用左侧模型的参数权重覆盖掉右侧模型的参数权重。然后冻住右侧模型，更新左侧模型，按此方法进行迭代训练。在该方法中左右两个模型就不是同一个模型了，在第 4.4 小节描述算法过程时，使用符号 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 表示下图中左侧的不断进行更新的模型，使用符号 <span class="arithmatex"><span class="MathJax_Preview">\hat{Q}</span><script type="math/tex">\hat{Q}</script></span> 表示下图右侧被冻住的模型。</p>
+<table align=center style="width:80%">
+    <thead>
+        <tr>
+            <th>图6</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align="center"><img src="/KVlfpIwR/assets/06.png" width=100%/></td>
+        </tr>
+    </tbody>
+</table>
+
+<h3 id="42-exploration">4.2 Exploration<a class="headerlink" href="#42-exploration" title="Permanent link">#</a></h3>
+<p>原始的 DQN 使用下式来获取新的策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span>：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}a = \text{argmax}_a Q(s, a)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}a = \text{argmax}_a Q(s, a)\end{equation}</script>
+</div>
+<p>这种方法是有问题的。在初始时所有的动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 都没有被采样过，也就是说给这些动作的价值的估计值都是0。此时只要采样到任何一个动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 的价值是正的，那么之后严格按照上述公式的话，之后就只会选取这个动作了。因为只有这个动作的价值的估计值是正的，其他的动作由于还没有被采样到所以价值的估计值是0。因此，就要求模型不能只选取价值最高的动作，还应该尝试探索更多的工作，基于此有以下两种设计。</p>
+<h4 id="421-epsilon-greedy">4.2.1 Epsilon Greedy<a class="headerlink" href="#421-epsilon-greedy" title="Permanent link">#</a></h4>
+<p>该方法是把原始 DQN 中的公式 <span class="arithmatex"><span class="MathJax_Preview">a = \text{argmax}_a Q(s, a)</span><script type="math/tex">a = \text{argmax}_a Q(s, a)</script></span> 改为下式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}a = \begin{cases}\text{argmax}_a Q(s, a) &amp;1-\epsilon  \\
+\text{random} &amp;\text{other} \end{cases}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}a = \begin{cases}\text{argmax}_a Q(s, a) &1-\epsilon  \\
+\text{random} &\text{other} \end{cases}\end{equation}</script>
+</div>
+<p>该公式的意思是：以 <span class="arithmatex"><span class="MathJax_Preview">1-\epsilon</span><script type="math/tex">1-\epsilon</script></span> 的概率选取价值最高的动作，另外的情况随机选取动作。其中 <span class="arithmatex"><span class="MathJax_Preview">\epsilon</span><script type="math/tex">\epsilon</script></span> 一般是比较小的值，比如：0.1。当然在实际操作中，<span class="arithmatex"><span class="MathJax_Preview">\epsilon</span><script type="math/tex">\epsilon</script></span> 还可以是随着时间减小的。初始状态时，由于动作价值函数的 model 效果不好估计不准确，分配更大的概率给随机选取动作。随着训练的进行，动作价值函数的 model 变得越来越准，那么就更大的概率使用该 model 选取动作。</p>
+<h4 id="422-boltzman-exploration">4.2.2 Boltzman Exploration<a class="headerlink" href="#422-boltzman-exploration" title="Permanent link">#</a></h4>
+<p>另外一种方法是，把原始 DQN 中的公式改为下式。新的策略 <span class="arithmatex"><span class="MathJax_Preview">\pi^\prime</span><script type="math/tex">\pi^\prime</script></span> 看到状态 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 之后不再是固定采取某个动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>，而是通过下式计算出每个动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 的分布，每次都从该分布中采样出动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>。对于价值比较高的动作，其采样的概率比较大；对于价值比较低的动作，也有一定的概率被采样到，不会出现永远无法被采样到的问题。</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}p(a|s) = \frac{\text{exp}(Q(s,a))}{\sum_a \text{exp}(Q(s,a))}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}p(a|s) = \frac{\text{exp}(Q(s,a))}{\sum_a \text{exp}(Q(s,a))}\end{equation}</script>
+</div>
+<h3 id="43-replay-buffer">4.3 Replay Buffer<a class="headerlink" href="#43-replay-buffer" title="Permanent link">#</a></h3>
+<p>先说明这个 Replay Buffer 具体是如何操作的，然后再说明其作用。</p>
+<p>首先开辟出一块空间用于存储采样到的数据，这个空间的大小是预先设定好的，如果该空间已经满了，又放入一条数据时，就把最老的那一条数据移除。DQN 的训练流程为：从模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 中依照采样策略采样出一条数据 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t, r_t, s_{t+1})</span><script type="math/tex">(s_t, a_t, r_t, s_{t+1})</script></span> 之后，就把该条数据放入到该 buffer 中。然后从该 buffer 中随机选取一条数据 <span class="arithmatex"><span class="MathJax_Preview">(s_i, a_i, r_i, s_{i+1})</span><script type="math/tex">(s_i, a_i, r_i, s_{i+1})</script></span> 用于学习和更新模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span>，注意随机选出的这条数据不一定是刚刚放入的那一条数据。当然，在实际操作时每个 step 中可以，从模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 中依照策略采样出一条数据放到 buffer 中，然后从该 buffer 中选取一个 minibatch 的数据（多条数据）用于学习和更新模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span>。</p>
+<p>在 DQN 的训练过程中，这个 buffer 中的数据不一定是当前最新的模型对应的策略采样出来的，有可能是之前旧的模型对应的策略采样出来的。该方法的作用有：</p>
+<ul>
+<li>由于这些数据可能是不同阶段的模型对应的策略采样的结果，保证了数据的多样性。经实验证明这种多样性对模型的训练是很有益的；</li>
+<li>数据可以多次使用，比如每次采样生成一条新数据放到 buffer 中，然后从 buffer 取出多条数据用于训练；</li>
+</ul>
+<h3 id="44-dqn">4.4 DQN 改进算法的算法过程<a class="headerlink" href="#44-dqn" title="Permanent link">#</a></h3>
+<p>下面把上面所述的 Target Network、Exploration、Replay Buffer 三个方法都用上，改进后的 DQN 算法的算法过程如下所示：</p>
+<blockquote>
+<ul>
+<li>
+<p>初始化 Q-function 的模型，记为 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span>；初始化 target Q-function 的模型，记为 <span class="arithmatex"><span class="MathJax_Preview">\hat{Q}</span><script type="math/tex">\hat{Q}</script></span>。</p>
+</li>
+<li>
+<p>循环遍历多个 episode，对于每个 episode：</p>
+<ul>
+<li>
+<p>遍历每个时刻 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span>：</p>
+<ul>
+<li>给定状态 <span class="arithmatex"><span class="MathJax_Preview">s_t</span><script type="math/tex">s_t</script></span>，使用模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span>，依照下述策略选出动作 <span class="arithmatex"><span class="MathJax_Preview">a_t</span><script type="math/tex">a_t</script></span>：</li>
+</ul>
+<div class="arithmatex">
+<div class="MathJax_Preview">a_t = \begin{cases}\text{argmax}_a Q(s_t, a_t) &amp;1-\epsilon  \\
+\text{random} &amp;\text{other} \end{cases}</div>
+<script type="math/tex; mode=display">a_t = \begin{cases}\text{argmax}_a Q(s_t, a_t) &1-\epsilon  \\
+\text{random} &\text{other} \end{cases}</script>
+</div>
+<ul>
+<li>
+<p>有了 <span class="arithmatex"><span class="MathJax_Preview">s_t</span><script type="math/tex">s_t</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">a_t</span><script type="math/tex">a_t</script></span> 之后，跟环境做交互可以得到 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">s_{t+1}</span><script type="math/tex">s_{t+1}</script></span>；</p>
+</li>
+<li>
+<p>将 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t, r_t, s_{t+1})</span><script type="math/tex">(s_t, a_t, r_t, s_{t+1})</script></span> 存储到 buffer 中；</p>
+</li>
+<li>
+<p>从 buffer 中 sample 出数据 <span class="arithmatex"><span class="MathJax_Preview">(s_i, a_i, r_i, s_{i+1})</span><script type="math/tex">(s_i, a_i, r_i, s_{i+1})</script></span>；（多数情况下会 sample 一个 batch 的数据）</p>
+</li>
+<li>
+<p>给定状态 <span class="arithmatex"><span class="MathJax_Preview">s_{i+1}</span><script type="math/tex">s_{i+1}</script></span>，使用模型 <span class="arithmatex"><span class="MathJax_Preview">\hat{Q}</span><script type="math/tex">\hat{Q}</script></span> 依照下述公式遍历所有可能的动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>，计算出要拟合的目标：</p>
+</li>
+</ul>
+<div class="arithmatex">
+<div class="MathJax_Preview">y = r_i + \text{max}_a \hat{Q}(s_{i+1}, a)</div>
+<script type="math/tex; mode=display">y = r_i + \text{max}_a \hat{Q}(s_{i+1}, a)</script>
+</div>
+<ul>
+<li>
+<p>将 <span class="arithmatex"><span class="MathJax_Preview">(s_i, a_i)</span><script type="math/tex">(s_i, a_i)</script></span> 输入到模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 得到 <span class="arithmatex"><span class="MathJax_Preview">Q(s_i, a_i)</span><script type="math/tex">Q(s_i, a_i)</script></span>；然后就是 <span class="arithmatex"><span class="MathJax_Preview">Q(s_i, a_i)</span><script type="math/tex">Q(s_i, a_i)</script></span> 作为 logits，<span class="arithmatex"><span class="MathJax_Preview">y</span><script type="math/tex">y</script></span> 作为 label，按照 regression 任务对模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 进行优化就可以了；</p>
+</li>
+<li>
+<p>每过 <span class="arithmatex"><span class="MathJax_Preview">C</span><script type="math/tex">C</script></span> 个 step 就用模型 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 的参数覆盖掉模型 <span class="arithmatex"><span class="MathJax_Preview">\hat{Q}</span><script type="math/tex">\hat{Q}</script></span> 的参数。</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=o_g9JUMw1Oc&amp;list=PLJV_el3uVTsODxQFgzMzPLa16h6B8kWM_&amp;index=3">https://www.youtube.com/watch?v=o_g9JUMw1Oc&amp;list=PLJV_el3uVTsODxQFgzMzPLa16h6B8kWM_&amp;index=3</a></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

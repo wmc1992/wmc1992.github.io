@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/101_%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AE%9E%E9%AA%8C%E8%AE%B0%E5%BD%95/02_ChatGLM/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/FC2FzDkE_no_toc/">隐藏左侧目录栏</a>][<a href="/FC2FzDkE/">显示左侧目录栏</a>]</p>
+
+<h1 id="chatglm">记录一些使用ChatGLM的结果<a class="headerlink" href="#chatglm" title="Permanent link">#</a></h1>
+<h2 id="1">1、使用领域数据微调之后对于通用问题的回答能力<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>测试使用的模型为ChatGLM，领域数据是医疗类数据，该数据是将分类、NER、关系抽取、事件抽取等任务的数据集构造为了生成式任务的格式。</p>
+<h3 id="11">1.1 数据简介<a class="headerlink" href="#11" title="Permanent link">#</a></h3>
+<p>该数据集总共有79260条数据，由16个子数据集组成，每个子数据集的任务类型如下表所示：</p>
+<table align=center style="width:auto">
+    <thead>
+        <tr><th>数据集名称</th><th>任务类型</th></tr>
+    </thead>
+    <tbody style="font-size: 0.5rem">
+        <tr><td>CHIP-CTC</td><td>cls</td></tr>
+        <tr><td>IMCS-V2-DAC</td><td>cls</td></tr>
+        <tr><td>KUAKE-QIC</td><td>cls</td></tr>
+        <tr><td>CMeEE-V2</td><td>ner</td></tr>
+        <tr><td>CMeIE</td><td>spo_generation</td></tr>
+        <tr><td>CHIP-CDEE</td><td>event_extraction</td></tr>
+        <tr><td>CHIP-CDN</td><td>normalization</td></tr>
+        <tr><td>CHIP-STS</td><td>cls</td></tr>
+        <tr><td>KUAKE-QQR</td><td>matching</td></tr>
+        <tr><td>KUAKE-IR</td><td>matching</td></tr>
+        <tr><td>KUAKE-QTR</td><td>matching</td></tr>
+        <tr><td>IMCS-V2-SR</td><td>attr_cls</td></tr>
+        <tr><td>CHIP-MDCFNPC</td><td>attr_cls</td></tr>
+        <tr><td>IMCS-V2-NER</td><td>ner</td></tr>
+        <tr><td>IMCS-V2-MRG</td><td>report_generation</td></tr>
+        <tr><td>MedDG</td><td>response_generation</td></tr>
+    </tbody>
+</table>
+
+<p>不同任务类型的数据样例如下：</p>
+<table align=center style="width:auto">
+    <thead>
+        <tr>
+            <th>任务类型</th>
+            <th>数据样例</th>
+        </tr>
+    </thead>
+    <tbody style="font-size: 0.5rem">
+        <tr>
+            <td>cls</td>
+            <td>{'input': '确定试验筛选标准的类型：\n12.病人必须同时适合行手术切除，射频消融治疗以及UGRASLR\n类型选项：预期寿命，伦理审查，特殊病人特征，过敏耐受，读写能力，实验室检查，器官组织状态，成瘾行为，肿瘤进展，能力，口腔相关，睡眠，疾病，性取向，药物，种族，受体状态，参与其它试验，献血，饮食，怀孕相关，性别，风险评估，吸烟状况，治疗或手术\n答：', 'target': '治疗或手术'}</td>
+        </tr>
+        <tr>
+            <td>normalization</td>
+            <td>{'input': '找出归一后的标准词：\n肝穿组织轻度急性排异反应不除外\n选项：反应性穿孔性胶原病，肝移植物急性抗宿主病，排盐利尿剂类反应，舒喘宁类药物反应\n说明：从候选的若干个ICD-10诊断标准词中选择出与原诊断描述匹配的词\n答：', 'target': '肝移植物急性抗宿主病'}</td>
+        </tr>
+        <tr>
+            <td>matching</td>
+            <td>{'input': '“眼睑内侧长了白色颗粒”和“下眼睑有白色颗粒”的意思有多相似？\n选项：完全一致，后者是前者的语义子集，后者是前者的语义父集，语义无直接关联\n答：', 'target': '语义无直接关联'}</td>
+        </tr>
+        <tr>
+            <td>ner</td>
+            <td>{'input': '实体抽取：\n肺部可闻广泛湿啰音和哮鸣音呼吸道黏膜易继发细菌感染。\n选项：医疗设备，微生物类，身体部位，医院科室，疾病，临床表现，药物，医疗程序，医学检验项目', 'target': '上述句子中的实体包含：\n医疗设备实体：\n微生物类实体：\n身体部位实体：肺部，呼吸道黏膜\n医院科室实体：\n疾病实体：细菌感染\n临床表现实体：肺部可闻广泛湿啰音和哮鸣音\n药物实体：\n医疗程序实体：\n医学检验项目实体：'}</td>
+        </tr>
+        <tr>
+            <td>attr_cls</td>
+            <td>{'input': '当前对话涉及哪些症状？这些症状的阴阳性如何？\n对话历史：\n患者：精神也好\n医生：一般脸黄可能是贫血导致，或者生病时间长，饮食不好，也会出现脸黄！\n当前对话：\n患者：昨天都好好的脸色，就今天吊水之后，我下班回家看他就脸色发黄\n选项：没有患有该症状，患有该症状，无法根据上下文确定病人是否患有该症状\n答：', 'target': '当前对话中的症状及其阴阳性判断为：\n脸色发黄：患有该症状'}</td>
+        </tr>
+        <tr>
+            <td>spo_generation</td>
+            <td>{'input': '肝硬化@ * 隐源性肝硬化。肝硬化@ ## 病理生理学 各种慢性肝损伤几乎都会出现肝纤维化，并可能最终进展为结节性肝硬化。\n问题：句子中的病因，阶段，放射治疗，内窥镜检查等关系类型三元组是什么？', 'target': '具有病因关系的头尾实体对如下：头实体为肝硬化，尾实体为隐源性肝硬化。\n具有阶段关系的头尾实体对如下：\n具有放射治疗关系的头尾实体对如下：\n具有内窥镜检查关系的头尾实体对如下：'}</td>
+        </tr>
+        <tr>
+            <td>event_extraction</td>
+            <td>{'input': '临床发现事件抽取：患者自发病以来，精神差，食欲差，睡眠可，大便如常，小便如常，体重无明显变化。\n说明：临床发现事件的主体词包含发生状态，描述词和解剖部位这三种属性，其中描述词和解剖部位可能有多个值', 'target': '上述句子中的临床发现事件如下：\n主体词：精神；发生状态：；描述词：差；解剖部位：\n主体词：食欲；发生状态：；描述词：差；解剖部位：\n主体词：睡眠；发生状态：；描述词：可 ；解剖部位：\n主体词：大便；发生状态：；描述词：如常；解剖部位：\n主体词：小便；发生状态：；描述词：如常；解剖部位：\n主体词：体重改变；发生状态：否定；描述词：明显；解剖部位：'}</td>
+        </tr>
+        <tr>
+            <td>response_generation</td>
+            <td>{'input': '患者：经常恶心想吐，腹胀怎么回事？没有怀孕（女，21岁）\n医生：你好，这种情况多久了？\n患者：大概一个月吧。\n医生：平时常吃辛辣、冰冻食物和熬夜吗。\n患者：都很少。\n医生：做过什么检查没有？\n根据上述对话历史，给出医生的下一句话\n答：', 'target': '做𠆤胃镜吧，考虑胃食管反说。'}</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3 id="12">1.2 能力对比<a class="headerlink" href="#12" title="Permanent link">#</a></h3>
+<p>由于微调数据为医疗数据，在测试能力时，现在使用通用问题和法律类问题进行测试。</p>
+<table align=center style="width:auto">
+    <thead>
+        <tr>
+            <th style="width:20%">输入</th>
+            <th style="width:40%">医疗数据微调后的模型</th>
+            <th style="width:40%">原始ChatGLM模型</th>
+        </tr>
+    </thead>
+    <tbody style="font-size: 0.5rem">
+        <tr>
+            <td>帮我写一份去西安的旅游计划。</td>
+            <td>好的,以下是一份去西安的旅游计划:<br>Day 1:抵达西安<br>抵达西安后,可以先休息一下,适应一下当地气候。<br>Day 2:兵马俑<br>早上前往兵马俑,下午返回西安。<br>Day 3:古城墙<br>早上前往古城墙,下午返回西安。<br>Day 4:大雁塔<br>早上前往大雁塔,下午返回西安。<br>Day 5:钟楼<br>早上前往钟楼,下午返回西安。<br>Day 6:华清池<br>早上前往华清池,下午返回西安。<br>Day 7:陕西历史博物馆<br>早上前往陕西历史博物馆,下午返回西安。<br>Day 8:钟楼回民街<br>早上前往钟楼回民街,下午返回西安。<br>Day 9:西安城墙<br>早上前往西安城墙,下午返回西安。<br>Day 10:大唐芙蓉园<br>早上前往大唐芙蓉园,下午返回西安。<br>Day 11:钟楼钟楼<br>早上前往钟楼钟楼,下午返回西安。<br>Day 12:返回家乡</td>
+            <td>第一天:<br>- 上午:到达西安,入住酒店<br>- 下午:游览兵马俑博物馆,了解中国古代的兵马俑<br>- 晚上:品尝当地美食,例如羊肉泡馍、肉夹馍、凉皮等<br><br>第二天:<br>- 上午:游览大雁塔,欣赏古代佛教文化<br>- 下午:游览钟楼和鼓楼,感受西安的历史文化氛围<br>- 晚上:品尝当地美食,例如烤肉串、葫芦头等<br><br>第三天:<br>- 上午:游览古城墙,感受西安的历史文化氛围<br>- 下午:游览华清池,欣赏古代皇家园林美景<br>- 晚上:品尝当地美食,例如羊肉泡馍、肉夹馍、凉皮等<br><br>第四天:<br>- 上午:游览陕西历史博物馆,了解西安的历史和文化<br>- 下午:游览大明宫国家遗址公园,欣赏古代皇家宫殿美景<br>- 晚上:品尝当地美食,例如烤肉串、葫芦头等<br><br>第五天:<br>- 上午:游览西安城墙,骑自行车游览城墙上的美景<br>- 下午:离开西安,返回家乡<br><br>以上是一份简单的旅游计划,可以根据自己的兴趣和时间进行适当的调整。希望您在西安度过一个愉快的旅行!</td>
+        </tr>
+        <tr>
+            <td>如果一个人故意驾车向人群冲撞,但没有造成重大损失,会被怎样处罚?</td>
+            <td>故意驾车向人群冲撞是一种严重的犯罪行为,如果造成重大损失,则可能构成故意杀人罪。如果没有造成重大损失,则可能构成过失杀人罪或者意外事件。</td>
+            <td>如果一个人故意驾车向人群冲撞,但没有造成重大损失,通常会被归类为故意杀人罪,属于比较严重的刑事犯罪。<br><br>在刑法中,故意杀人罪是指故意非法剥夺他人生命,情节较轻的犯罪。如果这个人的行为没有造成重大损失,通常会被被判处长期监禁或者死刑,但具体判决结果还需要根据案件的具体情况来确定。<br><br>此外,这个人的行为也可能会受到其他法律的制裁,例如交通事故责任强制保险制度、车辆保险制度等。如果这个人的行为造成了严重后果,保险公司可能会承担相应的赔偿责任。<br><br>总结起来,如果一个人故意驾车向人群冲撞,即使没有造成重大损失,也需要承担相应的法律责任。</td>
+        </tr>
+        <tr>
+            <td>如果一个邮政工作人员私自开拆了一个邮件,但只是为了查看其中的收件人地址,而并未泄露邮件内容,是否构成什么罪行? </td>
+            <td>这种行为是违法的。</td>
+            <td>私自开拆未授权的信件是一种违法行为,这种行为可能会导致法律后果,包括罚款、监禁或其他刑事处罚。<br><br>根据《中华人民共和国邮政法》的规定,邮政工作人员应当遵守下列规定:<br><br>(一)遵守国家法律法规,保护邮件、信件、包裹等邮政通信资源不受侵犯。<br><br>(二)按照国务院邮政管理部门的规定,履行邮政服务职责。<br><br>(三)负责管理和维护邮政设施、设备,保证邮政通信的安全。<br><br>(四)对邮政服务进行监督管理,维护邮政服务的正常秩序。<br><br>(五)法律、行政法规规定应当由邮政管理部门履行的其他职责。<br><br>如果邮政工作人员私自开拆了未授权的信件,而并未泄露邮件内容,则可能会违反上述规定。此外,私自开拆邮件的行为也可能会导致其他法律后果,例如泄露个人信息或造成其他损失。<br><br>因此,如果邮政工作人员私自开拆了未授权的信件,应该立即向上级或邮政管理部门报告,并采取必要的措施来防止任何进一步的违法行为。</td>
+        </tr>
+        <tr>
+            <td>如果某个工人每天工作10小时,那么每周工作时间超过了规定吗? </td>
+            <td>如果每天工作10小时,那么每周工作时间为40小时。</td>
+            <td>如果某个工人每天工作10小时,那么每周的工作时间应该是 10 小时 × 5 天 = 50 小时。<br><br>然而,如果工人每天工作10小时,那么他们每周实际上工作的时间为 50 小时 + 10 小时 = 60 小时。<br><br>因此,这个工人每周的工作时间超过了规定。按照规定,每周的工作时间应该是 40 小时。</td>
+        </tr>
+        <tr>
+            <td>甲公司注册资金为120万元,主营建材,乙厂为生产瓷砖的合伙企业。甲公司为稳定货源,决定投资30万元入伙乙厂。对此项投资的效力,下列表述哪一项是正确的?<br>A)须经甲公司股东会全体通过方为有效<br>B)须经甲公司董事会全体通过方为有效<br>C)须经乙厂全体合伙人同意方为有效<br>D)无效</td>
+            <td>无效</td>
+            <td>正确答案是A)须经甲公司股东会全体通过方为有效。<br><br>根据《合伙企业法》第35条的规定,甲公司投资入伙乙厂需要经全体合伙人同意。因此,甲公司投资入伙乙厂的行为需要经甲公司股东会全体通过方为有效。<br><br>选项B、C、D三项的表述都是错误的,因为甲公司投资入伙乙厂的行为已经得到了甲公司董事会的批准,所以不需要经其他股东或合伙人的同意。同时,根据《合伙企业法》第34条的规定,甲公司注册资本120万元,已经远远超过了入伙投资30万元所需的注册资本,因此甲公司投资入伙乙厂的行为也是有效的。</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3 id="13">1.3 总结<a class="headerlink" href="#13" title="Permanent link">#</a></h3>
+<p>可以看出最明显的一点是：由于微调时使用的数据都是直接输出答案，没有思考过程，导致微调后的模型的输出结果也变得直接输出答案，不再有思考过程。作为通用对话来说，这无疑是不友好的。</p>
+<p>有一点是微调后的模型对于通用问题依然能够适当的结束，这一点要比一些"汉化"效果不够好的LLaMA模型的效果要好。有些"汉化"效果不够好的模型在使用领域数据微调之后，对于通用问题经常会出现中英文夹杂以及不知道如何结束的问题。</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

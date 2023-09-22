@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/002_%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0/10_CRF/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#crf" class="nav-link">CRF</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#_1" class="nav-link">一、图模型</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#11" class="nav-link">1.1 把图看作是一种概率分布</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#12" class="nav-link">1.2 从概率分布的角度理解最大团与势函数</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_2" class="nav-link">二、条件随机场</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#21" class="nav-link">2.1 形式化定义</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#22" class="nav-link">2.2 参数化形式</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#23" class="nav-link">2.3 简化形式</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_3" class="nav-link">相关链接</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/3RS2434p_no_toc/">隐藏左侧目录栏</a>][<a href="/3RS2434p/">显示左侧目录栏</a>]</p>
+
+<h1 id="crf">CRF<a class="headerlink" href="#crf" title="Permanent link">#</a></h1>
+<h2 id="_1">一、图模型<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
+<h3 id="11">1.1 把图看作是一种概率分布<a class="headerlink" href="#11" title="Permanent link">#</a></h3>
+<p>现在考虑有一系列随机变量<span class="arithmatex"><span class="MathJax_Preview">Y</span><script type="math/tex">Y</script></span>，<span class="arithmatex"><span class="MathJax_Preview">y=\{y_1, y_2, ..., y_k\}</span><script type="math/tex">y=\{y_1, y_2, ..., y_k\}</script></span>是<span class="arithmatex"><span class="MathJax_Preview">Y</span><script type="math/tex">Y</script></span>的分布。由于所有的随机变量之间不是完全相互独立的，所以<span class="arithmatex"><span class="MathJax_Preview">y</span><script type="math/tex">y</script></span>的概率分布并不直接等于每个元素的概率连乘，它们之间是有一定的约束关系的。定义这些约束关系为<span class="arithmatex"><span class="MathJax_Preview">\psi_i(y_i), i \in \{1, 2, ..., I\}</span><script type="math/tex">\psi_i(y_i), i \in \{1, 2, ..., I\}</script></span>。这样可以将<span class="arithmatex"><span class="MathJax_Preview">y</span><script type="math/tex">y</script></span>的概率分布写出来：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(y) = \frac{1}{Z} \prod_{i=1}^I \psi_i(y_i)</div>
+<script type="math/tex; mode=display">p(y) = \frac{1}{Z} \prod_{i=1}^I \psi_i(y_i)</script>
+</div>
+<p>其中<span class="arithmatex"><span class="MathJax_Preview">Z</span><script type="math/tex">Z</script></span>是归一化因子。</p>
+<p>以HMM为例，HMM的状态序列就是一个图，只是它是线性链。序列为<span class="arithmatex"><span class="MathJax_Preview">q = \{q_0, q_1, ..., q_T\}</span><script type="math/tex">q = \{q_0, q_1, ..., q_T\}</script></span>，长度为<span class="arithmatex"><span class="MathJax_Preview">T</span><script type="math/tex">T</script></span>；每个节点的取值空间为<span class="arithmatex"><span class="MathJax_Preview">Q = \{Q_1, Q_2, ..., Q_N\}</span><script type="math/tex">Q = \{Q_1, Q_2, ..., Q_N\}</script></span>，可取值数量为<span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span>。在这里<span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span>是一些列随机变量，<span class="arithmatex"><span class="MathJax_Preview">q</span><script type="math/tex">q</script></span>是<span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span>的分布，而HMM模型中转移概率矩阵就是各个随机变量之间的约束关系。</p>
+<p>另外图可分为无向图和有向图。有向图是节点<span class="arithmatex"><span class="MathJax_Preview">k_1</span><script type="math/tex">k_1</script></span>到节点<span class="arithmatex"><span class="MathJax_Preview">k_2</span><script type="math/tex">k_2</script></span>的约束与节点<span class="arithmatex"><span class="MathJax_Preview">k_2</span><script type="math/tex">k_2</script></span>到节点<span class="arithmatex"><span class="MathJax_Preview">k_1</span><script type="math/tex">k_1</script></span>的约束是不同的，用概率体现出来可以是<span class="arithmatex"><span class="MathJax_Preview">p(k_1|k_2) != p(k_2|k_1)</span><script type="math/tex">p(k_1|k_2) != p(k_2|k_1)</script></span>。而无向图则永远是<span class="arithmatex"><span class="MathJax_Preview">p(k_1|k_2) = p(k_2|k_1)</span><script type="math/tex">p(k_1|k_2) = p(k_2|k_1)</script></span>。</p>
+<h3 id="12">1.2 从概率分布的角度理解最大团与势函数<a class="headerlink" href="#12" title="Permanent link">#</a></h3>
+<blockquote>
+<p>这些都是自己的猜测，不一定准确，对图论不是很了解</p>
+</blockquote>
+<p>最大团是任意两节点之间都有边连接，且不能再新加入节点使其满足该条件。从概率分布的角度理解</p>
+<ul>
+<li>任意两点间都有边连接表示这些随机变量之间都存在约束关系，不存在相互独立的可能。一个最大团的联合概率用一个势函数表示：<span class="arithmatex"><span class="MathJax_Preview">\psi_{i}(y_i)</span><script type="math/tex">\psi_{i}(y_i)</script></span>。这是整个分布的联合概率的最小单位，不可再分。</li>
+<li>不能再新加入节点使其满足条件表示两个最大团之间应该是相互独立的，体现在概率分布的公式上就是势函数相乘：</li>
+</ul>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(y) ∝ \prod_{i=0}^I \psi_i(y_i)</div>
+<script type="math/tex; mode=display">p(y) ∝ \prod_{i=0}^I \psi_i(y_i)</script>
+</div>
+<p>有如下无向图模型，及其联合概率与势函数的关系：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(y) ∝ \psi_1(y_1, y_2)\psi_2(y_2, y_3)\psi_3(y_3, y_1)</div>
+<script type="math/tex; mode=display">p(y) ∝ \psi_1(y_1, y_2)\psi_2(y_2, y_3)\psi_3(y_3, y_1)</script>
+</div>
+<p><img alt="" src="/3RS2434p/assets/概率图模型.png" /></p>
+<h2 id="_2">二、条件随机场<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
+<p>条件随机场：在给定随机变量<span class="arithmatex"><span class="MathJax_Preview">X</span><script type="math/tex">X</script></span>的条件下，随机变量<span class="arithmatex"><span class="MathJax_Preview">Y</span><script type="math/tex">Y</script></span>的马尔科夫随机场。</p>
+<h3 id="21">2.1 形式化定义<a class="headerlink" href="#21" title="Permanent link">#</a></h3>
+<p>设<span class="arithmatex"><span class="MathJax_Preview">X = (X_1, X_2, ..., X_n)</span><script type="math/tex">X = (X_1, X_2, ..., X_n)</script></span>，<span class="arithmatex"><span class="MathJax_Preview">Y = (Y_1, Y_2, ..., Y_n)</span><script type="math/tex">Y = (Y_1, Y_2, ..., Y_n)</script></span>为线性链表示的随机变量序列，若在给定随机变量序列<span class="arithmatex"><span class="MathJax_Preview">X</span><script type="math/tex">X</script></span>的情况下，随机变量<span class="arithmatex"><span class="MathJax_Preview">Y</span><script type="math/tex">Y</script></span>的条件概率分布<span class="arithmatex"><span class="MathJax_Preview">p(Y|X)</span><script type="math/tex">p(Y|X)</script></span>构成条件随机场，则称<span class="arithmatex"><span class="MathJax_Preview">p(Y|X)</span><script type="math/tex">p(Y|X)</script></span>是线性链条件随机场。</p>
+<p>线性链条件随机场满足马尔可夫性：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(Y_i|X, Y_1, Y_2, ..., Y_{i-1}, Y_{i+1}, ..., Y_n) = p(Y_i|X, Y_{i-1},Y_{i+1}) , i=1,2,...,n</div>
+<script type="math/tex; mode=display">p(Y_i|X, Y_1, Y_2, ..., Y_{i-1}, Y_{i+1}, ..., Y_n) = p(Y_i|X, Y_{i-1},Y_{i+1}) , i=1,2,...,n</script>
+</div>
+<p>理解该性质可以参考如下图：</p>
+<p><img alt="" src="/3RS2434p/assets/linear_crf.png" /></p>
+<h3 id="22">2.2 参数化形式<a class="headerlink" href="#22" title="Permanent link">#</a></h3>
+<div class="arithmatex">
+<div class="MathJax_Preview">p(y|x) = \frac{1}{Z(x)} \text{exp} \big(\sum_{i,k} \lambda_k t_k (y_{i-1}, y_i, x, i) + \sum_{i,l} \mu_l s_l(y_i, x, i) \big) </div>
+<script type="math/tex; mode=display">p(y|x) = \frac{1}{Z(x)} \text{exp} \big(\sum_{i,k} \lambda_k t_k (y_{i-1}, y_i, x, i) + \sum_{i,l} \mu_l s_l(y_i, x, i) \big) </script>
+</div>
+<p>其中：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">Z(x)</span><script type="math/tex">Z(x)</script></span>是归一化因子</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">t_k</span><script type="math/tex">t_k</script></span>是转移特征函数，依赖于当前和前一个位置</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">s_l</span><script type="math/tex">s_l</script></span>是状态特征函数，依赖于当前位置</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">\lambda_k</span><script type="math/tex">\lambda_k</script></span>是转移特征函数的权重</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">\mu_l</span><script type="math/tex">\mu_l</script></span>是状态特征函数的权重</li>
+</ul>
+<h3 id="23">2.3 简化形式<a class="headerlink" href="#23" title="Permanent link">#</a></h3>
+<p>简化形式：即将局部特征函数统一成一个全局特征函数。</p>
+<p>定义几个字符：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">K_1</span><script type="math/tex">K_1</script></span>：转移特征函数的个数</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">K_2</span><script type="math/tex">K_2</script></span>：状态特征函数的个数</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">K = K_1 + K_2</span><script type="math/tex">K = K_1 + K_2</script></span></li>
+</ul>
+<h4 id="231-t_kt_k-s_ls_l-f_ky_i-1-y_i-x-if_ky_i-1-y_i-x-i">2.3.1 使用新的符号将 <span class="arithmatex"><span class="MathJax_Preview">t_k</span><script type="math/tex">t_k</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">s_l</span><script type="math/tex">s_l</script></span> 统一表示为 <span class="arithmatex"><span class="MathJax_Preview">f_k(y_{i-1}, y_i, x, i)</span><script type="math/tex">f_k(y_{i-1}, y_i, x, i)</script></span>：<a class="headerlink" href="#231-t_kt_k-s_ls_l-f_ky_i-1-y_i-x-if_ky_i-1-y_i-x-i" title="Permanent link">#</a></h4>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+f_k (y_{i-1}, y_i, x, i) =
+\begin{cases}
+t_k (y_{i-1}, y_i, x, i), k=1,2,...,K_1 \\
+s_l (y_i, x, i), k=K_1 + l, l=1,2,...,K_2
+\end{cases}
+</div>
+<script type="math/tex; mode=display">
+f_k (y_{i-1}, y_i, x, i) =
+\begin{cases}
+t_k (y_{i-1}, y_i, x, i), k=1,2,...,K_1 \\
+s_l (y_i, x, i), k=K_1 + l, l=1,2,...,K_2
+\end{cases}
+</script>
+</div>
+<p>在 <span class="arithmatex"><span class="MathJax_Preview">f_k(y_{i-1}, y_i, x, i)</span><script type="math/tex">f_k(y_{i-1}, y_i, x, i)</script></span> 中有两个比较重要的参数：</p>
+<ul>
+<li>参数 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span>：序列中节点的位置；</li>
+<li>参数 <span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span>，合并之后统称为参数 <span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span>：表示是哪个特征函数；</li>
+</ul>
+<h4 id="232-ii">2.3.2 对所有在位置<span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span>的特征求和：<a class="headerlink" href="#232-ii" title="Permanent link">#</a></h4>
+<div class="arithmatex">
+<div class="MathJax_Preview">f_k(y,x) = \sum_{i=1}^n f_k(y_{i-1}, y_i, x, i) , k=1,2,...,K</div>
+<script type="math/tex; mode=display">f_k(y,x) = \sum_{i=1}^n f_k(y_{i-1}, y_i, x, i) , k=1,2,...,K</script>
+</div>
+<p>在<span class="arithmatex"><span class="MathJax_Preview">f_k(y,x)</span><script type="math/tex">f_k(y,x)</script></span>中可以看到已经把参数 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 去掉了，那么相比于<span class="arithmatex"><span class="MathJax_Preview">f_k(y_{i-1}, y_i, x, i)</span><script type="math/tex">f_k(y_{i-1}, y_i, x, i)</script></span>所表示的含义上的差别：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">f_k(y_{i-1}, y_i, x, i)</span><script type="math/tex">f_k(y_{i-1}, y_i, x, i)</script></span> 表示在位置 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 附近，<span class="arithmatex"><span class="MathJax_Preview">y_{i-1}</span><script type="math/tex">y_{i-1}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">y_i</span><script type="math/tex">y_i</script></span>、<span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span>之间的关系。这是在 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 这个位置的局部特征；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">f_k(y,x)</span><script type="math/tex">f_k(y,x)</script></span> 表示在整个序列上 <span class="arithmatex"><span class="MathJax_Preview">y</span><script type="math/tex">y</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 之间的关系。这是一个全局特征；</li>
+</ul>
+<h4 id="233-w_kw_k-lambda_klambda_k-mu_lmu_l">2.3.3 使用 <span class="arithmatex"><span class="MathJax_Preview">w_k</span><script type="math/tex">w_k</script></span> 统一表示 <span class="arithmatex"><span class="MathJax_Preview">\lambda_k</span><script type="math/tex">\lambda_k</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">\mu_l</span><script type="math/tex">\mu_l</script></span> 这两个权重：<a class="headerlink" href="#233-w_kw_k-lambda_klambda_k-mu_lmu_l" title="Permanent link">#</a></h4>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+w_k =
+\begin{cases}
+\lambda_k , k=1,2,...,K_1\\
+\mu_l , k=K_1+l, l=1,2,...,K_2
+\end{cases}
+</div>
+<script type="math/tex; mode=display">
+w_k =
+\begin{cases}
+\lambda_k , k=1,2,...,K_1\\
+\mu_l , k=K_1+l, l=1,2,...,K_2
+\end{cases}
+</script>
+</div>
+<h4 id="234-f_kyxf_kyx-w_kw_k">2.3.4 使用 <span class="arithmatex"><span class="MathJax_Preview">f_k(y,x)</span><script type="math/tex">f_k(y,x)</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">w_k</span><script type="math/tex">w_k</script></span> 来表示条件随机场：<a class="headerlink" href="#234-f_kyxf_kyx-w_kw_k" title="Permanent link">#</a></h4>
+<p>先看一下使用局部特征函数表示条件随机场：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{aligned}
+p(y|x) &amp;= \frac{1}{Z(x)} exp \sum_{k=1}^K \sum_{i=1}^n w_k f_k(y_{i-1}, y_i, x, i) \\
+Z(x) &amp;= \sum_y exp \sum_{k=1}^K \sum_{i=1}^n w_k f_k(y_{i-1}, y_i, x, i)
+\end{aligned}
+</div>
+<script type="math/tex; mode=display">
+\begin{aligned}
+p(y|x) &= \frac{1}{Z(x)} exp \sum_{k=1}^K \sum_{i=1}^n w_k f_k(y_{i-1}, y_i, x, i) \\
+Z(x) &= \sum_y exp \sum_{k=1}^K \sum_{i=1}^n w_k f_k(y_{i-1}, y_i, x, i)
+\end{aligned}
+</script>
+</div>
+<p>然后是使用全局特征函数表示条件随机场：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{aligned}
+p(y|x) &amp;= \frac{1}{Z(x)} exp \sum_{k=1}^K w_k f_k(y,x) \\
+Z(x) &amp;= \sum_y exp \sum_{k=1}^K w_k f_k(y,x)
+\end{aligned}
+</div>
+<script type="math/tex; mode=display">
+\begin{aligned}
+p(y|x) &= \frac{1}{Z(x)} exp \sum_{k=1}^K w_k f_k(y,x) \\
+Z(x) &= \sum_y exp \sum_{k=1}^K w_k f_k(y,x)
+\end{aligned}
+</script>
+</div>
+<h4 id="235">2.3.5 引入向量<a class="headerlink" href="#235" title="Permanent link">#</a></h4>
+<ul>
+<li>使用 <span class="arithmatex"><span class="MathJax_Preview">w</span><script type="math/tex">w</script></span> 表示权值向量，即 <span class="arithmatex"><span class="MathJax_Preview">w = \{w_1, ..., w_K\}^T</span><script type="math/tex">w = \{w_1, ..., w_K\}^T</script></span></li>
+<li>使用 <span class="arithmatex"><span class="MathJax_Preview">F(y,x)</span><script type="math/tex">F(y,x)</script></span>，即 <span class="arithmatex"><span class="MathJax_Preview">F(y,x) = (f_1(y,x), f_2(y,x), ..., f_K(y,x))^T</span><script type="math/tex">F(y,x) = (f_1(y,x), f_2(y,x), ..., f_K(y,x))^T</script></span></li>
+</ul>
+<p>使用 <span class="arithmatex"><span class="MathJax_Preview">w</span><script type="math/tex">w</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">F(y,x)</span><script type="math/tex">F(y,x)</script></span> 的内积形式表示条件随机场：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{aligned}
+p_w(y|x) &amp;= \frac{1}{Z_w(x)} exp(w \cdot F(y,x)) \\
+Z(x) &amp;= \sum_y exp(w \cdot F(y, x))
+\end{aligned}
+</div>
+<script type="math/tex; mode=display">
+\begin{aligned}
+p_w(y|x) &= \frac{1}{Z_w(x)} exp(w \cdot F(y,x)) \\
+Z(x) &= \sum_y exp(w \cdot F(y, x))
+\end{aligned}
+</script>
+</div>
+<h2 id="_3">相关链接<a class="headerlink" href="#_3" title="Permanent link">#</a></h2>
+<p>苏剑林 简明条件随机场CRF介绍</p>
+<p><a href="https://spaces.ac.cn/archives/5542/comment-page-1">https://spaces.ac.cn/archives/5542/comment-page-1</a></p>
+<p>条件随机场 CRF总结和实现</p>
+<p><a href="https://applenob.github.io/machine_learning/CRF/">https://applenob.github.io/machine_learning/CRF/</a></p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

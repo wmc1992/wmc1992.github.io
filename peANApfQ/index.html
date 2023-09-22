@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/004_GPT%E4%B8%8EBERT/004_%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%9C%BA%E5%88%B6/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#attention" class="nav-link">从机器翻译中理解注意力(attention)机制</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、背景说明</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、任务定义以及符号说明</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3attention" class="nav-link">3、涉及attention的模型结构</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4self-attention" class="nav-link">4、将上述注意力机制与self-attention做一下对比</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/peANApfQ_no_toc/">隐藏左侧目录栏</a>][<a href="/peANApfQ/">显示左侧目录栏</a>]</p>
+
+<h1 id="attention">从机器翻译中理解注意力(attention)机制<a class="headerlink" href="#attention" title="Permanent link">#</a></h1>
+<blockquote>
+<p>参考的论文链接: <a href="https://arxiv.org/abs/1508.04025">https://arxiv.org/abs/1508.04025</a></p>
+</blockquote>
+<h2 id="1">1、背景说明<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>机器翻译任务是典型的Encoder-Decoder结构。当然，虽然都是Encoder-Decoder结构，但是Encoder是输出一个向量还是输出多个向量，Encoder输出的向量是如何构建的等等，这些部分都可以有很多种设计，所以也很复杂。当然这不是本篇文章的重点，本篇文章主要目的是了解一下在self-attetion出现之前的注意力机制是怎么使用的，了解一下由最初的注意力机制到self-attention的发展过程。</p>
+<p>由于是要了解注意力机制，所以具体采用的是RNN、LSTM、GRU还是什么别的模型结构，这里不关心，直接把其当做一个黑盒，这个黑盒的模型结构会接受两个输入，给出一个输出。</p>
+<p>两个输入为：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">h_{t-1}</span><script type="math/tex">h_{t-1}</script></span>：表示前一个时间步的隐层输出；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">x_t</span><script type="math/tex">x_t</script></span>：表示当前时间步输入的token；</li>
+</ul>
+<p>一个输出为：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">h_t</span><script type="math/tex">h_t</script></span>：表示当前时间步的隐层输出；</li>
+</ul>
+<p>如下图所示，其中向上的箭头和向右的箭头输出内容可以是相同的，也可以是不同的，为了简化，这里选择它们两个是相同。下图中的这个模块的功能就对应图2中的蓝色或红色模块的功能。</p>
+<table>
+<thead>
+<tr>
+<th>图1: 模型中单个模块的输入输出结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><div align=center><img src=/peANApfQ/assets/model_block.png width=30% /></div></td>
+</tr>
+</tbody>
+</table>
+<h2 id="2">2、任务定义以及符号说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>原始输入序列（source sentence）为： <span class="arithmatex"><span class="MathJax_Preview">x_1, x_2, ..., x_n</span><script type="math/tex">x_1, x_2, ..., x_n</script></span></p>
+<p>目标输出序列（target sentence）为： <span class="arithmatex"><span class="MathJax_Preview">y_1, y_2, ..., y_m</span><script type="math/tex">y_1, y_2, ..., y_m</script></span></p>
+<blockquote>
+<p>在原论文中这部分的符号使用的有点奇怪，在定义原始输入序列时使用的是符号 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> ，但是在后面的推导过程中全部使用的符号 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> ，这里不对其做纠正，只要知道后面的所有的 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 其实就是输入数据 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 即可。</p>
+</blockquote>
+<p>Decoder部分解码的联合概率为下述公式，其中 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 表示原始输入序列：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\log p(y|s) = \sum_{j=1}^m \log p(y_j|y_{&lt;j}, s)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\log p(y|s) = \sum_{j=1}^m \log p(y_j|y_{<j}, s)\end{equation}</script>
+</div>
+<p>上述公式中的 <span class="arithmatex"><span class="MathJax_Preview">p(y_j|y_{&lt;j}, s)</span><script type="math/tex">p(y_j|y_{<j}, s)</script></span> 表示每个token的解码概率，在后面涉及 attention 的部分还会进行说明。</p>
+<p>隐藏层 <span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span> 的计算公式为下述公式，就像在第一部分中所描述的，这里的 <span class="arithmatex"><span class="MathJax_Preview">f(\cdot)</span><script type="math/tex">f(\cdot)</script></span> 对应着哪种模型结构在本文中并不关心，只要其输入为 <span class="arithmatex"><span class="MathJax_Preview">h_{t-1}</span><script type="math/tex">h_{t-1}</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> ，输出为 <span class="arithmatex"><span class="MathJax_Preview">h_t</span><script type="math/tex">h_t</script></span> 即可：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}h_j = f(h_{j-1}, s)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}h_j = f(h_{j-1}, s)\end{equation}</script>
+</div>
+<p>目标函数为下述公式，其中 <span class="arithmatex"><span class="MathJax_Preview">D</span><script type="math/tex">D</script></span> 表示训练数据集：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}J_t = \sum_{(x,y) \in D} - \log p(y|x)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}J_t = \sum_{(x,y) \in D} - \log p(y|x)\end{equation}</script>
+</div>
+<table>
+<thead>
+<tr>
+<th>图2: 本文中使用机器翻译模型结构示意图</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><div align=center><img src=/peANApfQ/assets/neural_machine_translation.png width=60% /></div></td>
+</tr>
+</tbody>
+</table>
+<h2 id="3attention">3、涉及attention的模型结构<a class="headerlink" href="#3attention" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>图3: LSTM网络中的注意力机制模型结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><div align=center><img src=/peANApfQ/assets/attention_model_architecture.png width=60% /></div></td>
+</tr>
+</tbody>
+</table>
+<p>每个token的解码概率：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}p(y_t|y_{&lt;t},s) = \text{softmax}(W_s \cdot \tilde{h}_t)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}p(y_t|y_{<t},s) = \text{softmax}(W_s \cdot \tilde{h}_t)\end{equation}</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">\tilde{h}_t</span><script type="math/tex">\tilde{h}_t</script></span> 表示Decoder中对每个token输出的logits，公式如下，在该公式中 <span class="arithmatex"><span class="MathJax_Preview">[c_t;h_t]</span><script type="math/tex">[c_t;h_t]</script></span> 表示concat操作：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\tilde{h}_t = \tanh (W_c \cdot [c_t;h_t])\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\tilde{h}_t = \tanh (W_c \cdot [c_t;h_t])\end{equation}</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">c_t</span><script type="math/tex">c_t</script></span> 表示对原始输入序列encoder之后得到的一个向量，公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}c_t = \sum_{l = 1}^L a_t^{(l)} \bar{h}_s^{(l)}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}c_t = \sum_{l = 1}^L a_t^{(l)} \bar{h}_s^{(l)}\end{equation}</script>
+</div>
+<p>在该公式中，<span class="arithmatex"><span class="MathJax_Preview">L</span><script type="math/tex">L</script></span> 表示原始输入序列的长度。<span class="arithmatex"><span class="MathJax_Preview">a_t^{(l)}</span><script type="math/tex">a_t^{(l)}</script></span> 表示在预测第 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 个token时，原始输入序列中第 <span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 个token的权重，这里的 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 就是 attention 的首字母，所以 <span class="arithmatex"><span class="MathJax_Preview">a_t^{(l)}</span><script type="math/tex">a_t^{(l)}</script></span> 就是注意力权重。<span class="arithmatex"><span class="MathJax_Preview">\bar{h}_s^{(l)}</span><script type="math/tex">\bar{h}_s^{(l)}</script></span> 表示原始输入序列第 <span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 个token对应的隐层输出。注意这里的 <span class="arithmatex"><span class="MathJax_Preview">a_t^{(l)}</span><script type="math/tex">a_t^{(l)}</script></span> 是一个标量，而 <span class="arithmatex"><span class="MathJax_Preview">\bar{h}_s^{(l)}</span><script type="math/tex">\bar{h}_s^{(l)}</script></span> 是一个向量，该公式的含义就是按照权重 <span class="arithmatex"><span class="MathJax_Preview">a_t^{(l)}</span><script type="math/tex">a_t^{(l)}</script></span> 对原始输入序列中每个token的隐向量进行加权求和得到一个新的向量 <span class="arithmatex"><span class="MathJax_Preview">c_t</span><script type="math/tex">c_t</script></span>。</p>
+<p>在预测第 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 个token时的权重 <span class="arithmatex"><span class="MathJax_Preview">a_t</span><script type="math/tex">a_t</script></span> 的计算公式为，该公式其实就是在对原始输入序列中每个token的得分做softmax：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}a_t^{(l)} = \frac{\exp (\text{score}(h_t, \bar{h}_s^{(l)}))}{\sum_{l'=1}^L \exp (\text{score} (h_t, \bar{h}_s^{(l')}))} = \text{softmax}(\text{score}(h_t, \bar{h}_s))\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}a_t^{(l)} = \frac{\exp (\text{score}(h_t, \bar{h}_s^{(l)}))}{\sum_{l'=1}^L \exp (\text{score} (h_t, \bar{h}_s^{(l')}))} = \text{softmax}(\text{score}(h_t, \bar{h}_s))\end{equation}</script>
+</div>
+<p>这里的 <span class="arithmatex"><span class="MathJax_Preview">\text{score}(h_t, \bar{h}_s^{(l)})</span><script type="math/tex">\text{score}(h_t, \bar{h}_s^{(l)})</script></span> 是一个标量，具体的计算公式有多种形式，比如如下三种：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\text{score}(h_t, \bar{h}_s^{(l)}) = 
+\begin{cases}
+h_t^{\top} \bar{h}_s^{(l)} \\
+h_t^{\top} W_a \bar{h}_s^{(l)} \\
+v_a^{\top} \tanh (W_a [h_t; \bar{h}_s^{(l)}])
+\end{cases}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\text{score}(h_t, \bar{h}_s^{(l)}) = 
+\begin{cases}
+h_t^{\top} \bar{h}_s^{(l)} \\
+h_t^{\top} W_a \bar{h}_s^{(l)} \\
+v_a^{\top} \tanh (W_a [h_t; \bar{h}_s^{(l)}])
+\end{cases}\end{equation}</script>
+</div>
+<h2 id="4self-attention">4、将上述注意力机制与self-attention做一下对比<a class="headerlink" href="#4self-attention" title="Permanent link">#</a></h2>
+<p>将上述公式(7)代入到公式(6)中得到：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}
+\begin{split} c_t &amp;= \sum_{l = 1}^L \text{softmax}(\text{score}(h_t, \bar{h}_s^{(l)})) \cdot \bar{h}_s^{(l)} \\
+&amp;= \sum_{l = 1}^L \text{softmax}(h_t^{\top} \bar{h}_s^{(l)}) \cdot \bar{h}_s^{(l)} \qquad\qquad \text{score}(h_t, \bar{h}_s^{(l)})\text{采用公式(8)中的第一个形式}
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}
+\begin{split} c_t &= \sum_{l = 1}^L \text{softmax}(\text{score}(h_t, \bar{h}_s^{(l)})) \cdot \bar{h}_s^{(l)} \\
+&= \sum_{l = 1}^L \text{softmax}(h_t^{\top} \bar{h}_s^{(l)}) \cdot \bar{h}_s^{(l)} \qquad\qquad \text{score}(h_t, \bar{h}_s^{(l)})\text{采用公式(8)中的第一个形式}
+\end{split}\end{equation}</script>
+</div>
+<p>然后写一下self-attention的计算公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\text{Attention}(Q, K, V) = \text{softmax}(\frac{QK^{\top}}{\sqrt{d_k}}) V\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\text{Attention}(Q, K, V) = \text{softmax}(\frac{QK^{\top}}{\sqrt{d_k}}) V\end{equation}</script>
+</div>
+<p>可以看出公式(9)最后的形式和self-attention已经非常相似了。</p>
+<p>公式(9)中有一个求和符号的原因是 <span class="arithmatex"><span class="MathJax_Preview">\text{softmax}(h_t^{\top} \bar{h}_s^{(l)})</span><script type="math/tex">\text{softmax}(h_t^{\top} \bar{h}_s^{(l)})</script></span> 是一个标量，可以将这 <span class="arithmatex"><span class="MathJax_Preview">L</span><script type="math/tex">L</script></span> 个标量转化为向量的写法，那样就没有了求和符号。</p>
+<p>另外，公式(9)中是目标输出序列中第 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 个token对原始输入序列的注意力，可以说是一个向量，元素个数为 <span class="arithmatex"><span class="MathJax_Preview">L</span><script type="math/tex">L</script></span> 。而self-attention的公式中是所有时间步的token对整个序列的注意力，这个注意力是一个矩阵。该矩阵中的单个元素 <span class="arithmatex"><span class="MathJax_Preview">a_{ij}</span><script type="math/tex">a_{ij}</script></span> 的公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+a_{ij} &amp;= \text{softmax}(\frac{q_ik_j^{\top}}{\sqrt{d_k}}) \\
+&amp;= \frac{\exp(q_ik_j^{\top})}{\sqrt{d_k}\sum_{r \in S_i} \exp(q_ik_r^{\top})}
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+a_{ij} &= \text{softmax}(\frac{q_ik_j^{\top}}{\sqrt{d_k}}) \\
+&= \frac{\exp(q_ik_j^{\top})}{\sqrt{d_k}\sum_{r \in S_i} \exp(q_ik_r^{\top})}
+\end{split}\end{equation}</script>
+</div>
+<p><br></p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

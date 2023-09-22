@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/002_%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83/006_GPT4/01_%E5%BE%AE%E8%BD%AFGPT4%E7%A0%94%E7%A9%B6%E6%8A%A5%E5%91%8A/">
+        <link rel="shortcut icon" href="../../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/fDiAXQa5_no_toc/">隐藏左侧目录栏</a>][<a href="/fDiAXQa5/">显示左侧目录栏</a>]</p>
+
+<h1 id="gpt4">微软GPT4研究报告<a class="headerlink" href="#gpt4" title="Permanent link">#</a></h1>
+<h2 id="1coding">1、Coding<a class="headerlink" href="#1coding" title="Permanent link">#</a></h2>
+<p>关于GPT-4在代码方面的用法有：</p>
+<ul>
+<li>根据指令写代码（writing code from instructions）</li>
+<li>理解现有代码（understanding existing code）</li>
+<li>推理代码的执行结果（reason about code execution）</li>
+<li>模拟指令的执行结果，并且给出自然语言的解释（simulate the effects of instructions and explain the results in natural language）</li>
+<li>甚至还能执行伪代码（even execute pseudocode）</li>
+</ul>
+<h3 id="11">1.1 根据指令写代码<a class="headerlink" href="#11" title="Permanent link">#</a></h3>
+<p>在测试根据指令写代码的这部分，一方面是给模型指令，让其按照指令写代码；另一方面是在模型写完代码之后，在之前的基础上增加/修改一些需求，看其修改的效果。</p>
+<h4 id="111">1.1.1 刷代码题<a class="headerlink" href="#111" title="Permanent link">#</a></h4>
+<p>首先是使用benchmark数据集HumanEval（关于数据集的介绍见<a href="http://mingchao.wang/uyopDSSB/#humaneval">HumanEval</a>）进行测试，指标如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>图1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><div align=center><img src="/fDiAXQa5/assets/01.png" width=100% /></div></td>
+</tr>
+</tbody>
+</table>
+<p>不过不能保证在预训练阶段数据集HumanEval中的数据是否有泄漏，所以又选择了leetcode上2022年10月8日之后的新题给GPT-4做了一做，结果如下所示，一次性就accept的比例是68.2%，尝试5次保证有一次accept的比例是86.4。</p>
+<blockquote>
+<p>这刷题的正确率感觉比我还高-_-</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>图2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><div align=center><img src="/fDiAXQa5/assets/02.png" width=100% /></div></td>
+</tr>
+</tbody>
+</table>
+<p>然后下面是给GPT-4做leetcode题目时的指令模版及其返回结果：</p>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/03.png" width=100% /></div>
+</details>
+
+<h4 id="112">1.1.2 数据可视化<a class="headerlink" href="#112" title="Permanent link">#</a></h4>
+<p>可视化这里的任务是让模型对上面图2中的数据绘制条形图，图2的表格是以LATEX的形式输入给模型的。在该表格中，任务难度有Easy、Median、Hard、Overall四种，角色有GPT-4、text-davinci-003、Codex、Human四种，同时每次还会评估top1和top5两种。在测试时，ChatGPT无法绘制出正确的表格，下图是GPT-4绘制的结果。另外，可以看到在第一个次绘制的结果上，添加上以下两个新的需求之后，GPT-4依然能够正确的理解需求，并且给出正确的代码：</p>
+<ul>
+<li>（1）要求两个图表的纵坐标相同；</li>
+<li>（2）突出Human这个角色；</li>
+</ul>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/04.png" width=100% /></div>
+</details>
+
+<h4 id="113">1.1.3 前端代码开发<a class="headerlink" href="#113" title="Permanent link">#</a></h4>
+<p>这个是让模型使用HTML和JavaScript开发一个小游戏。所使用的prompt如下表所示，中文部分是直接谷歌翻译的结果。从prompt可以看出这个是zero-shot调用的。</p>
+<table align=center style="width:auto">
+    <tbody style="font-size: 0.6rem">
+        <tr>
+            <td>
+                <p>Can you write a 3D game in HTML with Javascript, I want: </p>
+                <p>- There are three avatars, each is a sphere.</p>
+                <p>- The player controls its avatar using arrow keys to move. </p>
+                <p>- The enemy avatar is trying to catch the player.</p>
+                <p>- The defender avatar is trying to block the enemy.</p>
+                <p>- There are also random obstacles as cubes spawned randomly at the beginning and moving randomly. The avatars cannot cross those cubes.</p>
+                <p>- The player moves on a 2D plane surrounded by walls that he cannot cross. The wall should cover the boundary of the entire plane.</p>
+                <p>- Add physics to the environment using cannon.</p>
+                <p>- If the enemy catches the player, the game is over.</p>
+                <p>- Plot the trajectories of all the three avatars.</p>
+            </td>
+            <td>
+                <p>你能用 Javascript 用 HTML 编写 3D 游戏吗，我想要：</p>
+                <p>- 共有三个角色，每个角色都是一个球体。</p>
+                <p>- 玩家使用箭头键控制其角色移动。 </p>
+                <p>- 敌方角色试图抓住玩家。</p>
+                <p>- 防御者角色尝试阻挡敌方角色。</p>
+                <p>- 地图中还有立方体作为随机障碍，障碍在开始时随机生成并随机移动。角色无法穿过这些立方体。</p>
+                <p>- 角色在 2D 平面上移动，周围环绕着他无法跨越的墙壁。墙壁应该覆盖整个平面的边界。</p>
+                <p>- 使用大炮将物理添加到环境中。</p>
+                <p>- 如果敌方角色抓住玩家角色，游戏就结束。</p>
+                <p>- 绘制所有三个角色的轨迹。</p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<p>下图是prompt，以及GPT-4生成的代码执行的结果。</p>
+<p>图1中蓝色为玩家角色，红色为敌方角色，品红色为防御者角色。玩家角色没有移动，所以没有行动轨迹。图中的红色的线和品红色的线为敌方角色和防御者角色的行动轨迹，可以看出地方角色径直对着玩家角色移动，防御者角色跟随地方角色试图拦截在地方角色与玩家角色之间。同时防御者角色的轨迹中在初始那一段由于有障碍物还有两次拐弯。</p>
+<p>图2中玩家角色有移动，所以也有轨迹。可以看出敌方角色目的还是抓住玩家角色，防御者角色还是拦截在两者之间。另外在这个图中，敌方角色和防御者角色由于撞到了障碍物抛起来到了空中。</p>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/05.png" width=100% /></div>
+</details>
+
+<h4 id="114">1.1.4 深度学习代码<a class="headerlink" href="#114" title="Permanent link">#</a></h4>
+<p>接下来是对比GPT-4和ChatGPT写深度学习代码的能力。对该优化器的要求和说明如下表所示。在下表的描述中可以看出，在指令中并没有对每个操作都有着非常详细的描述，比如倒数第二条描述 "Apply momentum on W_k, and then update the network parameters using this momentum"，这里并没有解释什么是动量，模型如果想要正确的实现这一条要求，那么就需要他自己本身知道深度学习的优化器中动量的概念。</p>
+<table align=center style="width:auto">
+    <tbody style="font-size: 0.6rem">
+        <tr>
+            <td style="width:55%">
+                <p>I want to write a customized optimizer in pytorch, the optimizer should do:</p>
+                <p>1. the parameters for the optimizer is learning rate, momentum ,weigth decay, d_dim, k and factor alpha</p>
+                <p>2. the optimizer goes through each parameter in the network, and then</p>
+                <p>-- Get the gradient of this parameter, reshape it to 2D by looping through the dimensions, and keeping the dimension whose actual dimension (shape) is equal to d_dim, do an SVD decomposition of the parameter so W = U\Sigma V.</p>
+                <p>-- Keep the top k singular vectors of W, so we get a new matrix W_k = U \Sigma_k V.</p>
+                <p>-- Keep the top 2k singular vectors of W, so we get a new matrix W_{2k} = U \Sigma_{2k} V.</p>
+                <p>-- Normalize W_k according to the momentum of the F-norm of W_{2k}.</p>
+                <p>-- Truncate each coordinate of W_k to the top alpha percentile of all the coordinates, in absolute value.</p>
+                <p>-- Apply momentum on W_k, and then update the network parameters using this momentum.</p>
+                <p>-- Apply weight decay.</p>
+            </td>
+            <td style="width:45%">
+                <p>我想在pytorch中编写一个定制的优化器，优化器应该这样做：</p>
+                <p>1. 优化器的参数是学习率、动量、权重衰减、d_dim、k 和因子 alpha</p>
+                <p>2. 优化器遍历网络中的每个参数，然后</p>
+                <p>-- 获取此参数的梯度，通过循环维度将其重塑为 2D，并保持实际维度（形状）等于 d_dim 的维度，对参数进行 SVD 分解，因此 W = U\Sigma V</p>
+                <p>-- 保留W的前k个奇异向量，因此我们得到一个新的矩阵W_k = U \Sigma_k V</p>
+                <p>-- 保留 W 的前 2k 个奇异向量，因此我们得到一个新的矩阵 W_{2k} = U \Sigma_{2k} V</p>
+                <p>--根据W_{2k}的F-范数的动量对W_k进行归一化</p>
+                <p>-- 将 W_k 的每个坐标截断为所有坐标的最高 alpha 百分位数（绝对值）</p>
+                <p>-- 在 W_k 上应用动量，然后使用该动量更新网络参数</p>
+                <p>--应用权重衰减</p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<p>下图是ChatGPT和GPT-4生成的优化器的代码。</p>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/06.png" width=100% /></div>
+</details>
+
+<h4 id="115-latex">1.1.5 LATEX 代码<a class="headerlink" href="#115-latex" title="Permanent link">#</a></h4>
+<p>接下来是测试GPT-4写LATEX的能力，输入的LATEX是带有一些问题的，比如不规范、语法有问题、编译不通过，然后让模型修复其中存在的问题。效果如下图所示，对于下例中的prompt实际调用GPT-4测试了一下，生成的LATEX确实能够直接使用，且格式上都是正确的。</p>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/07.png" width=100% /></div>
+</details>
+
+<h3 id="12">1.2 理解代码能力<a class="headerlink" href="#12" title="Permanent link">#</a></h3>
+<h4 id="121">1.2.1 逆向工程<a class="headerlink" href="#121" title="Permanent link">#</a></h4>
+<p>这里是使用一个加了密的二进制文件，正常来说有了密码才能够执行该二进制文件，接下来测试ChatGPT和GPT-4能否破解该文件的密码。ChatGPT拒绝了这项工作，原因是这项工作不道德，GPT-4没有拒绝这项工作，这里感觉ChatGPT的选择更合理。在做逆向工程时采用的是多轮交互的方式，由GPT-4给出要执行的指令，人工执行完该指令之后将执行的结果告诉GPT-4，然后继续由GPT-4给出下一步骤要执行的指令。这种多轮交互的方式有一个优点就是，每个步骤所执行的命令的作用GPT-4都会明确的说出来，会给每个步骤一个解释。</p>
+<p>下表是破解该二进制文件密码的部分交互内容，对这个完全不了解，也基本看不懂。</p>
+<table align=center style="width:auto">
+    <tbody style="font-size: 0.6rem">
+        <tr>
+            <td>
+                <p> Human: Now I have an executable file named easy_one in the home folder of my mac OS X laptop. Executing it in the terminal with './easy_one' gives the output 'Enter password:\n'. Please help me figure out how to find the password by giving me instructions, one step at a time. Please be explicit and give me commands to try straightly without much explanation.</p>
+                <span>AI: Yes, sir. The first command you should try is</span><br>
+                <p>file easy_one</p>
+                <span>Human: okay, it says</span><br>
+                <span>easy_one: Mach-O 64-bit executable x86_64</span><br>
+                <p>What's next?</p>
+                <span>AI: This means that the file is a binary executable for the x86_64 architecture, which is the one your laptop uses. The next command you should try is</span><br>
+                <p>strings easy_one</p>
+                <span>Human: This gives me</span><br>
+                <span>Enter the password...</span><br>
+                <span>Correct!</span><br>
+                <span>the password is: %s</span><br>
+                <p>wrong password</p>
+                <p>Anything interesting here?</p>
+                <p>......</p>
+                <span>AI: There are two possible ways to proceed from here. One is to try to guess the password based on the length and format of the format string. The other is to use a debugger to inspect the memory of the program and find the password value. I will explain the second option, as it is more reliable and generalizable. The next command you should try is</span><br>
+                <p>lldb ./easy_one</p>
+                <span>Human: (lldb) target create "./easy_one"</span><br>
+                <span>Current executable set to '/Users/yz/Downloads/easy_one' (x86_64).</span><br>
+                <p>(lldb)</p>
+                <span>AI: This will launch the lldb debugger, which is a tool that allows you to control and examine the execution of a program. The next command you should try is</span><br>
+                <p>breakpoint set --name printf</p>
+                <span>Human: (lldb) breakpoint set --name printf</span><br>
+                <p>Breakpoint 1: where = libsystem_c.dylib`printf, address = 0x00007ff8002c70fc</p>
+                <span>AI: This will set a breakpoint at the printf function, which means that the program will stop whenever it calls this function. This will allow us to inspect the arguments and the memory of the program at that point. The next command you should try is</span><br>
+                <p>run</p>
+                <span>Human: (lldb) run</span><br>
+                <span>Process 33894 launched: '/Users/yz/Downloads/easy_one' (x86_64)</span><br>
+                <span>Process 33894 stopped</span><br>
+                <span>* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1</span><br>
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;frame #0: 0x00007ff81bb8e0fc libsystem_c.dylib`printf</span><br>
+                <span>libsystem_c.dylib`printf:</span><br>
+                <span>-> 0x7ff81bb8e0fc <+0>: pushq %rbp</span><br>
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;0x7ff81bb8e0fd <+1>: movq %rsp, %rbp</span><br>
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;0x7ff81bb8e100 <+4>: subq $0xd0, %rsp</span><br>
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;0x7ff81bb8e107 <+11>: movq %rdi, %r10</span><br>
+                <p>Target 0: (easy_one) stopped.</p>
+                <span>AI: This will run the program until it hits the breakpoint. stack. The next command you should try is</span><br>
+                <p>register read rdi</p>
+                <span>Human: (lldb) register read rdi</span><br>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;rdi = 0x0000000100000f66 "Enter the password...\n"</p>
+                <p>......</p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h4 id="122">1.2.2 推理代码执行结果<a class="headerlink" href="#122" title="Permanent link">#</a></h4>
+<p>这部分是测试GPT-4和ChatGPT推理代码的执行结果，出的问题对于我这个写python的来说是比较刁钻的，不确定对写C的人来说是不是属于常识了。题目和两个模型的输出结果都见下图。代码块A和代码块B中都是声明了两个char类型变量和一个int类型的变量，不过声明时的顺序不同，问题是其使用的内存大小分别是多少。GPT-4的回答是在不同的实现里所使用的内存大小是不同的，有的会做对齐，有的不会做。而ChatGPT则给出了不同的答案，它的答案是两者使用的内存必然相同，并且非常肯定的说明了变量的声明顺序不会改变其所占用的内存大小。</p>
+<p>上述两个答案中GPT-4的答案是正确的，而且ChatGPT解释的那句 "变量的声明顺序不会改变其所占用的内存大小"（下图中红色部分）在这个题目下是完全不正确的，但是它的这种自信的语气实在是厉害。</p>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/08.png" width=100% /></div>
+</details>
+
+<h4 id="123">1.2.3 执行代码<a class="headerlink" href="#123" title="Permanent link">#</a></h4>
+<p>给了一段python代码，代码中带有递归，让GPT-4输出该代码执行结果的同时，把中间每一步的递归过程也同时输出出来。结果如下图，如果能够保证GPT-4在执行代码时的结果都是正确的话，对于那种复杂的代码，让其输出整个执行过程用来辅助理解倒是个挺好的方法，可以看到下图中GPT-4给出的代码中间每步执行过程的说明非常的详细。</p>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/09.png" width=100% /></div>
+</details>
+
+<h4 id="124">1.2.4 执行伪代码<a class="headerlink" href="#124" title="Permanent link">#</a></h4>
+<p>上面一小节测试使用的是python代码，无论是python代码，还是Java代码，抑或是C/C++，这些代码都是有着严格的代码规范的，而且在模型训练过程中有着大量的该语言的代码。在这小节要测试的是GPT-4执行伪代码的能力。伪代码是没有严格的语法规范的。下表是所给出的指令和伪代码。</p>
+<table align=center style="width:auto">
+    <tbody style="font-size: 0.6rem">
+        <tr>
+            <td style="width:50%">
+                <span>I have a python function  merge_array, the function takes two arrays of length m, n respectively, and output a new array by merging the first m-1 element of the first array and the last n - 1 elements of the second array.</span><br>
+                <span>Suppose I call the merge_array function in the following way:</span><br><br>
+                <span>function rec</span><br>
+                <span>input: one array A, integer k</span><br>
+                <span>code:</span><br>
+                <span>if the length of A is less than k, we first call rec(A + [length(A)], k) to get B</span><br>
+                <span>after that, call merge_array(B, B) to get C</span><br>
+                <span>return C.</span><br>
+                <span>if the length of A is larger or equal to k, return A.</span><br>
+                <span>end rec</span><br><br>
+                <span>Can you tell me what is the execution of rec([5, 10, 88], 6) with intermediate steps?</span><br>
+            </td>
+            <td>
+                <span>我有一个python函数merge_array，该函数分别接受两个长度为m、n的数组，并通过合并第一个数组的前m-1个元素和第二个数组的最后n-1个元素来输出一个新数组 .</span><br>
+                <span>假设我按以下方式调用 merge_array 函数：</span><br><br>
+                <span>function rec</span><br>
+                <span>input: one array A, integer k</span><br>
+                <span>code:</span><br>
+                <span>if the length of A is less than k, we first call rec(A + [length(A)], k) to get B</span><br>
+                <span>after that, call merge_array(B, B) to get C</span><br>
+                <span>return C.</span><br>
+                <span>if the length of A is larger or equal to k, return A.</span><br>
+                <span>end rec</span><br><br>
+                <span>你能告诉我rec([5, 10, 88], 6)的执行过程以及中间步骤是什么吗？</span><br>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<p>从下图的GPT-4的输出结果中可以看到，GPT-4能够理解所给出的伪代码的含义，并执行得出正确的结果。</p>
+<details>
+    <summary>点击查看图片</summary>
+    <div align=center><img src="/fDiAXQa5/assets/10.png" width=100% /></div>
+</details>
+
+<h2 id="_1">临时记录<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
+<p>除了通用的对话能力以外，GPT-4能够解决的问题包括的行业有：</p>
+<ul>
+<li>mathematics</li>
+<li>coding</li>
+<li>vision</li>
+<li>medicine</li>
+<li>law</li>
+<li>psychology</li>
+</ul>
+<p>本文所研究的GPT-4的能力包括：</p>
+<ul>
+<li>多模态能力：图像、音频；</li>
+<li>代码能力；</li>
+<li>数学能力；</li>
+<li>与真实世界的交互能力；</li>
+<li>与人的交互能力；</li>
+<li>歧视问题；</li>
+</ul>
+<p>本文中另外的两个议题是：</p>
+<ul>
+<li>这种自回归网络的局限性；</li>
+<li>GPT-4所产生的社会影响；</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../../js/base.js" defer></script>
+        <script src="../../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

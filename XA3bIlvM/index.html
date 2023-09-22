@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/005_%E5%B7%A5%E5%85%B7%E6%A1%86%E6%9E%B6/001_huggingface/tokenizers/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#tokenizers" class="nav-link">Tokenizers</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、基础使用</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2-tokenizer" class="nav-link">2、从头训练一个 tokenizer</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3tokenization-pipeline" class="nav-link">3、Tokenization Pipeline</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#31-normalization" class="nav-link">3.1 normalization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#32-pre-tokenization" class="nav-link">3.2 pre-tokenization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#33-model" class="nav-link">3.3 model</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#34-post-processing" class="nav-link">3.4 post-processing</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#35" class="nav-link">3.5 总结</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/XA3bIlvM_no_toc/">隐藏左侧目录栏</a>][<a href="/XA3bIlvM/">显示左侧目录栏</a>]</p>
+
+<h1 id="tokenizers">Tokenizers<a class="headerlink" href="#tokenizers" title="Permanent link">#</a></h1>
+<p>提到 Tokenizers 就不得不提几种编码策略的理论基础，之前的文章已经写过这部分了，链接为: <a href="http://mingchao.wang/ZfZEmye9/">几种 tokenize 策略</a>。</p>
+<h2 id="1">1、基础使用<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<blockquote>
+<p>参考文档: <a href="https://huggingface.co/docs/transformers/preprocessing">https://huggingface.co/docs/transformers/preprocessing</a></p>
+</blockquote>
+<p>加载 tokenizer 对象：</p>
+<pre><code class="language-python">from transformers import AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained(&quot;bert-base-cased&quot;)
+</code></pre>
+<p>使用 tokenizer 对一条文本进行编码：</p>
+<pre><code class="language-python">encoded_input = tokenizer(&quot;Do not meddle in the affairs of wizards, for they are subtle and quick to anger.&quot;)
+print(encoded_input)
+
+# 输出：
+# {'input_ids': [101, 2079, 2025, 19960, 10362, 1999, 1996, 3821, 1997, 16657, 1010, 2005, 2027, 2024, 11259, 1998, 4248, 2000, 4963, 1012, 102], 
+#  'token_type_ids': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+#  'attention_mask': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+</code></pre>
+<p>使用 tokenizer 对编码结果进行解码，从下述输出结果中可以看出，在编码时不仅仅是将文本转为了 id，同时还在头尾分别添加了 '[CLS]' 和 '[SEP]' 这两个字符：</p>
+<pre><code class="language-python">tokenizer.decode(encoded_input[&quot;input_ids&quot;])
+
+# 输出：
+# '[CLS] Do not meddle in the affairs of wizards, for they are subtle and quick to anger. [SEP]'
+</code></pre>
+<p>除了每次处理单条数据，还可以一次处理一批数据，代码结果如下：</p>
+<pre><code class="language-python">batch_sentences = [
+    &quot;But what about second breakfast?&quot;,
+    &quot;Don't think he knows about second breakfast, Pip.&quot;,
+    &quot;What about elevensies?&quot;,
+]
+encoded_inputs = tokenizer(batch_sentences)
+print(encoded_inputs)
+
+# 输出：
+# {'input_ids': [[101, 1252, 1184, 1164, 1248, 6462, 136, 102], 
+#                [101, 1790, 112, 189, 1341, 1119, 3520, 1164, 1248, 6462, 117, 21902, 1643, 119, 102], 
+#                [101, 1327, 1164, 5450, 23434, 136, 102]], 
+#  'token_type_ids': [[0, 0, 0, 0, 0, 0, 0, 0], 
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+#                     [0, 0, 0, 0, 0, 0, 0]], 
+#  'attention_mask': [[1, 1, 1, 1, 1, 1, 1, 1], 
+#                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+#                     [1, 1, 1, 1, 1, 1, 1]]}
+</code></pre>
+<p>接下来的功能分别是 padding、截断、返回指定框架的类型的tensor，对应的输入参数为：<code>padding</code>、<code>truncation</code>、<code>return_tensors</code>，代码结果如下；</p>
+<pre><code class="language-python">batch_sentences = [
+    &quot;But what about second breakfast?&quot;,
+    &quot;Don't think he knows about second breakfast, Pip.&quot;,
+    &quot;What about elevensies?&quot;,
+]
+encoded_input = tokenizer(batch_sentences, padding=True, truncation=True, return_tensors=&quot;pt&quot;)
+print(encoded_input)
+
+# 输出：
+# {'input_ids': tensor([[101, 1252, 1184, 1164, 1248, 6462, 136, 102, 0, 0, 0, 0, 0, 0, 0],
+#                       [101, 1790, 112, 189, 1341, 1119, 3520, 1164, 1248, 6462, 117, 21902, 1643, 119, 102],
+#                       [101, 1327, 1164, 5450, 23434, 136, 102, 0, 0, 0, 0, 0, 0, 0, 0]]), 
+#  'token_type_ids': tensor([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]), 
+#  'attention_mask': tensor([[1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+#                            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+#                            [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]])}
+</code></pre>
+<p>另外，在使用 tokenizer 时可传的参数还有：<code>max_length</code>、<code>return_attention_mask</code>、<code>return_token_type_ids</code> 等等，可以具体用到时再了解。</p>
+<p>查看tokenizer中所有的vocab，可以调用<code>get_vocab()</code>函数获取，返回值是一个字典，该字典的key是token，value是该token对应的id，而函数<code>get_vocab()</code>对应的实现也很简单，如下述几行代码：</p>
+<pre><code class="language-python">def get_vocab(self):
+    vocab = {self.convert_ids_to_tokens(i): i for i in range(self.vocab_size)}
+    vocab.update(self.added_tokens_encoder)
+    return vocab
+</code></pre>
+<h2 id="2-tokenizer">2、从头训练一个 tokenizer<a class="headerlink" href="#2-tokenizer" title="Permanent link">#</a></h2>
+<blockquote>
+<p>参考文档: <a href="https://huggingface.co/docs/tokenizers/quicktour">https://huggingface.co/docs/tokenizers/quicktour</a></p>
+</blockquote>
+<p>下面以 BPE 为例，看一下如何从头训练一个 tokenizer。</p>
+<p>首先实例化一个 tokenizers.models 对象，然后创建一个 Tokenizer：</p>
+<pre><code class="language-python">from tokenizers import Tokenizer
+from tokenizers.models import BPE
+model = BPE(unk_token=&quot;[UNK]&quot;)
+tokenizer = Tokenizer(model)
+</code></pre>
+<p>有了 tokenizer 对象之后，接下来是为其配置 pipeline 中各个部分，整个 pipeline 有如下几部分：</p>
+<ul>
+<li>normalization</li>
+<li>pre-tokenization</li>
+<li>model</li>
+<li>post-processing</li>
+</ul>
+<p>关于这个pipeline的详情会在下一个小章节详细介绍。在这里，作为例子，仅设置 pre-tokenization 部分，其他部分采用默认值。设置 pre-tokenization 部分的代码如下：</p>
+<pre><code class="language-python">from tokenizers.pre_tokenizers import Whitespace
+tokenizer.pre_tokenizer = Whitespace()
+</code></pre>
+<p>如果要训练的话还需要一个 trainer 对象，初始化代码如下。该对象创建时还可以传入 <code>vocab_size</code>、<code>min_frequency</code> 等参数，这些具体使用时可以看相应的API。对 <code>special_tokens</code> 传入的参数要特别说明一下，这里传入的 special token 的顺序就是生成的 vocab 中的顺序，比如如下代码的话，最终 "[UNK]" 对应id为0，"[CLS]" 对应id为1，"[SEP]" 对应id为2，"[PAD]" 对应id为3，"[MASK]" 对应id为4。</p>
+<pre><code class="language-python">from tokenizers.trainers import BpeTrainer
+trainer = BpeTrainer(special_tokens=[&quot;[UNK]&quot;, &quot;[CLS]&quot;, &quot;[SEP]&quot;, &quot;[PAD]&quot;, &quot;[MASK]&quot;])
+</code></pre>
+<p>上述步骤完成之后，就可以通过给定的语料进行训练了，代码如下：</p>
+<pre><code class="language-python">files = [f&quot;data/wikitext-103-raw/wiki.{split}.raw&quot; for split in [&quot;test&quot;, &quot;train&quot;, &quot;valid&quot;]]
+tokenizer.train(files, trainer)
+</code></pre>
+<p>训练完成之后要进行保存，代码如下：</p>
+<pre><code class="language-python">tokenizer.save(&quot;data/tokenizer-wiki.json&quot;)
+</code></pre>
+<p>至此，整个训练过程就全部完成了，如果要使用自己刚才保存的文件加载 tokenizer 对象，代码如下：</p>
+<pre><code class="language-python">tokenizer = Tokenizer.from_file(&quot;data/tokenizer-wiki.json&quot;)
+</code></pre>
+<h2 id="3tokenization-pipeline">3、Tokenization Pipeline<a class="headerlink" href="#3tokenization-pipeline" title="Permanent link">#</a></h2>
+<blockquote>
+<p>参考文档: </p>
+<ul>
+<li><a href="https://huggingface.co/docs/tokenizers/pipeline">https://huggingface.co/docs/tokenizers/pipeline</a></li>
+<li><a href="https://www.huaxiaozhuan.com/%E5%B7%A5%E5%85%B7/huggingface_transformer/chapters/1_tokenizer.html">https://www.huaxiaozhuan.com/%E5%B7%A5%E5%85%B7/huggingface_transformer/chapters/1_tokenizer.html</a></li>
+</ul>
+</blockquote>
+<p>在使用 tokenizer.encode() 时，其内部总共是经历了如下四个步骤：</p>
+<ul>
+<li>normalization</li>
+<li>pre-tokenization</li>
+<li>model</li>
+<li>post-processing</li>
+</ul>
+<p>下面分别介绍一下每个步骤所起的功能，并给出部分代码样例。</p>
+<h3 id="31-normalization">3.1 normalization<a class="headerlink" href="#31-normalization" title="Permanent link">#</a></h3>
+<p>该步骤是标准化步骤，包括一些常规清理，例如删除不必要的空格、大写转小写、以及删除重音符号。</p>
+<p>对于别人已经训练好的 tokenizer，如果想要访问其 <code>normalizer</code> 可以采用如下代码的形式。在下述代码中，由于采用的是大小写无关的 bert 模型，所以其 tokenizer 会把所有的大写都转为小写。</p>
+<pre><code class="language-python">from transformers import AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained(&quot;bert-base-uncased&quot;)
+normalizer = tokenizer.backend_tokenizer.normalizer
+
+print(&quot;I love China&quot;)
+print(normalizer.normalize_str(&quot;I love China&quot;))
+
+# 输出: 
+# I love  China
+# i love  china
+</code></pre>
+<p>另外，还可以自己从 <code>tokenizers.normalizers</code> 中 import 各种 normalizer 操作，样例代码如下：</p>
+<pre><code class="language-python">import tokenizers
+
+normalizer = tokenizers.normalizers.Lowercase()
+
+print(&quot;I love China&quot;)
+print(normalizer.normalize_str(&quot;I love China&quot;))
+
+# 输出: 
+# I love  China
+# i love  china
+</code></pre>
+<h3 id="32-pre-tokenization">3.2 pre-tokenization<a class="headerlink" href="#32-pre-tokenization" title="Permanent link">#</a></h3>
+<p>对于别人已经训练好的 tokenizer，如果想要访问其 <code>pre_tokenizer</code> 可以采用如下代码的形式。在下述代码中，采用的是 gpt2-xl 的 tokenizer，它是使用 Byte-Level BPE，并且会把空格替换为一个特殊的字符 <code>Ġ</code>，然后可以看到其还会跟踪每个单词的偏移。</p>
+<pre><code class="language-python">from transformers import AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained(&quot;gpt2-xl&quot;)
+pre_tokenizer = tokenizer.backend_tokenizer.pre_tokenizer
+
+print(&quot;I love China&quot;)
+print(pre_tokenizer.pre_tokenize_str(&quot;I love China&quot;))
+
+# 输出：
+# I love China
+# [('I', (0, 1)), ('Ġlove', (1, 6)), ('ĠChina', (6, 12))]
+</code></pre>
+<p>另外，<code>pre_tokenizer</code> 也是可以自己创建的，其路径为 <code>tokenizers.pre_tokenizers</code>，下面的样例代码是自己创建一个 ByteLevel 的 <code>pre_tokenizer</code>：</p>
+<pre><code class="language-python">import tokenizers
+
+pre_tokenizer = tokenizers.pre_tokenizers.ByteLevel()
+
+print(&quot;I love China&quot;)
+print(pre_tokenizer.pre_tokenize_str(&quot;I love China&quot;))
+
+# 输出：
+# I love China
+# [('I', (0, 1)), ('Ġlove', (1, 6)), ('ĠChina', (6, 12))]
+</code></pre>
+<h3 id="33-model">3.3 model<a class="headerlink" href="#33-model" title="Permanent link">#</a></h3>
+<p>输入的文本经过 <code>normalizer</code> 和 <code>pre_tokenizer</code> 之后，接下来就会对文本执行 <code>tokenize</code> 操作，该步骤就是执行 <code>tokenize</code> 操作的。</p>
+<p>model 有如下几种：</p>
+<ul>
+<li>tokenizers.models.BPE</li>
+<li>tokenizers.models.Unigram</li>
+<li>tokenizers.models.WordLevel</li>
+<li>tokenizers.models.WordPiece</li>
+</ul>
+<p>经过该步骤之后，就得到了 token 序列。</p>
+<h3 id="34-post-processing">3.4 post-processing<a class="headerlink" href="#34-post-processing" title="Permanent link">#</a></h3>
+<p>这个步骤所做的操作包括：</p>
+<ul>
+<li>按照配置在 token 序列中添加各种 <code>special token</code>；</li>
+<li>生成 attention mask 和 token type ids；</li>
+<li>如果是 NSP 任务，或者相似度任务，还会把两条数据拼接到一块；</li>
+</ul>
+<p>这部分的样例代码可参考：<a href="https://huggingface.co/docs/tokenizers/pipeline#postprocessing">https://huggingface.co/docs/tokenizers/pipeline#postprocessing</a></p>
+<h3 id="35">3.5 总结<a class="headerlink" href="#35" title="Permanent link">#</a></h3>
+<p>最后，用一张图来展示一下整个 pipeline 中各个环节的作用，如下图：</p>
+<p><img alt="" src="/XA3bIlvM/assets/01.png" /></p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

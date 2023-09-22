@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/004_GPT%E4%B8%8EBERT/007_GPT/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#gpt" class="nav-link">GPT</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、模型结构与预训练</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#11-gptelmo" class="nav-link">1.1 GPT与ELMo的区别</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#12" class="nav-link">1.2 模型结构与预训练</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、有监督微调</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、代码操作细节</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#31" class="nav-link">3.1 训练时偏移一位的实现</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#32" class="nav-link">3.2 推理代码</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#33" class="nav-link">3.3 解码时如何减少模型的重复输出</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/5QjuqLH5_no_toc/">隐藏左侧目录栏</a>][<a href="/5QjuqLH5/">显示左侧目录栏</a>]</p>
+
+<h1 id="gpt">GPT<a class="headerlink" href="#gpt" title="Permanent link">#</a></h1>
+<p>GPT 的全称为 Generative Pre-training Transformer。</p>
+<h2 id="1">1、模型结构与预训练<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<h3 id="11-gptelmo">1.1 GPT与ELMo的区别<a class="headerlink" href="#11-gptelmo" title="Permanent link">#</a></h3>
+<ol>
+<li>
+<p>网络结构上：ELMo 使用浅层（2层）BiLSTM 网络，然后虽然 BiLSTM 网络是双向的，但是其两个方向是相互独立的。GPT 使用深层（12层）Transformer 网络，然后 Transformer 是能够同时看到两个方向的文本的。</p>
+</li>
+<li>
+<p>下游任务时：ELMo 是将多个层的输出都用上，并且根据任务的不同，每层的权重不同。GPT 是不同的下游任务都是用模型中最后一层 Transformer 的输出。</p>
+</li>
+</ol>
+<h3 id="12">1.2 模型结构与预训练<a class="headerlink" href="#12" title="Permanent link">#</a></h3>
+<p>... 略 ...</p>
+<h2 id="2">2、有监督微调<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>先放上原论文中经典的图：</p>
+<p><img alt="" src="/5QjuqLH5/assets/01.png" /></p>
+<p><strong>分类任务</strong>：Bert模型如果要做 sequence classification 任务，其需要给每条样本专门增加 [CLS] 这个token，使用该token对应的向量做分类。而GPT则不需要新增一个特殊的token，它是直接使用整个输入token序列的下一个位置预测的向量做分类。</p>
+<p><strong>自然语言推理</strong>：将前提（premise）和假设（hypothesis）通过分隔符（Delimiter）隔开，两端加上起始和终止token。再依次通过transformer和全连接得到预测结果；</p>
+<p><strong>语义相似度</strong>：输入的两个句子，正向和反向各拼接一次，然后分别输入给transformer，得到的特征向量拼接后再送给全连接得到预测结果；</p>
+<p><strong>问答和常识推理</strong>：将 n 个选项的问题抽象化为 n 个二分类问题，即每个选项分别和内容进行拼接，然后各送入transformer和全连接中，最后选择置信度最高的作为预测结果。</p>
+<h2 id="3">3、代码操作细节<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<h3 id="31">3.1 训练时偏移一位的实现<a class="headerlink" href="#31" title="Permanent link">#</a></h3>
+<p>从上文已经知道GPT的训练是已知前面的字符，预测后面的字符，对应的公式为：<span class="arithmatex"><span class="MathJax_Preview">p(x_1,...,x_n)=\prod_{i=1}^n p(x_i|x_1,...,x_{i-1})</span><script type="math/tex">p(x_1,...,x_n)=\prod_{i=1}^n p(x_i|x_1,...,x_{i-1})</script></span>，那么这个根据前面的字符预测当前字符在代码中是如何实现的呢？下面分别说明项目 <a href="https://github.com/huggingface/transformers">huggingface/transformers</a> 和项目 <a href="https://github.com/karpathy/minGPT">karpathy/minGPT</a> 中是如何实现的。</p>
+<p>先说下大体的思路，实现上述公式的代码有两种方式：</p>
+<ul>
+<li>
+<p>数据载入时 "input_ids" 和 "labels" 完全相同，然后在模型计算loss时做一下偏移，项目 <a href="https://github.com/huggingface/transformers">huggingface/transformers</a> 中就是这样做的；</p>
+</li>
+<li>
+<p>数据载入时就对 "input_ids" 和 "labels" 做好偏移，比如 "input_ids" 为 <code>1 2 3 4 5 6 7 8 9</code>，而 "labels" 为 <code>2 3 4 5 6 7 8 9 &lt;eos&gt;</code>。项目 <a href="https://github.com/karpathy/minGPT">karpathy/minGPT</a> 采用的是这种方式。</p>
+</li>
+</ul>
+<h4 id="huggingfacetransformers"><strong><a href="https://github.com/huggingface/transformers">huggingface/transformers</a> 项目</strong><a class="headerlink" href="#huggingfacetransformers" title="Permanent link">#</a></h4>
+<p>该项目中，其在数据处理部分获取 "input_ids" 和 "labels" 时的代码如下所示（<a href="https://github.com/huggingface/transformers/blob/v4.28.1/examples/pytorch/language-modeling/run_clm_no_trainer.py#L446">官方代码链接</a>）：</p>
+<pre><code class="language-python">    def group_texts(examples):
+        ... ...
+        result = {
+            k: [t[i : i + block_size] for i in range(0, total_length, block_size)]
+            for k, t in concatenated_examples.items()
+        }
+        result[&quot;labels&quot;] = result[&quot;input_ids&quot;].copy()
+        return result
+</code></pre>
+<p>上述代码主要看倒数第二行，可以看到 "labels" 的值是直接copy的 "input_ids"，所以在此时 "input_ids" 与 "labels" 肯定是相同的。</p>
+<p>然后再看一下在该项目中GPT2模型计算loss时的代码，如下（<a href="https://github.com/huggingface/transformers/blob/v4.28.1/src/transformers/models/gpt2/modeling_gpt2.py#L1104">官方代码链接</a>）：</p>
+<pre><code class="language-python">        loss = None
+        if labels is not None:
+            # move labels to correct device to enable model parallelism
+            labels = labels.to(lm_logits.device)
+            # Shift so that tokens &lt; n predict n
+            shift_logits = lm_logits[..., :-1, :].contiguous()
+            shift_labels = labels[..., 1:].contiguous()
+            # Flatten the tokens
+            loss_fct = CrossEntropyLoss()
+            loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+</code></pre>
+<p>上述代码中，<code>lm_logits</code> 表示模型前向传播输出的结果，其shape为[batch_size, seq_len, vocab_size]；<code>labels</code> 就是 copy 自 "input_ids" 的，其shape为[batch_size, seq_len]。主要看上述代码的第6行和第7行可知，其对 <code>labels</code> 去掉了第一个token，对 <code>lm_logits</code> 去掉了最后一个token，这样也就实现了根据前面的token预测下一个token了。</p>
+<h4 id="karpathymingpt"><strong><a href="https://github.com/karpathy/minGPT">karpathy/minGPT</a> 项目</strong><a class="headerlink" href="#karpathymingpt" title="Permanent link">#</a></h4>
+<p>该项目是实现了一个最简版的GPT，主要目的是方便新手理解GPT是如何实现的。也由于该项目是一个玩具项目，所以其训练数据并不是从文件中读取的，而是随机生成的，代码如下（<a href="https://github.com/karpathy/minGPT/blob/master/demo.ipynb">官方代码链接</a>）：</p>
+<pre><code class="language-python">    def __getitem__(self, idx):
+        ... ...
+        # the inputs to the transformer will be the offset sequence
+        x = cat[:-1].clone()
+        y = cat[1:].clone()
+        # we only want to predict at output locations, mask out the loss at the input locations
+        y[:self.length-1] = -1
+        return x, y
+</code></pre>
+<p>上述代码中 <code>cat</code> 是随机生成的 token 序列，<code>x</code> 是 "input_ids"，<code>y</code> 是 "labels"。可以看出其操作与huggingface的transformers中模型的前向推理时所作的操作是完全相同的。</p>
+<h3 id="32">3.2 推理代码<a class="headerlink" href="#32" title="Permanent link">#</a></h3>
+<p>由于项目 <a href="https://github.com/karpathy/minGPT">karpathy/minGPT</a> 中只实现了最核心的功能，非常利于理解原理，所以还是使用该项目中的代码。推理部分的代码如下（<a href="https://github.com/karpathy/minGPT/blob/master/mingpt/model.py#L283">官方代码链接</a>）：</p>
+<pre><code class="language-python">def generate(self, idx, max_new_tokens, temperature=1.0, do_sample=False, top_k=None):
+    &quot;&quot;&quot;
+    Take a conditioning sequence of indices idx (LongTensor of shape (b,t)) and complete
+    the sequence max_new_tokens times, feeding the predictions back into the model each time.
+    Most likely you'll want to make sure to be in model.eval() mode of operation for this.
+    &quot;&quot;&quot;
+    for _ in range(max_new_tokens):
+        # if the sequence context is growing too long we must crop it at block_size
+        idx_cond = idx if idx.size(1) &lt;= self.block_size else idx[:, -self.block_size:]
+        # forward the model to get the logits for the index in the sequence
+        logits, _ = self(idx_cond)
+        # pluck the logits at the final step and scale by desired temperature
+        logits = logits[:, -1, :] / temperature
+        # optionally crop the logits to only the top k options
+        if top_k is not None:
+            v, _ = torch.topk(logits, top_k)
+            logits[logits &lt; v[:, [-1]]] = -float('Inf')
+        # apply softmax to convert logits to (normalized) probabilities
+        probs = F.softmax(logits, dim=-1)
+        # either sample from the distribution or take the most likely element
+        if do_sample:
+            idx_next = torch.multinomial(probs, num_samples=1)
+        else:
+            _, idx_next = torch.topk(probs, k=1, dim=-1)
+        # append sampled index to the running sequence and continue
+        idx = torch.cat((idx, idx_next), dim=1)
+
+    return idx
+</code></pre>
+<p>该代码中是比较简单的，比如这里没有遇到某个结束字符就中断for循环的逻辑。</p>
+<h3 id="33">3.3 解码时如何减少模型的重复输出<a class="headerlink" href="#33" title="Permanent link">#</a></h3>
+<p>在使用生成式模型时，比较常见的一个现象就是模型经常会输出重复的文本。然后 openai 的 API 中有两个参数 <code>presence_penalty</code> 和 <code>frequency_penalty</code> 用于在解码时控制允许在多大程度上输出重复文本（官方解释文档：<a href="https://platform.openai.com/docs/api-reference/parameter-details">Frequency and presence penalties</a>）。</p>
+<p>该方法的大概思路是：根据每个 token 是否已经被选中过，以及被选中过的频次，对当前位置的模型输出的 logits 做一些修改。使那些出现过、或者出现过多次的 token 的概率降低。计算公式如下：</p>
+<pre><code>mu[j] -&gt; mu[j] - c[j] * alpha_frequency - float(c[j] &gt; 0) * alpha_presence
+</code></pre>
+<p>其中：</p>
+<ul>
+<li>
+<p><code>mu[j]</code>：表示模型在 token 序列的位置 j 处输出的 logits；</p>
+</li>
+<li>
+<p><code>c[j]</code>：表示在 token 序列的位置 j 之前每个 token 分别已经被选中的频次；</p>
+</li>
+<li>
+<p><code>float(c[j] &gt; 0)</code>：当 <code>c[j] &gt; 0</code> 为 true 时该值 1 ，否则为 0 ；</p>
+</li>
+<li>
+<p><code>alpha_frequency</code>：可配置的超参数之一；</p>
+</li>
+<li>
+<p><code>alpha_presence</code>：可配置的超参数之一；</p>
+</li>
+</ul>
+<p>可以看出参数 <code>alpha_presence</code> 只关心某个 token 是否在之前出现过，参数 <code>alpha_frequency</code> 还会关心某个 token 在之前出现过的频次，所以这两个参数可以结合使用。一般来说，如果想轻度抑制模型生成重复文本，可将这两个参数设置为 0.1 到 1 之间；如果想非常严格的控制生成重复文本的问题，可以将这两个参数设置为 2。</p>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf">https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf</a></p>
+</li>
+<li>
+<p><a href="https://lilianweng.github.io/posts/2019-01-31-lm/#gpt">https://lilianweng.github.io/posts/2019-01-31-lm/#gpt</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/350017443">https://zhuanlan.zhihu.com/p/350017443</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

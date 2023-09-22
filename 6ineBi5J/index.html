@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/004_GPT%E4%B8%8EBERT/010_ALBERT/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#albert" class="nav-link">ALBERT</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1-embedding" class="nav-link">1、对 Embedding 层的参数做因式分解</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、跨层参数共享</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3-nsp-sop" class="nav-link">3、将 NSP 任务换成了 SOP 任务</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4" class="nav-link">4、新模型收益</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#41" class="nav-link">4.1 运行速度和显存消耗方面</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#42" class="nav-link">4.2 效果方面</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#reference" class="nav-link">Reference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/6ineBi5J_no_toc/">隐藏左侧目录栏</a>][<a href="/6ineBi5J/">显示左侧目录栏</a>]</p>
+
+<h1 id="albert">ALBERT<a class="headerlink" href="#albert" title="Permanent link">#</a></h1>
+<blockquote>
+<p>原文链接：<a href="https://openreview.net/pdf?id=H1eA7AEtvS">https://openreview.net/pdf?id=H1eA7AEtvS</a></p>
+</blockquote>
+<p>ALBERT 的全称为 A Lite BERT。所以从名字可以看出，这个模型的目的是想搞一个比 Bert 更小、更轻量级的模型。</p>
+<p>这个模型相比于 Bert 在三个方面做了修改，下面先描述修改哪三个方面，最后放上和 Bert 对比的效果。</p>
+<h2 id="1-embedding">1、对 Embedding 层的参数做因式分解<a class="headerlink" href="#1-embedding" title="Permanent link">#</a></h2>
+<p>符号说明：将 embedding 层向量的维度定义为 E，将 transformer 层中向量的维度定义为 H，在 Bert 中 E 与 H 是相等的。</p>
+<p>在 Bert 模型中，embedding 层的向量维度与 transformer 层的向量维度是相同的，该问作者认为这两者没有必要相同，原因有二：</p>
+<ul>
+<li>
+<p>一般来说，模型不同的层学到的信息是不同的，按照 ELMo 模型中的分析，靠近输入的层学到的是语法信息，离输入较远的层学到的是语义信息。在本文中作者认为，embedding 层中学到的向量应该是没有上下文（context）信息的，而 transformer 层中学到的向量是包含上下文（context）信息的。所以从这个角度来说由于需要存储更复杂的上下文（context）信息，transformer 层中的向量维度 H 应该要远大于 embedding 层中的向量维度 E。</p>
+</li>
+<li>
+<p>另外一个方面则是因为 embedding 的参数量在整个模型的参数量中占比是比较高的，而 embedding 层在训练时更新的又比较稀疏（这个结论是哪来的？）所以减少 embedding 层的参数量是合理的。</p>
+</li>
+</ul>
+<p>基于上述两个原因，本文提出的方法是 embedding 权重矩阵的维度是 V * E（这里的 E &lt; H ），得到 embedding 的向量之后再通过一个 E * H 的权重矩阵投影到 transformer 层的隐空间上。改进前后 embedding 层的参数量分别为：</p>
+<ul>
+<li>改进前的参数量：V * E，这里 V 表示 vocab 的个数，并且 E 与 H 相等。以 bert-base 模型为例，参数量为 21128 * 768 = 16226304，约为 16M；</li>
+<li>改进后的参数量：V * E + E * H，这里 E 是小于 H 的。还是以 bert-base 模型为例，假设 embedding 层的向量维度 E 为 128，参数量为 21128 * 128 + 128 * 768 = 2802688，约为 2.8M；</li>
+</ul>
+<p>可以看出 embedding 层的参数量大幅减少。</p>
+<blockquote>
+<p>下面简单介绍一下 embedding 层中的参数量在整个模型的参数量中的占比（以 bert-base 为例进行分析）。</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">\quad</span><script type="math/tex">\quad</script></span></p>
+<p>bert-base 的模型结构为：vocab 总共有 21128 个，隐藏层维度为 768，12 层 transformer，multi-head attention 中是 12 个 head，每个 head 的隐层维度是 64。官方论文中总参数量为 110M。</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">\quad</span><script type="math/tex">\quad</script></span></p>
+<p>估计 Bert 模型的参数量：</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">\quad</span><script type="math/tex">\quad</script></span></p>
+<ul>
+<li>
+<p><strong>embedding 层</strong>：总共 21128 个 vocab，每个向量的维度是 768，总参数量为 21128 * 768 = 16226304</p>
+</li>
+<li>
+<p><strong>multi-head attention 层</strong>：这一层带有参数的有三部分，分别为 QKV 的权重矩阵、dense 层、Layer Norm层，分别计算</p>
+<ul>
+<li>QKV 的权重矩阵：每个权重矩阵的输入向量的维度为 768，有 12 个 head，每个 head 的隐层维度是 64，则参数量为 768 * 64 * 12 = 589824，三个权重矩阵的参数量就是再乘以3，即 768 * 64 * 12 * 3 = 1769472</li>
+<li>dense 层：这个比较简单，直接就是 768 * 768 = 589824</li>
+<li>Layer Norm层：这一层里面不是矩阵乘法，而是向量的相应位置的元素相乘，所以 <span class="arithmatex"><span class="MathJax_Preview">\gamma</span><script type="math/tex">\gamma</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">\beta</span><script type="math/tex">\beta</script></span> 的参数量是 768 + 768 = 1536</li>
+</ul>
+</li>
+<li>
+<p><strong>FFN 层</strong>：这一层包含两个 dense 层，这两个 dense 层先将维度由 768 升到 3072，再由 3072 降到 768，然后接一个 Layer Norm 层，所以参数量为 (768 * 3072) + (3072 * 768) + (768 + 768) = 4720128</p>
+</li>
+<li>
+<p><strong>总共12个 transformer 层</strong>：这个就是 multi-head attention 层的参数量加上 FFN 层的参数量，然后乘以 12 即可，每层 transformer 的参数量 1769472 + 589824 + 1536 + 4720128 = 7080960，总共 12 层的参数量 7080960 * 12 = 84971520</p>
+</li>
+<li>
+<p>如果是预训练的话在 12 层 transformer 之后还会有分类器，这部分就忽略不计算了。</p>
+</li>
+<li>
+<p>最后汇总 embedding 层和 12 个 transformer 层的总参数量: 16226304 + 84971520 = 101197824，也就是说大概 101M 的参数量，相比于官方所说的 110M，这其中的差距主要包括最后的分类器层，以及上述计算过程中都没有考虑偏置项（bias）。</p>
+</li>
+</ul>
+<p>最后回到重点：看一下 embedding 层的参数量占总模型参数量的比例，16226304 / (16226304 + 84971520) = 16.0%，再对比一下每个 transformer 层的参数量占总模型的参数量的比例，7080960 / (16226304 + 84971520) = 7.0%，所以 embedding 层的参数量相当于两个 transformer 层的参数量还多，这也是本文中认为 embedding 层的参数量可以缩减的原因。</p>
+</blockquote>
+<h2 id="2">2、跨层参数共享<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>这部分的做法很容易理解，就是所有的 transformer 层共享相同的参数，也就是说实际上只有一个 transformer 层的权重，然后会多次经过这个 transformer 层。比如 bert-base 有 12 层 transformer，改成 albert 就是数据会经过同一个 transformer 层 12 次，如下图：</p>
+<table>
+<thead>
+<tr>
+<th>图1:</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><div align=center><img src="/6ineBi5J/assets/01.png" width=50% /></div></td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-nsp-sop">3、将 NSP 任务换成了 SOP 任务<a class="headerlink" href="#3-nsp-sop" title="Permanent link">#</a></h2>
+<p>SOP 的全称为 sentence order prediction。</p>
+<p>在该文章之前已经有些文章发现，bert 的论文中的 NSP 任务没有什么作用。该论文任务 NSP 任务之所以没有作用，是因为其太简单了，所以在其基础上设计了一个难度更高的新任务，也就是 SOP 任务。SOP 任务就是预测两句话有没有被交换过顺序。</p>
+<h2 id="4">4、新模型收益<a class="headerlink" href="#4" title="Permanent link">#</a></h2>
+<h3 id="41">4.1 运行速度和显存消耗方面<a class="headerlink" href="#41" title="Permanent link">#</a></h3>
+<p>关于显存消耗方面，收益主要来自于第 2 章节中提到的跨层参数共享，本来需要 12 层的权重，现在直接变成 1 层了，需要的显存大幅减少。另外第 1 章节中提到的减少 embedding 层的参数量也能显著减少显存的消耗。</p>
+<p>关于运算速度方面，可以看出在最耗时的 transformer 的计算部分丝毫没有减少，本来需要计算 12 层 transformer 的话，新模型还是需要计算 12 层。论文中所提到的速度提升是因为使用相同的数据量做预训练时，由于模型参数量变少，占用的显存变小，每个 batch 中就可以方更多的数据，由此导致的训练时间减少。但如果要对一天样本进行推理，那么速度上是相同的。</p>
+<h3 id="42">4.2 效果方面<a class="headerlink" href="#42" title="Permanent link">#</a></h3>
+<p>由原论文中提供的下图可以看出：ALBERT-base 相比于 BERT-base 降了 2.2%；ALBERT-large 相比于 BERT-large 降了 2.8%。所以参数量的大幅减少是以损耗一定的模型效果为前提的，具体要选择哪种模型，还要结合具体任务。</p>
+<div align=center><img src="/6ineBi5J/assets/02.png" width=100% /></div>
+
+<h3 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/84273154">https://zhuanlan.zhihu.com/p/84273154</a></p>
+</li>
+<li>
+<p><a href="https://lilianweng.github.io/posts/2019-01-31-lm/#albert">https://lilianweng.github.io/posts/2019-01-31-lm/#albert</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

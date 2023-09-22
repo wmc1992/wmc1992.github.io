@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/003_%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/004_%E6%AD%A3%E5%88%99%E5%8C%96/L1%E5%92%8CL2%E6%AD%A3%E5%88%99%E5%8C%96/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/mV11YR9l_no_toc/">隐藏左侧目录栏</a>][<a href="/mV11YR9l/">显示左侧目录栏</a>]</p>
+
+<h1 id="_1">正则化<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<blockquote>
+<p>说明：在该篇文章中所有的推导都忽略了偏置项 bias；</p>
+</blockquote>
+<h2 id="1l2">1、L2正则<a class="headerlink" href="#1l2" title="Permanent link">#</a></h2>
+<p>正则化项为 <span class="arithmatex"><span class="MathJax_Preview">\Omega (\theta) = \frac{1}{2}||\theta||^2_2</span><script type="math/tex">\Omega (\theta) = \frac{1}{2}||\theta||^2_2</script></span>，系数 <span class="arithmatex"><span class="MathJax_Preview">\frac{1}{2}</span><script type="math/tex">\frac{1}{2}</script></span> 是为了求导时得到的系数为 <span class="arithmatex"><span class="MathJax_Preview">1</span><script type="math/tex">1</script></span>；</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span> 正则化能够使参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 的方差更接近0；</p>
+<p>目标函数：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}J(\theta)=L(\theta)+ \lambda \Omega(\theta) = L(\theta) + \frac{1}{2}\lambda ||\theta||^2_2\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}J(\theta)=L(\theta)+ \lambda \Omega(\theta) = L(\theta) + \frac{1}{2}\lambda ||\theta||^2_2\end{equation}</script>
+</div>
+<p>梯度为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\nabla_{\theta} J(\theta) = \nabla_{\theta} L(\theta) + \lambda \theta\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla_{\theta} J(\theta) = \nabla_{\theta} L(\theta) + \lambda \theta\end{equation}</script>
+</div>
+<p>梯度下降过程如下，这里的 <span class="arithmatex"><span class="MathJax_Preview">\gamma</span><script type="math/tex">\gamma</script></span> 为学习率：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\theta \leftarrow \theta - \gamma (\nabla_{\theta} L(\theta) + \lambda \theta)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\theta \leftarrow \theta - \gamma (\nabla_{\theta} L(\theta) + \lambda \theta)\end{equation}</script>
+</div>
+<p>对上述梯度下降过程整理一下得：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\theta \leftarrow (1-\gamma \lambda)\theta - \gamma \nabla_{\theta} L(\theta)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\theta \leftarrow (1-\gamma \lambda)\theta - \gamma \nabla_{\theta} L(\theta)\end{equation}</script>
+</div>
+<p>在不使用 <span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span> 正则化的情况下，梯度下降的公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\theta \leftarrow \theta - \gamma \nabla_{\theta} L(\theta)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\theta \leftarrow \theta - \gamma \nabla_{\theta} L(\theta)\end{equation}</script>
+</div>
+<p>对比公式<span class="arithmatex"><span class="MathJax_Preview">(4)</span><script type="math/tex">(4)</script></span>和公式<span class="arithmatex"><span class="MathJax_Preview">(5)</span><script type="math/tex">(5)</script></span>可知，<span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span>正则化对梯度更新的影响是：每一步执行更新前，会对权重向量乘以一个常数因子来收缩权重向量，使参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 的方差更接近0，因此<span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span>也被称为<strong>权重衰减</strong>。</p>
+<h2 id="2l1">2、L1正则<a class="headerlink" href="#2l1" title="Permanent link">#</a></h2>
+<p>正则化项为 <span class="arithmatex"><span class="MathJax_Preview">\Omega(\theta) = ||\theta||_1 = \sum_{i=1}^d |\theta_i|</span><script type="math/tex">\Omega(\theta) = ||\theta||_1 = \sum_{i=1}^d |\theta_i|</script></span>，即各个参数的绝对值之和；</p>
+<p>目标函数：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}J(\theta)=L(\theta)+\Omega(\theta)=L(\theta)+\lambda ||\theta||_1\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}J(\theta)=L(\theta)+\Omega(\theta)=L(\theta)+\lambda ||\theta||_1\end{equation}</script>
+</div>
+<p>梯度：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\nabla_{\theta} J(\theta)=\nabla_{\theta} L(\theta) + \lambda \cdot \text{sign}(\theta)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla_{\theta} J(\theta)=\nabla_{\theta} L(\theta) + \lambda \cdot \text{sign}(\theta)\end{equation}</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">\text{sign}(\cdot)</span><script type="math/tex">\text{sign}(\cdot)</script></span> 表示取自变量的符号；</p>
+<p>梯度下降过程如下，这里的 <span class="arithmatex"><span class="MathJax_Preview">\gamma</span><script type="math/tex">\gamma</script></span> 为学习率：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\theta \leftarrow \theta - \gamma \cdot(\nabla_{\theta} L(\theta) + \lambda \cdot \text{sign}(\theta))\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\theta \leftarrow \theta - \gamma \cdot(\nabla_{\theta} L(\theta) + \lambda \cdot \text{sign}(\theta))\end{equation}</script>
+</div>
+<p>对上述梯度下降过程整理一下得：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\theta \leftarrow (\theta - \gamma \cdot \lambda \cdot \text{sign}(\theta)) - \gamma \cdot \nabla_{\theta}L(\theta)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\theta \leftarrow (\theta - \gamma \cdot \lambda \cdot \text{sign}(\theta)) - \gamma \cdot \nabla_{\theta}L(\theta)\end{equation}</script>
+</div>
+<p>在不使用 <span class="arithmatex"><span class="MathJax_Preview">L_1</span><script type="math/tex">L_1</script></span> 正则化的情况下，梯度下降的公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\theta \leftarrow \theta - \gamma \nabla_{\theta} L(\theta)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\theta \leftarrow \theta - \gamma \nabla_{\theta} L(\theta)\end{equation}</script>
+</div>
+<p>对比公式<span class="arithmatex"><span class="MathJax_Preview">(9)</span><script type="math/tex">(9)</script></span>和公式<span class="arithmatex"><span class="MathJax_Preview">(10)</span><script type="math/tex">(10)</script></span>可知:</p>
+<ul>
+<li>
+<p>上面讨论过 <span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span> 正则化对梯度更新的影响是：给每个权重值乘上一个常数因子，线性的缩放每个权重值；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">L_1</span><script type="math/tex">L_1</script></span>正则化对梯度更新的影响是：给每个权重值减去一个与 <span class="arithmatex"><span class="MathJax_Preview">\text{sign}(\theta_i)</span><script type="math/tex">\text{sign}(\theta_i)</script></span> 同符号的常数因子；</p>
+</li>
+</ul>
+<blockquote>
+<p>特别说明：对于带有 <span class="arithmatex"><span class="MathJax_Preview">L_1</span><script type="math/tex">L_1</script></span> 正则的目标函数，由于其不是处处可导，所以一般不使用梯度下降法进行求解，这里只是和 <span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span> 正则做一个类似的讨论。在本文的最后一部分会介绍坐标轴下降法，是更常用的用于求解带有 <span class="arithmatex"><span class="MathJax_Preview">L_1</span><script type="math/tex">L_1</script></span> 正则的目标函数的方法；</p>
+</blockquote>
+<h2 id="3lasso">3、Lasso回归与岭回归<a class="headerlink" href="#3lasso" title="Permanent link">#</a></h2>
+<h3 id="31-lasso">3.1 Lasso回归与岭回归的定义<a class="headerlink" href="#31-lasso" title="Permanent link">#</a></h3>
+<p>在线性回归的目标函数上添加上 <span class="arithmatex"><span class="MathJax_Preview">L_1</span><script type="math/tex">L_1</script></span> 或 <span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span> 正则化项，则可以得到Lasso回归和岭回归，其公式如下：</p>
+<p>Lasso回归：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}J(\theta)=L(\theta)+ \lambda ||\theta||_1 =\frac{1}{2}\sum_{i=1}^n (h_{\theta}(x_i) - y_i)^2 + \lambda ||\theta||_1\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}J(\theta)=L(\theta)+ \lambda ||\theta||_1 =\frac{1}{2}\sum_{i=1}^n (h_{\theta}(x_i) - y_i)^2 + \lambda ||\theta||_1\end{equation}</script>
+</div>
+<p>岭回归：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}J(\theta)=L(\theta)+ \lambda \cdot \frac{1}{2} ||\theta||_2^2= \frac{1}{2}\sum_{i=1}^n (h_{\theta}(x_i) - y_i)^2 + \lambda \cdot \frac{1}{2} ||\theta||_2^2\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}J(\theta)=L(\theta)+ \lambda \cdot \frac{1}{2} ||\theta||_2^2= \frac{1}{2}\sum_{i=1}^n (h_{\theta}(x_i) - y_i)^2 + \lambda \cdot \frac{1}{2} ||\theta||_2^2\end{equation}</script>
+</div>
+<h3 id="32-l1">3.2 L1为何能做特征筛选<a class="headerlink" href="#32-l1" title="Permanent link">#</a></h3>
+<p>关于 <span class="arithmatex"><span class="MathJax_Preview">L_1</span><script type="math/tex">L_1</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span> 有一个常见的结论是：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">L_1</span><script type="math/tex">L_1</script></span>：能够使权重值中的一些特征趋于0，因此可以用来做特征筛选；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span>：能够使权重值中的所有特征的方差趋于0；</li>
+</ul>
+<p>这一部分讨论一下为什么 <span class="arithmatex"><span class="MathJax_Preview">L_1</span><script type="math/tex">L_1</script></span> 能够使权重值中的一些特征趋于0；</p>
+<p>Lasso回归与岭回归的目标函数都是拉格朗日格式，其中 <span class="arithmatex"><span class="MathJax_Preview">\lambda</span><script type="math/tex">\lambda</script></span> 是KKT乘子，所以可以将其改写为带有约束条件的最优化问题。</p>
+<p>Lasso回归：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{equation}
+\begin{split}
+&amp; \min_{\theta} \frac{1}{2} \sum_{i=1}^n (h_{\theta}(x_i) - y_i)^2 \\
+&amp; s.t. \quad ||\theta||_1 \leqslant t
+\end{split}
+\end{equation}
+</div>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{split}
+& \min_{\theta} \frac{1}{2} \sum_{i=1}^n (h_{\theta}(x_i) - y_i)^2 \\
+& s.t. \quad ||\theta||_1 \leqslant t
+\end{split}
+\end{equation}
+</script>
+</div>
+<p>岭回归：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{equation}
+\begin{split}
+&amp; \min_{\theta} \frac{1}{2} \sum_{i=1}^n (h_{\theta}(x_i) - y_i)^2 \\
+&amp; s.t. \quad \frac{1}{2}||\theta||_2^2 \leqslant t
+\end{split}
+\end{equation}
+</div>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{split}
+& \min_{\theta} \frac{1}{2} \sum_{i=1}^n (h_{\theta}(x_i) - y_i)^2 \\
+& s.t. \quad \frac{1}{2}||\theta||_2^2 \leqslant t
+\end{split}
+\end{equation}
+</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 表示正则化的力度，<span class="arithmatex"><span class="MathJax_Preview">t</span><script type="math/tex">t</script></span> 越小，正则化力度越大，也对应原目标函数中的 <span class="arithmatex"><span class="MathJax_Preview">\lambda</span><script type="math/tex">\lambda</script></span> 越大。</p>
+<p>下面通过画图来理解。</p>
+<p><img alt="" src="/mV11YR9l/assets/01.png" /></p>
+<p>如上图所示，Lasso回归（即公式<span class="arithmatex"><span class="MathJax_Preview">(13)</span><script type="math/tex">(13)</script></span>）的约束条件为左图中灰色的方形区域；岭回归（即公式<span class="arithmatex"><span class="MathJax_Preview">(14)</span><script type="math/tex">(14)</script></span>）的约束条件为右图中灰色的圆形区域；两图中右上方的椭圆线为损失函数 <span class="arithmatex"><span class="MathJax_Preview">L(\theta)</span><script type="math/tex">L(\theta)</script></span> 的等高线，损失函数 <span class="arithmatex"><span class="MathJax_Preview">L(\theta)</span><script type="math/tex">L(\theta)</script></span> 在椭圆的中心处取得最小值。</p>
+<p>既要满足方形/圆形的灰色区域的约束，又要尽量取最小值，可知上述两个带约束的最优化问题的最优解都在：等高线与约束区域边界的交点处；即两个红色箭头所指的交点处。</p>
+<p>由于 <span class="arithmatex"><span class="MathJax_Preview">L_1</span><script type="math/tex">L_1</script></span> 正则对应的约束区域是方形的，椭圆形的等高线与方形区域边界的交点更容易出现在该方形区域的顶点上，也就是坐标轴上。而这些坐标轴上的点仅当前坐标轴对应的维度非0，其他维度取值都为0。所以相比于 <span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span>，<span class="arithmatex"><span class="MathJax_Preview">L_1</span><script type="math/tex">L_1</script></span>更适合做特征选择。</p>
+<h2 id="4l2">4、带有L2正则的目标函数的求解<a class="headerlink" href="#4l2" title="Permanent link">#</a></h2>
+<h3 id="41">4.1 公式<a class="headerlink" href="#41" title="Permanent link">#</a></h3>
+<p>由于 <span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span> 正则本身连续且处处可微，所以直接使用梯度下降法即可进行求解。</p>
+<p>在第一部分的讨论中，已经求得了带有 <span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span> 正则的目标函数的梯度下降过程公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\theta \leftarrow \theta - \gamma \cdot (\nabla_{\theta} L(\theta) + \lambda \theta)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\theta \leftarrow \theta - \gamma \cdot (\nabla_{\theta} L(\theta) + \lambda \theta)\end{equation}</script>
+</div>
+<p>这个公式很简单，下面看一下在Pytorch中是如何实现<span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span>正则的功能的。</p>
+<h3 id="42-pytorchl2">4.2 Pytorch中L2的实现<a class="headerlink" href="#42-pytorchl2" title="Permanent link">#</a></h3>
+<h4 id="421">4.2.1 调用方式<a class="headerlink" href="#421" title="Permanent link">#</a></h4>
+<p>在 pytorch 中L2正则是通过 weight decay 在优化器中实现的，只需要在初始化优化器时指定哪些参数需要L2正则，哪些参数不需要L2正则即可。如下所示：</p>
+<pre><code class="language-python">weight_decay = 0.01
+learning_rate = 0.00005
+
+no_decay = [&quot;bias&quot;, &quot;LayerNorm.weight&quot;]
+optimizer_grouped_parameters = [
+    {
+        &quot;params&quot;: [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
+        &quot;weight_decay&quot;: weight_decay,
+    },
+    {
+        &quot;params&quot;: [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)],
+        &quot;weight_decay&quot;: 0.0,
+    },
+]
+optimizer = AdamW(optimizer_grouped_parameters, lr=learning_rate)
+</code></pre>
+<h4 id="422">4.2.2 源码<a class="headerlink" href="#422" title="Permanent link">#</a></h4>
+<p>以最简单的SGD优化器来看一下L2正则在优化器中具体是如何实现的：</p>
+<pre><code class="language-python">class SGD(Optimizer):
+
+    def step(self,):
+        for group in self.param_groups:
+            lr = group[&quot;lr&quot;]  # 学习率
+            weight_decay = group[&quot;weight_decay&quot;]  # weight decay
+
+            for p in group[&quot;params&quot;]:
+                if p.grad is None:  # 如果当前参数梯度为None，则不需要更新
+                    continue
+                d_p = p.grad  # 梯度
+
+                if weight_decay != 0:
+                    # 在原梯度的基础上加上 (weight_decay * 权重)
+                    d_p.add_(weight_decay, p.data)  
+
+                # 将（梯度 * -学习率）更新到权重参数上；当 weight_decay 不等
+                # 于0时，这里的梯度 d_p 已经加上了(weight_decay * 权重)
+                p.data.add_(-lr, d_p)  
+</code></pre>
+<p>再放一下梯度下降过程的公式，对着公式来看代码：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\theta \leftarrow \theta - \gamma \cdot (\nabla_{\theta} L(\theta) + \lambda \cdot \theta)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\theta \leftarrow \theta - \gamma \cdot (\nabla_{\theta} L(\theta) + \lambda \cdot \theta)\end{equation}</script>
+</div>
+<ul>
+<li>
+<p>公式中的 <span class="arithmatex"><span class="MathJax_Preview">\lambda</span><script type="math/tex">\lambda</script></span> 对应代码中的 <code>weight_decay</code>；</p>
+</li>
+<li>
+<p>公式中的 <span class="arithmatex"><span class="MathJax_Preview">\gamma</span><script type="math/tex">\gamma</script></span> 对应代码中的 <code>lr</code>；</p>
+</li>
+</ul>
+<p>代码中的注释很详细，不再赘述。</p>
+<h2 id="5l1">5、带有L1正则的目标函数的求解<a class="headerlink" href="#5l1" title="Permanent link">#</a></h2>
+<p>下面使用坐标轴下降法对带有 <span class="arithmatex"><span class="MathJax_Preview">L_1</span><script type="math/tex">L_1</script></span> 正则的目标函数进行求解；</p>
+<p>梯度下降法是沿着梯度的负方向下降；坐标轴下降法是沿着坐标轴方向下降；二者的相似点是都是迭代法；</p>
+<h3 id="51">5.1 优化问题<a class="headerlink" href="#51" title="Permanent link">#</a></h3>
+<p>先在这里列一下模型和目标函数，然后描述如何使用坐标轴下降法对该优化问题进行求解；</p>
+<p>模型为：<span class="arithmatex"><span class="MathJax_Preview">y = h_{\theta(x)}</span><script type="math/tex">y = h_{\theta(x)}</script></span>，其中权重参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 的维度为 <span class="arithmatex"><span class="MathJax_Preview">d</span><script type="math/tex">d</script></span>，即 <span class="arithmatex"><span class="MathJax_Preview">\theta = (\theta_1, \theta_2, ..., \theta_d)</span><script type="math/tex">\theta = (\theta_1, \theta_2, ..., \theta_d)</script></span></p>
+<p>损失函数选取MSE，则目标函数为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">J(\theta) = \frac{1}{2}\sum_{i=1}^n (y_i - \sum_{j=1}^d x_{ij} \cdot \theta_j)^2 + \lambda \sum_{j=1}^d |\theta_j|</div>
+<script type="math/tex; mode=display">J(\theta) = \frac{1}{2}\sum_{i=1}^n (y_i - \sum_{j=1}^d x_{ij} \cdot \theta_j)^2 + \lambda \sum_{j=1}^d |\theta_j|</script>
+</div>
+<h3 id="52">5.2 坐标轴下降法<a class="headerlink" href="#52" title="Permanent link">#</a></h3>
+<p>坐标轴下降算法过程分为三个步骤：</p>
+<ol>
+<li>
+<p>对权重进行随机初始化；随机初始化的权重记作 <span class="arithmatex"><span class="MathJax_Preview">\theta^{(0)}=(\theta_1^{(0)}, \theta_2^{(0)}, ..., \theta_d^{(0)})</span><script type="math/tex">\theta^{(0)}=(\theta_1^{(0)}, \theta_2^{(0)}, ..., \theta_d^{(0)})</script></span>；这里右上角的角标 <span class="arithmatex"><span class="MathJax_Preview">\cdot^{(0)}</span><script type="math/tex">\cdot^{(0)}</script></span> 表示当前是第0轮迭代，右下角的角标表示的是权重参数的第几个维度；</p>
+</li>
+<li>
+<p>进行第 <span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span> 轮迭代；</p>
+<p>第 <span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span> 轮迭代前：<span class="arithmatex"><span class="MathJax_Preview">\theta^{(k-1)} = (\theta_1^{(k-1)}, \theta_2^{(k-1)}, ..., \theta_d^{(k-1)})</span><script type="math/tex">\theta^{(k-1)} = (\theta_1^{(k-1)}, \theta_2^{(k-1)}, ..., \theta_d^{(k-1)})</script></span></p>
+<p>第 <span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span> 轮迭代后：<span class="arithmatex"><span class="MathJax_Preview">\theta^{(k)} = (\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_d^{(k)})</span><script type="math/tex">\theta^{(k)} = (\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_d^{(k)})</script></span></p>
+<p>在第 <span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span> 轮迭代中，会从坐标轴1逐步迭代到坐标轴 <span class="arithmatex"><span class="MathJax_Preview">d</span><script type="math/tex">d</script></span>（即迭代权重参数的每个维度），对 <span class="arithmatex"><span class="MathJax_Preview">\theta^{(k-1)}</span><script type="math/tex">\theta^{(k-1)}</script></span> 的 <span class="arithmatex"><span class="MathJax_Preview">d</span><script type="math/tex">d</script></span> 个维度逐步迭代的公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp; \theta_1^{(k)} = \arg \min_{\theta_1} J(\theta_1, \theta_2^{(k-1)}, ..., \theta_d^{(k-1)}) \\
+&amp; \theta_2^{(k)} = \arg \min_{\theta_2} J(\theta_1^{(k)}, \theta_2, \theta_3^{(k-1)}, ..., \theta_d^{(k-1)}) \\
+&amp; ... \\
+&amp; \theta_d^{(k)} = \arg \min_{\theta_d} J(\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_{d-1}^{(k)}, \theta_d)
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+& \theta_1^{(k)} = \arg \min_{\theta_1} J(\theta_1, \theta_2^{(k-1)}, ..., \theta_d^{(k-1)}) \\
+& \theta_2^{(k)} = \arg \min_{\theta_2} J(\theta_1^{(k)}, \theta_2, \theta_3^{(k-1)}, ..., \theta_d^{(k-1)}) \\
+& ... \\
+& \theta_d^{(k)} = \arg \min_{\theta_d} J(\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_{d-1}^{(k)}, \theta_d)
+\end{split}\end{equation}</script>
+</div>
+<p>注意在上述公式（17）中，第一个式子的等号右边只有 <span class="arithmatex"><span class="MathJax_Preview">\theta_1</span><script type="math/tex">\theta_1</script></span> 为变量，其它都是常量；第二个式子的等号右边只有 <span class="arithmatex"><span class="MathJax_Preview">\theta_2</span><script type="math/tex">\theta_2</script></span> 为变量，其它都是常量；最后一个式子的等号右边只有 <span class="arithmatex"><span class="MathJax_Preview">\theta_d</span><script type="math/tex">\theta_d</script></span> 是变量，其他都是常量；</p>
+<p>公式（17）中的 <span class="arithmatex"><span class="MathJax_Preview">d</span><script type="math/tex">d</script></span> 个式子可以合并用如下一个式子进行表示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\theta_l^{(k)} = \arg \min_{\theta_l} J(\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_{l-1}^{(k)}, \theta_{l}, \theta_{l+1}^{(k-1)}, ..., \theta_d^{(k-1)}), \qquad  l \in \{1, 2, ..., d\}</div>
+<script type="math/tex; mode=display">\theta_l^{(k)} = \arg \min_{\theta_l} J(\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_{l-1}^{(k)}, \theta_{l}, \theta_{l+1}^{(k-1)}, ..., \theta_d^{(k-1)}), \qquad  l \in \{1, 2, ..., d\}</script>
+</div>
+<p>在该式的等号右边只有 <span class="arithmatex"><span class="MathJax_Preview">\theta_l</span><script type="math/tex">\theta_l</script></span> 是变量，其它的像 <span class="arithmatex"><span class="MathJax_Preview">\theta_1^{(k)}</span><script type="math/tex">\theta_1^{(k)}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\theta_2^{(k)}</span><script type="math/tex">\theta_2^{(k)}</script></span>、...、<span class="arithmatex"><span class="MathJax_Preview">\theta_{l-1}^{(k)}</span><script type="math/tex">\theta_{l-1}^{(k)}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\theta_{l+1}^{(k-1)}</span><script type="math/tex">\theta_{l+1}^{(k-1)}</script></span>、...、<span class="arithmatex"><span class="MathJax_Preview">\theta_d^{(k-1)}</span><script type="math/tex">\theta_d^{(k-1)}</script></span>都是常量；</p>
+<p>我们现在先假设该式是容易求解的，先看完坐标轴下降法的整个算法流程；至于该式的具体解法在下一小节说明；</p>
+</li>
+<li>
+<p>终止条件：第 <span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span> 次迭代完成后，检查 <span class="arithmatex"><span class="MathJax_Preview">\theta^{(k)}</span><script type="math/tex">\theta^{(k)}</script></span> 与 <span class="arithmatex"><span class="MathJax_Preview">\theta^{(k-1)}</span><script type="math/tex">\theta^{(k-1)}</script></span> 在各个维度上的变化情况，如果各个维度的变化都足够小，那么终止迭代，<span class="arithmatex"><span class="MathJax_Preview">\theta^{(k)}</span><script type="math/tex">\theta^{(k)}</script></span> 即为最终结果；否则重复第2步，继续迭代；</p>
+</li>
+</ol>
+<p>以上就是坐标轴下降法：先随机初始化权重矩阵；然后对每个维度的参数进行优化，在优化第 <span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 个维度时，将其它维度视为常量；待每个维度都优化一轮之后，检查是否可以终止：若可以终止，则优化结束，否则重复上述优化步骤；</p>
+<h3 id="53-arg-min_theta_l-jarg-min_theta_l-j">5.3 求解 <span class="arithmatex"><span class="MathJax_Preview">\arg \min_{\theta_l} J</span><script type="math/tex">\arg \min_{\theta_l} J</script></span><a class="headerlink" href="#53-arg-min_theta_l-jarg-min_theta_l-j" title="Permanent link">#</a></h3>
+<p>在上一小节遗留了一个问题，就是如何求解下式，在这一小节对该式进行求解。</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\theta_l^{(k)} = \arg \min_{\theta_l} J(\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_{l-1}^{(k)}, \theta_{l}, \theta_{l+1}^{(k-1)}, ..., \theta_d^{(k-1)})\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\theta_l^{(k)} = \arg \min_{\theta_l} J(\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_{l-1}^{(k)}, \theta_{l}, \theta_{l+1}^{(k-1)}, ..., \theta_d^{(k-1)})\end{equation}</script>
+</div>
+<h4 id="531">5.3.1 问题描述<a class="headerlink" href="#531" title="Permanent link">#</a></h4>
+<p>再次描述一下整个问题，如下：</p>
+<p>模型为：<span class="arithmatex"><span class="MathJax_Preview">y = h_{\theta(x)}</span><script type="math/tex">y = h_{\theta(x)}</script></span>，其中权重参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 的维度为 <span class="arithmatex"><span class="MathJax_Preview">d</span><script type="math/tex">d</script></span>，即 <span class="arithmatex"><span class="MathJax_Preview">\theta = (\theta_1, \theta_2, ..., \theta_d)</span><script type="math/tex">\theta = (\theta_1, \theta_2, ..., \theta_d)</script></span></p>
+<p>目标函数为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}J(\theta) = \frac{1}{2}\sum_{i=1}^n (y_i - \sum_{j=1}^d x_{ij} \cdot \theta_j)^2 + \lambda \sum_{j=1}^d |\theta_j|\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}J(\theta) = \frac{1}{2}\sum_{i=1}^n (y_i - \sum_{j=1}^d x_{ij} \cdot \theta_j)^2 + \lambda \sum_{j=1}^d |\theta_j|\end{equation}</script>
+</div>
+<p>求解：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\theta_l^{(k)} = \arg \min_{\theta_l} J(\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_{l-1}^{(k)}, \theta_{l}, \theta_{l+1}^{(k-1)}, ..., \theta_d^{(k-1)})\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\theta_l^{(k)} = \arg \min_{\theta_l} J(\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_{l-1}^{(k)}, \theta_{l}, \theta_{l+1}^{(k-1)}, ..., \theta_d^{(k-1)})\end{equation}</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 表示数据集中的样本数量；<span class="arithmatex"><span class="MathJax_Preview">d</span><script type="math/tex">d</script></span> 表示每条样本的维度，同时也是权重参数 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 的维度；<span class="arithmatex"><span class="MathJax_Preview">\lambda</span><script type="math/tex">\lambda</script></span> 是超参数；</p>
+<p>求解上式，我们采用导数等于 <span class="arithmatex"><span class="MathJax_Preview">0</span><script type="math/tex">0</script></span> 的方式。所以下面将分为两部分说明：一部分是求导；另一部分是令导数等于 <span class="arithmatex"><span class="MathJax_Preview">0</span><script type="math/tex">0</script></span> 求解出 <span class="arithmatex"><span class="MathJax_Preview">\theta_l</span><script type="math/tex">\theta_l</script></span>；</p>
+<h4 id="532">5.3.2 求导<a class="headerlink" href="#532" title="Permanent link">#</a></h4>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp; \frac{\partial}{\partial \theta_l} J(\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_{l-1}^{(k)}, \theta_{l}, \theta_{l+1}^{(k-1)}, ..., \theta_d^{(k-1)}) \\
+= &amp; \sum_{i=1}^n (y_i - \sum_{j=1}^d x_{ij} \cdot \theta_j) \cdot (-x_{il}) + \lambda \frac{\partial}{\partial \theta_l} |\theta_l| \\
+= &amp; \sum_{i=1}^n (y_i - \sum_{j \neq l}^d x_{ij} \cdot \theta_j - x_{il} \cdot \theta_l) \cdot (-x_{il}) + \lambda \frac{\partial}{\partial \theta_l} |\theta_l| \\
+= &amp; - \sum_{i=1}^n (y_i - \sum_{j \neq l}^d x_{ij} \cdot \theta_j) \cdot x_{il} + \sum_{i=1}^n x_{il}^2 \cdot \theta_l + \lambda \frac{\partial}{\partial \theta_l} |\theta_l|
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+& \frac{\partial}{\partial \theta_l} J(\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_{l-1}^{(k)}, \theta_{l}, \theta_{l+1}^{(k-1)}, ..., \theta_d^{(k-1)}) \\
+= & \sum_{i=1}^n (y_i - \sum_{j=1}^d x_{ij} \cdot \theta_j) \cdot (-x_{il}) + \lambda \frac{\partial}{\partial \theta_l} |\theta_l| \\
+= & \sum_{i=1}^n (y_i - \sum_{j \neq l}^d x_{ij} \cdot \theta_j - x_{il} \cdot \theta_l) \cdot (-x_{il}) + \lambda \frac{\partial}{\partial \theta_l} |\theta_l| \\
+= & - \sum_{i=1}^n (y_i - \sum_{j \neq l}^d x_{ij} \cdot \theta_j) \cdot x_{il} + \sum_{i=1}^n x_{il}^2 \cdot \theta_l + \lambda \frac{\partial}{\partial \theta_l} |\theta_l|
+\end{split}\end{equation}</script>
+</div>
+<p>在上述推导过程中，后两步变换过程主要目的是将变量提出来，在上式中只有 <span class="arithmatex"><span class="MathJax_Preview">\theta_l</span><script type="math/tex">\theta_l</script></span> 是变量，其他的都是常量。</p>
+<p>为了后面书写方便，记：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp; r_l = \sum_{i=1}^n (y_i - \sum_{j\neq l}^d x_{ij} \cdot \theta_j) \cdot x_{il} \\
+&amp; z_l = \sum_{i=1}^n x_{il}^2
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+& r_l = \sum_{i=1}^n (y_i - \sum_{j\neq l}^d x_{ij} \cdot \theta_j) \cdot x_{il} \\
+& z_l = \sum_{i=1}^n x_{il}^2
+\end{split}\end{equation}</script>
+</div>
+<p>再次强调，由于 <span class="arithmatex"><span class="MathJax_Preview">x_{ij}</span><script type="math/tex">x_{ij}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">y_i</span><script type="math/tex">y_i</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\theta_j(j \neq l)</span><script type="math/tex">\theta_j(j \neq l)</script></span> 都是常量，所以这里的 <span class="arithmatex"><span class="MathJax_Preview">r_l</span><script type="math/tex">r_l</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">z_l</span><script type="math/tex">z_l</script></span> 也都是常量；于是公式（21）就变成了如下形式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\frac{\partial J(...)}{\partial \theta_l} = -r_l + z_l \cdot \theta_l + \lambda \frac{\partial}{\partial \theta_l} |\theta_l|\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\frac{\partial J(...)}{\partial \theta_l} = -r_l + z_l \cdot \theta_l + \lambda \frac{\partial}{\partial \theta_l} |\theta_l|\end{equation}</script>
+</div>
+<blockquote>
+<p>这里涉及到了对绝对值函数进行求导，涉及次梯度的概念。在此，只放一个结论，不过多讨论。对于函数 <span class="arithmatex"><span class="MathJax_Preview">f(x)=|x|</span><script type="math/tex">f(x)=|x|</script></span>，其导数为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">f^{\prime}(x) = \begin{cases}1, &amp;x &gt; 0 \\
+[-1, 1], &amp;x = 0 \\
+-1, &amp;x &lt; 0
+\end{cases}</div>
+<script type="math/tex; mode=display">f^{\prime}(x) = \begin{cases}1, &x > 0 \\
+[-1, 1], &x = 0 \\
+-1, &x < 0
+\end{cases}</script>
+</div>
+</blockquote>
+<p>根据绝对值函数导数的结论，对公式（23）继续求导可得：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}
+\frac{\partial J(...)}{\partial \theta_l} =\begin{cases}
+-r_l + z_l \theta_l + \lambda, &amp;\theta_l &gt; 0 \\
+[-r_l + z_l \theta_l - \lambda, -r_l + z_l \theta_l + \lambda], &amp;\theta_l = 0 \\
+-r_l + z_l \theta_l - \lambda, &amp;\theta_l &lt; 0 
+\end{cases}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}
+\frac{\partial J(...)}{\partial \theta_l} =\begin{cases}
+-r_l + z_l \theta_l + \lambda, &\theta_l > 0 \\
+[-r_l + z_l \theta_l - \lambda, -r_l + z_l \theta_l + \lambda], &\theta_l = 0 \\
+-r_l + z_l \theta_l - \lambda, &\theta_l < 0 
+\end{cases}\end{equation}</script>
+</div>
+<p>至此，求导完成，下面令导数等于0，求解 <span class="arithmatex"><span class="MathJax_Preview">\theta_l</span><script type="math/tex">\theta_l</script></span>；</p>
+<h4 id="533-0-theta_ltheta_l">5.3.3 令导数等于0求解 <span class="arithmatex"><span class="MathJax_Preview">\theta_l</span><script type="math/tex">\theta_l</script></span><a class="headerlink" href="#533-0-theta_ltheta_l" title="Permanent link">#</a></h4>
+<p>由于上一步中最后求得的导数为分段函数，这里也分段进行求解；</p>
+<ul>
+<li>
+<p>当 <span class="arithmatex"><span class="MathJax_Preview">\theta_l &gt; 0</span><script type="math/tex">\theta_l > 0</script></span> 时：</p>
+<p>有 <span class="arithmatex"><span class="MathJax_Preview">-r_l + z_l \theta_l + \lambda = 0</span><script type="math/tex">-r_l + z_l \theta_l + \lambda = 0</script></span>，解得 <span class="arithmatex"><span class="MathJax_Preview">\theta_l = \frac{r_l - \lambda}{z_l}</span><script type="math/tex">\theta_l = \frac{r_l - \lambda}{z_l}</script></span></p>
+<p>由于 <span class="arithmatex"><span class="MathJax_Preview">\theta_l=\frac{r_l - \lambda}{z_l}&gt;0</span><script type="math/tex">\theta_l=\frac{r_l - \lambda}{z_l}>0</script></span> 且 <span class="arithmatex"><span class="MathJax_Preview">z_l = \sum_{i=1}^n x_{il}^2 \geqslant 0</span><script type="math/tex">z_l = \sum_{i=1}^n x_{il}^2 \geqslant 0</script></span>，可推导出 <span class="arithmatex"><span class="MathJax_Preview">r_l &gt; \lambda</span><script type="math/tex">r_l > \lambda</script></span></p>
+</li>
+<li>
+<p>当 <span class="arithmatex"><span class="MathJax_Preview">\theta_l &lt; 0</span><script type="math/tex">\theta_l < 0</script></span> 时：</p>
+<p>有 <span class="arithmatex"><span class="MathJax_Preview">-r_l + z_l \theta_l - \lambda = 0</span><script type="math/tex">-r_l + z_l \theta_l - \lambda = 0</script></span>，解得 <span class="arithmatex"><span class="MathJax_Preview">\theta_l = \frac{r_l + \lambda}{z_l}</span><script type="math/tex">\theta_l = \frac{r_l + \lambda}{z_l}</script></span></p>
+<p>由于 <span class="arithmatex"><span class="MathJax_Preview">\theta_l=\frac{r_l + \lambda}{z_l}&gt;0</span><script type="math/tex">\theta_l=\frac{r_l + \lambda}{z_l}>0</script></span> 且 <span class="arithmatex"><span class="MathJax_Preview">z_l = \sum_{i=1}^n x_{il}^2 \geqslant 0</span><script type="math/tex">z_l = \sum_{i=1}^n x_{il}^2 \geqslant 0</script></span>，可推导出 <span class="arithmatex"><span class="MathJax_Preview">r_l &lt; -\lambda</span><script type="math/tex">r_l < -\lambda</script></span></p>
+</li>
+<li>
+<p>当 <span class="arithmatex"><span class="MathJax_Preview">\theta_l = 0</span><script type="math/tex">\theta_l = 0</script></span> 时：</p>
+<p>有 <span class="arithmatex"><span class="MathJax_Preview">0 \in [-r_l - \lambda, -r_l + \lambda]</span><script type="math/tex">0 \in [-r_l - \lambda, -r_l + \lambda]</script></span>，可推导出 <span class="arithmatex"><span class="MathJax_Preview">-\lambda \leqslant r_l \leqslant \lambda</span><script type="math/tex">-\lambda \leqslant r_l \leqslant \lambda</script></span></p>
+</li>
+</ul>
+<p>将三部分合到一起，即：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\theta_l = \begin{cases}
+\frac{r_l - \lambda}{z_l}, &amp;r_l &gt; \lambda \\
+0, &amp;-\lambda \leqslant r_l \leqslant \lambda \\
+\frac{r_l + \lambda}{z_l}, &amp;r_l &lt; -\lambda
+\end{cases}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\theta_l = \begin{cases}
+\frac{r_l - \lambda}{z_l}, &r_l > \lambda \\
+0, &-\lambda \leqslant r_l \leqslant \lambda \\
+\frac{r_l + \lambda}{z_l}, &r_l < -\lambda
+\end{cases}\end{equation}</script>
+</div>
+<p>至此对 <span class="arithmatex"><span class="MathJax_Preview">\arg \min_{\theta_l} J(\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_{l-1}^{(k)}, \theta_{l}, \theta_{l+1}^{(k-1)}, ..., \theta_d^{(k-1)})</span><script type="math/tex">\arg \min_{\theta_l} J(\theta_1^{(k)}, \theta_2^{(k)}, ..., \theta_{l-1}^{(k)}, \theta_{l}, \theta_{l+1}^{(k-1)}, ..., \theta_d^{(k-1)})</script></span> 的求解完成。</p>
+<h4 id="534">5.3.4 伪代码实现<a class="headerlink" href="#534" title="Permanent link">#</a></h4>
+<p>前面已经说过多次，<span class="arithmatex"><span class="MathJax_Preview">r_l</span><script type="math/tex">r_l</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">z_l</span><script type="math/tex">z_l</script></span> 都是常量，可通过数据集 <span class="arithmatex"><span class="MathJax_Preview">\{(x_1,y_1), (x_2, y_2), ..., (x_n, y_n)\}</span><script type="math/tex">\{(x_1,y_1), (x_2, y_2), ..., (x_n, y_n)\}</script></span> 与 除了第 <span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 维以外的权重参数 <span class="arithmatex"><span class="MathJax_Preview">\theta_1^{(k)}</span><script type="math/tex">\theta_1^{(k)}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\theta_2^{(k)}</span><script type="math/tex">\theta_2^{(k)}</script></span>、...、<span class="arithmatex"><span class="MathJax_Preview">\theta_{l-1}^{(k)}</span><script type="math/tex">\theta_{l-1}^{(k)}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\theta_{l+1}^{(k-1)}</span><script type="math/tex">\theta_{l+1}^{(k-1)}</script></span>、...、<span class="arithmatex"><span class="MathJax_Preview">\theta_d^{(k-1)}</span><script type="math/tex">\theta_d^{(k-1)}</script></span> 求解出来；</p>
+<p>据此给出伪代码如下：</p>
+<pre><code>function calculate_theta_l():
+    r_l = ... # 前面已解释了r_l可直接求得
+    z_l = ... # 前面已解释了z_l可直接求得
+    theta_l = max((r_l - lambda)/z_l, 0) + min((r_l + lambda)/z_l, 0) # 上面最后推导出来的分段函数（25）可以整合成这一行伪代码
+</code></pre>
+<h2 id="refrence">Refrence<a class="headerlink" href="#refrence" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="http://www.huaxiaozhuan.com/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/chapters/3_regularization.html">正则化：http://www.huaxiaozhuan.com/深度学习/chapters/3_regularization.html</a></p>
+</li>
+<li>
+<p><a href="https://www.cnblogs.com/wuliytTaotao/p/10837533.html">Lasso回归和岭回归：https://www.cnblogs.com/wuliytTaotao/p/10837533.html</a></p>
+</li>
+<li>
+<p><a href="https://www.cnblogs.com/pinard/p/6018889.html">Lasso回归算法： 坐标轴下降法与最小角回归法小结：https://www.cnblogs.com/pinard/p/6018889.html</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/429541451">LASSO的坐标下降法求解：https://zhuanlan.zhihu.com/p/429541451</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

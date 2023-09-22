@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/003_%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/007_%E8%AF%84%E4%BC%B0%E6%8C%87%E6%A0%87/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/q2h3G8DU_no_toc/">隐藏左侧目录栏</a>][<a href="/q2h3G8DU/">显示左侧目录栏</a>]</p>
+
+<h1 id="_1">评估指标<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<h2 id="1bleu">1、BLEU<a class="headerlink" href="#1bleu" title="Permanent link">#</a></h2>
+<h3 id="11">1.1 基本公式<a class="headerlink" href="#11" title="Permanent link">#</a></h3>
+<p>BLEU 的计算公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\text{score} = \frac{\sum_{C \in \{\text{Candidates}\}}\sum_{\text{n-gram} \in C} \text{Count}_{\text{clip}}(\text{n-gram})}{\sum_{C^{\prime} \in \{\text{Candidates}\}}\sum_{\text{n-gram}^{\prime} \in C^{\prime}} \text{Count} (\text{n-gram}^{\prime})}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\text{score} = \frac{\sum_{C \in \{\text{Candidates}\}}\sum_{\text{n-gram} \in C} \text{Count}_{\text{clip}}(\text{n-gram})}{\sum_{C^{\prime} \in \{\text{Candidates}\}}\sum_{\text{n-gram}^{\prime} \in C^{\prime}} \text{Count} (\text{n-gram}^{\prime})}\end{equation}</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">\{\text{Candidates}\}</span><script type="math/tex">\{\text{Candidates}\}</script></span> 表示机器翻译生成的多条样本，当然在这里举的例子中只有一条样本；<span class="arithmatex"><span class="MathJax_Preview">\text{n-gram}</span><script type="math/tex">\text{n-gram}</script></span> 表示对文本做 n-gram 之后得到的结果，在 BLEU 中n一般取值为 <span class="arithmatex"><span class="MathJax_Preview">\{1,2,3,4\}</span><script type="math/tex">\{1,2,3,4\}</script></span>；<span class="arithmatex"><span class="MathJax_Preview">\text{Count}_{\text{clip}}(\text{n-gram})</span><script type="math/tex">\text{Count}_{\text{clip}}(\text{n-gram})</script></span> 表示机器翻译生成的样本中做 n-gram 之后得到的结果中有多少个出现在人工标注的译文中；<span class="arithmatex"><span class="MathJax_Preview">\text{Count}(\text{n-gram}^{\prime})</span><script type="math/tex">\text{Count}(\text{n-gram}^{\prime})</script></span> 表示机器翻译生成的样本做 n-gram 之后总共有多少个。所以看起来 BLEU 计算的是准确率。</p>
+<h3 id="12">1.2 举例说明计算方式<a class="headerlink" href="#12" title="Permanent link">#</a></h3>
+<p>下面以机器翻译为例，举例说明如何计算 BLEU 的值。</p>
+<p>原始待翻译的文本为法语，文本如下：</p>
+<pre><code>J’ai mangé trois filberts.
+</code></pre>
+<p>要翻译成的语言是英语，下面两句是上述法语的人工标注译文：</p>
+<pre><code>I have eaten three hazelnuts.
+I ate three filberts.
+</code></pre>
+<p>下面这句是机器翻译模型生成的翻译结果：</p>
+<pre><code>I ate three hazelnuts.
+</code></pre>
+<p><strong>计算 1-gram 的分值</strong></p>
+<p>机器翻译生成的结果做 1-gram 得到的结果为：</p>
+<pre><code>['I', 'ate', 'three', 'hazelnuts']
+</code></pre>
+<p>人工标注的译文做 1-gram 得到的结果为：</p>
+<pre><code>['I', 'have', 'eaten', 'three', 'hazelnuts']
+['I', 'ate', 'three', 'filberts']
+</code></pre>
+<p>可以看出机器翻译生成的结果做 1-gram 之后得到的结果中出现在人工标注译文中的个数为 4 个，机器翻译生成的结果中也是 4 个，所以得分为 <span class="arithmatex"><span class="MathJax_Preview">4/4 = 1.0</span><script type="math/tex">4/4 = 1.0</script></span></p>
+<p><strong>计算 2-gram 的分值</strong></p>
+<p>机器翻译生成的结果做 2-gram 得到的结果为：</p>
+<pre><code>['I ate', 'ate three', 'three hazelnuts']
+</code></pre>
+<p>人工标注的译文做 2-gram 得到的结果为：</p>
+<pre><code>['I have', 'have eaten', 'eaten three', 'three hazelnuts']
+['I ate', 'ate three', 'three filberts']
+</code></pre>
+<p>可以看出机器翻译生成的结果做 2-gram 之后得到的结果中出现在人工标注译文中的个数为 3 个，机器翻译生成的结果中也是 3 个，所以得分为 <span class="arithmatex"><span class="MathJax_Preview">3/3 = 1.0</span><script type="math/tex">3/3 = 1.0</script></span></p>
+<p><strong>计算 3-gram 的分值</strong></p>
+<p>机器翻译生成的结果做 3-gram 得到的结果为：</p>
+<pre><code>['I ate three', 'ate three hazelnuts']
+</code></pre>
+<p>人工标注的译文做 3-gram 得到的结果为：</p>
+<pre><code>['I have eaten', 'have eaten three', 'eaten three hazelnuts']
+['I ate three', 'ate three filberts']
+</code></pre>
+<p>可以看出机器翻译生成的结果做 3-gram 之后得到的结果中出现在人工标注译文中的个数为 1 个，机器翻译生成的结果中是 2 个，所以得分为 <span class="arithmatex"><span class="MathJax_Preview">1/2 = 0.5</span><script type="math/tex">1/2 = 0.5</script></span></p>
+<p><strong>计算 4-gram 的分值</strong></p>
+<p>机器翻译生成的结果做 1-gram 得到的结果为：</p>
+<pre><code>['I ate three hazelnuts']
+</code></pre>
+<p>人工标注的译文做 1-gram 得到的结果为：</p>
+<pre><code>['I have eaten three', 'have eaten three hazelnuts']
+['I ate three filberts']
+</code></pre>
+<p>可以看出机器翻译生成的结果做 4-gram 之后得到的结果中出现在人工标注译文中的个数为 0 个，机器翻译生成的结果中是 1 个，所以得分为 <span class="arithmatex"><span class="MathJax_Preview">0/1 = 0.0</span><script type="math/tex">0/1 = 0.0</script></span></p>
+<p>最终的 BLUE 的得分是 1-gram、2-gram、3-gram、4-gram 的平均得分，即 <span class="arithmatex"><span class="MathJax_Preview">(1.0 + 1.0 + 0.5 + 0.0) / 4 = 0.625</span><script type="math/tex">(1.0 + 1.0 + 0.5 + 0.0) / 4 = 0.625</script></span></p>
+<p>由上面的例子可以看出，在做 n-gram 划分时，随着 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 的增大得分越来越低。这个是很直观的，当 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 非常大时就等于是要求生成的结果必须和人工标注的译文一摸一样才能得分。</p>
+<h3 id="13-bleu">1.3 BLEU 优缺点<a class="headerlink" href="#13-bleu" title="Permanent link">#</a></h3>
+<p>上述描述 BLEU 在计算时要分别计算 1-gram、2-gram、3-gram、4-gram 然后再取均值，如果只计算 1-gram 会有什么问题？使用如下例子进行说明。</p>
+<p>待翻译的法语文本和人工标注的英文译文还是上述描述的不变，假设现在机器翻译生成的结果如下所示：</p>
+<pre><code>three three three three three
+</code></pre>
+<p>将该机器翻译生成的结果做 1-gram 得到的结果为：</p>
+<pre><code>['three', 'three', 'three', 'three', 'three']
+</code></pre>
+<p>再放一下人工标注的译文做 1-gram 得到的结果为：</p>
+<pre><code>['I', 'have', 'eaten', 'three', 'hazelnuts']
+['I', 'ate', 'three', 'filberts']
+</code></pre>
+<p>这样就会发现机器翻译生成的结果做 1-gram 之后得到的结果中出现在人工标注译文中的个数为 5 个，机器翻译生成的结果中也是 5 个，所以最终得分是 <span class="arithmatex"><span class="MathJax_Preview">5/5 = 1.0</span><script type="math/tex">5/5 = 1.0</script></span>。但是很明显这个翻译结果是非常差的，这个 1.0 的得分不是想要的。所以需要 2-gram、3-gram、4-gram，因为对于该例子来说这几项得分都是 <span class="arithmatex"><span class="MathJax_Preview">0.0</span><script type="math/tex">0.0</script></span> 分。</p>
+<p>另外在本文描述 BLEU 公式的部分已经写了，BLEU 是在计算准确率，所以该指标不能很好的衡量召回的质量。使用如下例子进行说明。</p>
+<p>待翻译的法语文本和人工标注的英文译文还是上述描述的不变，假设现在机器翻译生成的结果如下所示：</p>
+<pre><code>I ate
+</code></pre>
+<p>在这个生成的结果下，计算 1-gram、2-gram、3-gram、4-gram 的得分都是 <span class="arithmatex"><span class="MathJax_Preview">1.0</span><script type="math/tex">1.0</script></span> 分。</p>
+<p>除了上述详细描述的两点以外，BLEU 还有如下优缺点：</p>
+<p>优点：</p>
+<ul>
+<li>BLEU 快速且易于计算，特别是与人工翻译速率模型输出相比的话尤为明显。</li>
+<li>BLEU 无处不在，这使你将模型与同一任务的基准进行比较变得更为轻松。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>它不考虑意义；</li>
+<li>它不直接考虑句子结构；</li>
+<li>它不能很好地处理形态丰富的语言；</li>
+<li>它与人类的判断并不相符；</li>
+</ul>
+<h2 id="2rouge">2、ROUGE指标<a class="headerlink" href="#2rouge" title="Permanent link">#</a></h2>
+<p>ROUGE指标总共有四种：<span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-N}</span><script type="math/tex">\text{Rouge-N}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-L}</span><script type="math/tex">\text{Rouge-L}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-W}</span><script type="math/tex">\text{Rouge-W}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-S}</span><script type="math/tex">\text{Rouge-S}</script></span>。相比于 BLEU 计算的是准确率，ROUGE 指标计算的是召回率。</p>
+<h3 id="21-textrouge-ntextrouge-n">2.1 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-N}</span><script type="math/tex">\text{Rouge-N}</script></span> 指标<a class="headerlink" href="#21-textrouge-ntextrouge-n" title="Permanent link">#</a></h3>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-N}</span><script type="math/tex">\text{Rouge-N}</script></span> 的全称为 N-gram Co-Occurrence Statistics。</p>
+<p>简单来说 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-N}</span><script type="math/tex">\text{Rouge-N}</script></span> 就是将模型生成结果和标注结果按照 n-gram 划分后，计算召回率。公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\text{Rouge-N} = \frac{\sum_{S \in \text{ReferenceSummaries}}\sum_{\text{gram}_n \in S} \text{Count}_{\text{match}}(\text{gram}_n)}{\sum_{S \in \text{ReferenceSummaries}}\sum_{\text{gram}_n \in S} \text{Count}(\text{gram}_n)}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\text{Rouge-N} = \frac{\sum_{S \in \text{ReferenceSummaries}}\sum_{\text{gram}_n \in S} \text{Count}_{\text{match}}(\text{gram}_n)}{\sum_{S \in \text{ReferenceSummaries}}\sum_{\text{gram}_n \in S} \text{Count}(\text{gram}_n)}\end{equation}</script>
+</div>
+<p>其中分子表示所有样本的标注结果按 n-gram 拆分后与生成结果按 n-gram 拆分后匹配上个数的和；分母表示所有样本的标注结果按 n-gram 拆分后的和。下面举例说明计算方式。</p>
+<p>假设一个翻译任务，人工标注的结果如下所示：</p>
+<pre><code>the cat was under the bed
+</code></pre>
+<p>模型生成的结果如下所示：</p>
+<pre><code>the cat was found under the bed
+</code></pre>
+<p>人工标注的结果做 1-gram 之后的结果如下：</p>
+<pre><code>['the', 'cat', 'was', 'under', 'the', 'bed']
+</code></pre>
+<p>模型生成的结果做 1-gram 之后的结果如下：</p>
+<pre><code>['the', 'cat', 'was', 'found', 'under', 'the', 'bed']
+</code></pre>
+<p>可以看出上述公式的分子为 6，分母为 6，所以最终得分 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-N} = 6/ 6 = 1.0</span><script type="math/tex">\text{Rouge-N} = 6/ 6 = 1.0</script></span>。至于 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 大于1时的计算方式和这个是类似的。然后和 BLEU 一样，<span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 越大，得分越低。</p>
+<h3 id="22-textrouge-ltextrouge-l">2.2 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-L}</span><script type="math/tex">\text{Rouge-L}</script></span> 指标<a class="headerlink" href="#22-textrouge-ltextrouge-l" title="Permanent link">#</a></h3>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-L}</span><script type="math/tex">\text{Rouge-L}</script></span> 的全称为 Longest Common Subsequence。</p>
+<p>无论 BLEU 指标还是 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-N}</span><script type="math/tex">\text{Rouge-N}</script></span> 指标使用的都是词袋模型，它们都不考虑词语之间的相对顺序，而 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-L}</span><script type="math/tex">\text{Rouge-L}</script></span> 指标则是考虑了词语之间的相对顺序。这个名字里的 <span class="arithmatex"><span class="MathJax_Preview">L</span><script type="math/tex">L</script></span> 表示的是Longest Common Subsequence（最长公共子序列：注意这个非连续的）。</p>
+<p>计算公式如下所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}R_{lcs} = \frac{\text{LCS}(X, Y)}{m}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}R_{lcs} = \frac{\text{LCS}(X, Y)}{m}\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}P_{lcs} = \frac{\text{LCS}(X, Y)}{n}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}P_{lcs} = \frac{\text{LCS}(X, Y)}{n}\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}F_{lcs} = \frac{(1+\beta^2) R_{lcs} P_{lcs}}{R_{lcs} + \beta^2 P_{lcs}}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}F_{lcs} = \frac{(1+\beta^2) R_{lcs} P_{lcs}}{R_{lcs} + \beta^2 P_{lcs}}\end{equation}</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">X</span><script type="math/tex">X</script></span> 表示人工标注的结果，<span class="arithmatex"><span class="MathJax_Preview">Y</span><script type="math/tex">Y</script></span> 表示模型预测的结果，<span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 表示 <span class="arithmatex"><span class="MathJax_Preview">X</span><script type="math/tex">X</script></span> 的长度，<span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 表示 <span class="arithmatex"><span class="MathJax_Preview">Y</span><script type="math/tex">Y</script></span> 的长度。<span class="arithmatex"><span class="MathJax_Preview">\text{LCS}(X, Y)</span><script type="math/tex">\text{LCS}(X, Y)</script></span> 表示 <span class="arithmatex"><span class="MathJax_Preview">X</span><script type="math/tex">X</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">Y</span><script type="math/tex">Y</script></span> 的最长公共子序列，<span class="arithmatex"><span class="MathJax_Preview">\beta</span><script type="math/tex">\beta</script></span> 是一个超参数。</p>
+<blockquote>
+<p>上述公式中的 <span class="arithmatex"><span class="MathJax_Preview">\beta</span><script type="math/tex">\beta</script></span> 的作用还不清楚是怎么回事。</p>
+</blockquote>
+<p>下面举例说明 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-L}</span><script type="math/tex">\text{Rouge-L}</script></span> 指标如何计算。假设一个翻译任务，人工标注的结果如下所示：</p>
+<pre><code>the cat was under the bed
+</code></pre>
+<p>模型生成的结果如下所示：</p>
+<pre><code>the cat was found under the bed
+</code></pre>
+<p>人工标注的结果做 1-gram 之后的结果如下：</p>
+<pre><code>['the', 'cat', 'was', 'under', 'the', 'bed']
+</code></pre>
+<p>模型生成的结果做 1-gram 之后的结果如下：</p>
+<pre><code>['the', 'cat', 'was', 'found', 'under', 'the', 'bed']
+</code></pre>
+<p>可以得出 <span class="arithmatex"><span class="MathJax_Preview">m=6</span><script type="math/tex">m=6</script></span>，<span class="arithmatex"><span class="MathJax_Preview">n=7</span><script type="math/tex">n=7</script></span>，<span class="arithmatex"><span class="MathJax_Preview">\text{LCS}(X, Y) = 6</span><script type="math/tex">\text{LCS}(X, Y) = 6</script></span>，代入到公式中：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}R_{lcs} = \frac{\text{LCS}(X, Y)}{m}=\frac{6}{6} = 1.0\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}R_{lcs} = \frac{\text{LCS}(X, Y)}{m}=\frac{6}{6} = 1.0\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}P_{lcs} = \frac{\text{LCS}(X, Y)}{n}=\frac{6}{7} = 0.86\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}P_{lcs} = \frac{\text{LCS}(X, Y)}{n}=\frac{6}{7} = 0.86\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}F_{lcs} = \frac{(1+\beta^2) R_{lcs} P_{lcs}}{R_{lcs} + \beta^2 P_{lcs}} = \frac{(1+\beta^2) * 1.0 * 0.86}{1.0 + \beta^2 \cdot 0.86}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}F_{lcs} = \frac{(1+\beta^2) R_{lcs} P_{lcs}}{R_{lcs} + \beta^2 P_{lcs}} = \frac{(1+\beta^2) * 1.0 * 0.86}{1.0 + \beta^2 \cdot 0.86}\end{equation}</script>
+</div>
+<p>假设超参数 <span class="arithmatex"><span class="MathJax_Preview">\beta=1.0</span><script type="math/tex">\beta=1.0</script></span>，则最终的得分为 <span class="arithmatex"><span class="MathJax_Preview">F_{lcs} = \frac{2 * 1.0 * 0.86}{1.0 + 0.86} = 0.9247</span><script type="math/tex">F_{lcs} = \frac{2 * 1.0 * 0.86}{1.0 + 0.86} = 0.9247</script></span></p>
+<h3 id="23-textrouge-wtextrouge-w">2.3 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-W}</span><script type="math/tex">\text{Rouge-W}</script></span> 指标<a class="headerlink" href="#23-textrouge-wtextrouge-w" title="Permanent link">#</a></h3>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-W}</span><script type="math/tex">\text{Rouge-W}</script></span> 的全称为 Weighted Longest Common Subsequence。</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-L}</span><script type="math/tex">\text{Rouge-L}</script></span> 指标虽然考虑了词语之间的相对顺序，但是由于其使用最长公共子序列，所以没有考虑到词语之间是否连续的问题。还是以机器翻译为例，假设人工标注的文本如下所示：</p>
+<pre><code>A B C D E F G
+</code></pre>
+<p>现在有两个机器翻译模型，翻译结果分别如下所示：</p>
+<p>模型1：</p>
+<pre><code>A B C D H I K
+</code></pre>
+<p>模型2:</p>
+<pre><code>A H B K C I D
+</code></pre>
+<p>可以看出这两个预测结果和标注结果的最长公共子序列都是 "A B C D"，不过该子序列在模型1的预测结果中是连续的，在模型2的预测结果中是不连续的，所以希望模型1的预测结果的得分要高于模型2的预测结果的得分。如果使用 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-L}</span><script type="math/tex">\text{Rouge-L}</script></span> 计算的话，得分是相同的。所以提出了 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-W}</span><script type="math/tex">\text{Rouge-W}</script></span> 指标。简单来说，<span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-W}</span><script type="math/tex">\text{Rouge-W}</script></span> 就是给连续匹配到的子序列更高的权重，最终让连续匹配的结果要比非连续匹配的结果得分更高一些。</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-W}</span><script type="math/tex">\text{Rouge-W}</script></span> 的计算公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}R_{wlcs} = f^{-1} \Big( \frac{\text{WLCS}(X, Y)}{f(m)} \Big) \end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}R_{wlcs} = f^{-1} \Big( \frac{\text{WLCS}(X, Y)}{f(m)} \Big) \end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}P_{wlcs} = f^{-1} \Big( \frac{\text{WLCS}(X, Y)}{f(n)} \Big)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}P_{wlcs} = f^{-1} \Big( \frac{\text{WLCS}(X, Y)}{f(n)} \Big)\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}F_{wlcs} = \frac{(1+\beta^2) R_{wlcs} P_{wlcs}}{R_{wlcs} + \beta^2 P_{wlcs}}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}F_{wlcs} = \frac{(1+\beta^2) R_{wlcs} P_{wlcs}}{R_{wlcs} + \beta^2 P_{wlcs}}\end{equation}</script>
+</div>
+<p>其中函数 <span class="arithmatex"><span class="MathJax_Preview">f(\cdot)</span><script type="math/tex">f(\cdot)</script></span> 就是实现给予连续匹配的序列更高权重的函数，比如连续的、相邻的 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">y</span><script type="math/tex">y</script></span> 的权重 <span class="arithmatex"><span class="MathJax_Preview">f(xy)</span><script type="math/tex">f(xy)</script></span> 要比不连续的单独的 <span class="arithmatex"><span class="MathJax_Preview">f(x)</span><script type="math/tex">f(x)</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">f(y)</span><script type="math/tex">f(y)</script></span> 的分值要高，即：<span class="arithmatex"><span class="MathJax_Preview">f(xy) &gt; f(x) + f(y)</span><script type="math/tex">f(xy) > f(x) + f(y)</script></span>。函数 <span class="arithmatex"><span class="MathJax_Preview">f^{-1}(\cdot)</span><script type="math/tex">f^{-1}(\cdot)</script></span> 是函数 <span class="arithmatex"><span class="MathJax_Preview">f(\cdot)</span><script type="math/tex">f(\cdot)</script></span> 的逆函数。<span class="arithmatex"><span class="MathJax_Preview">\text{WLCS}(\cdot)</span><script type="math/tex">\text{WLCS}(\cdot)</script></span> 表示带有加权的最长公共子序列，这里加权的权重就是给连续匹配的子序列更高的权重。其他部分的计算和 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-L}</span><script type="math/tex">\text{Rouge-L}</script></span> 是一致的。</p>
+<blockquote>
+<p>该算法还是比较复杂的，关于函数 <span class="arithmatex"><span class="MathJax_Preview">f(\cdot)</span><script type="math/tex">f(\cdot)</script></span> 和其逆函数 <span class="arithmatex"><span class="MathJax_Preview">f^{-1}(\cdot)</span><script type="math/tex">f^{-1}(\cdot)</script></span> 更多的性质，以及其具体的公式。还有 <span class="arithmatex"><span class="MathJax_Preview">\text{WLCS}(\cdot)</span><script type="math/tex">\text{WLCS}(\cdot)</script></span> 算法的细节，请看原始论文：<a href="https://aclanthology.org/W04-1013.pdf">https://aclanthology.org/W04-1013.pdf</a></p>
+</blockquote>
+<h3 id="24-textrouge-stextrouge-s">2.4 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-S}</span><script type="math/tex">\text{Rouge-S}</script></span> 指标<a class="headerlink" href="#24-textrouge-stextrouge-s" title="Permanent link">#</a></h3>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-S}</span><script type="math/tex">\text{Rouge-S}</script></span> 的全称为 Skip-Bigram Co-Occurrence Statistics。</p>
+<p>在 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-N}</span><script type="math/tex">\text{Rouge-N}</script></span> 中对文本做 2-gram 划分（也称 bigram 划分）时，都是连续的进行划分。在 <span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-S}</span><script type="math/tex">\text{Rouge-S}</script></span> 中使用的 skip-bigram 则是在划分时允许跳过一些词。下面先放上计算公式，然后举例进行说明如何计算。</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">\text{Rouge-S}</span><script type="math/tex">\text{Rouge-S}</script></span> 的计算公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}R_{skip2} = \frac{\text{SKIP2}(X, Y)}{C(m, 2)}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}R_{skip2} = \frac{\text{SKIP2}(X, Y)}{C(m, 2)}\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}P_{skip2} = \frac{\text{SKIP2}(X, Y)}{C(n, 2)}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}P_{skip2} = \frac{\text{SKIP2}(X, Y)}{C(n, 2)}\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}F_{skip2} = \frac{(1+\beta^2) R_{skip2}P_{skip2}}{R_{skip2} + \beta^2 P_{skip2}}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}F_{skip2} = \frac{(1+\beta^2) R_{skip2}P_{skip2}}{R_{skip2} + \beta^2 P_{skip2}}\end{equation}</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">X</span><script type="math/tex">X</script></span> 表示人工标注的结果，<span class="arithmatex"><span class="MathJax_Preview">Y</span><script type="math/tex">Y</script></span> 表示模型预测的结果，<span class="arithmatex"><span class="MathJax_Preview">\text{SKIP2}(X, Y)</span><script type="math/tex">\text{SKIP2}(X, Y)</script></span> 表示标注结果按照 skip-bigram 拆分后与预测结果按照 skip-bigram 拆分后匹配上的个数。<span class="arithmatex"><span class="MathJax_Preview">C(m,2)</span><script type="math/tex">C(m,2)</script></span> 表示人工标注结果按照 skip-bigram 拆分后的个数，<span class="arithmatex"><span class="MathJax_Preview">C(n, 2)</span><script type="math/tex">C(n, 2)</script></span> 表示预测结果按照 skip-bigram 拆分后的个数。<span class="arithmatex"><span class="MathJax_Preview">\beta</span><script type="math/tex">\beta</script></span> 是超参数。</p>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">\text{SKIP2}(X, Y)</span><script type="math/tex">\text{SKIP2}(X, Y)</script></span> 表示所有样本的标注结果按 n-gram 拆分后与生成结果按 n-gram 拆分后匹配上个数的和；分母表示所有样本的标注结果按 n-gram 拆分后的和。下面举例说明计算方式。</p>
+<p>以机器翻译任务为例，人工标注结果为：</p>
+<pre><code>police killed the gunman
+</code></pre>
+<p>模型预测结果为：</p>
+<pre><code>police kill the gunman
+</code></pre>
+<p>人工标注结果做 skip-bigram 划分之后的结果为：</p>
+<pre><code>['police killed', 'police the', 'police gunman', 'killed the', 'killed gunman', 'the gunman']
+</code></pre>
+<p>模型预测结果做 skip-bigram 划分之后的结果为：</p>
+<pre><code>['police kill', 'police the', 'police gunman', 'kill the', 'kill gunman', 'the gunman']
+</code></pre>
+<p>可以看出人工标注结果和模型预测结果的 skip-bigram 个数都是6个，即 <span class="arithmatex"><span class="MathJax_Preview">C(m,2)=C(4,2)=6</span><script type="math/tex">C(m,2)=C(4,2)=6</script></span>，<span class="arithmatex"><span class="MathJax_Preview">C(n,2)=C(4,2)=6</span><script type="math/tex">C(n,2)=C(4,2)=6</script></span>；其共同的部分有3个，即 'police the'、'police gunman'、'the gunman'，所以 <span class="arithmatex"><span class="MathJax_Preview">\text{SKIP2}(X, Y)=3</span><script type="math/tex">\text{SKIP2}(X, Y)=3</script></span>，假设超参数 <span class="arithmatex"><span class="MathJax_Preview">\beta=1.0</span><script type="math/tex">\beta=1.0</script></span>，代入上述公式可得：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}R_{skip2} = \frac{\text{SKIP2}(X, Y)}{C(m, 2)}=\frac{3}{6}=0.5\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}R_{skip2} = \frac{\text{SKIP2}(X, Y)}{C(m, 2)}=\frac{3}{6}=0.5\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}P_{skip2} = \frac{\text{SKIP2}(X, Y)}{C(n, 2)}=\frac{3}{6}=0.5\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}P_{skip2} = \frac{\text{SKIP2}(X, Y)}{C(n, 2)}=\frac{3}{6}=0.5\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}F_{skip2} = \frac{(1 + 1.0^2) R_{skip2}P_{skip2}}{R_{skip2} + 1.0^2 P_{skip2}}=\frac{2 * 0.5 * 0.5}{0.5 + 1.0 * 0.5} = 0.5\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}F_{skip2} = \frac{(1 + 1.0^2) R_{skip2}P_{skip2}}{R_{skip2} + 1.0^2 P_{skip2}}=\frac{2 * 0.5 * 0.5}{0.5 + 1.0 * 0.5} = 0.5\end{equation}</script>
+</div>
+<h2 id="3precisionrecallf1">3、precision、recall、f1指标<a class="headerlink" href="#3precisionrecallf1" title="Permanent link">#</a></h2>
+<p>略</p>
+<h2 id="4roc-auc">4、ROC-AUC<a class="headerlink" href="#4roc-auc" title="Permanent link">#</a></h2>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://www.infoq.cn/article/i_hq9tjgulbx6ahlhkyd">https://www.infoq.cn/article/i_hq9tjgulbx6ahlhkyd</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/504279252">https://zhuanlan.zhihu.com/p/504279252</a></p>
+</li>
+<li>
+<p><a href="https://aclanthology.org/W04-1013.pdf">https://aclanthology.org/W04-1013.pdf</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

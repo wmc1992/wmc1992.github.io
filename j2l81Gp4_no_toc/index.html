@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/008_algorithm/007_%E5%9B%9E%E6%BA%AF/%E5%9B%B0%E9%9A%BE/0051_N%E7%9A%87%E5%90%8E/">
+        <link rel="shortcut icon" href="../../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/j2l81Gp4_no_toc/">隐藏左侧目录栏</a>][<a href="/j2l81Gp4/">显示左侧目录栏</a>]</p>
+
+<h1 id="51-n">51. N 皇后<a class="headerlink" href="#51-n" title="Permanent link">#</a></h1>
+<p>链接: <a href="https://leetcode.cn/problems/n-queens/">https://leetcode.cn/problems/n-queens/</a></p>
+<h2 id="1">1、题目描述<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>按照国际象棋的规则，皇后可以攻击与之处在同一行或同一列或同一斜线上的棋子。</p>
+<p>n 皇后问题 研究的是如何将 n 个皇后放置在 n×n 的棋盘上，并且使皇后彼此之间不能相互攻击。</p>
+<p>给你一个整数 n ，返回所有不同的 n 皇后问题 的解决方案。</p>
+<p>每一种解法包含一个不同的 n 皇后问题 的棋子放置方案，该方案中 'Q' 和 '.' 分别代表了皇后和空位。</p>
+<p>示例 1：</p>
+<div align=center><img src="/j2l81Gp4/assets/01.png" width=70% /></div>
+
+<blockquote>
+<p>输入：n = 4</p>
+<p>输出：[[".Q..","...Q","Q...","..Q."],["..Q.","Q...","...Q",".Q.."]]</p>
+<p>解释：如上图所示，4 皇后问题存在两个不同的解法。</p>
+</blockquote>
+<p>示例 2：</p>
+<blockquote>
+<p>输入：n = 1</p>
+<p>输出：[["Q"]]</p>
+</blockquote>
+<p>提示：</p>
+<ul>
+<li>1 &lt;= n &lt;= 9</li>
+</ul>
+<h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<h4 id="for">能否仅用for循环解决<a class="headerlink" href="#for" title="Permanent link">#</a></h4>
+<p>在没有系统学习该类问题前，总想使用for循环解决该问题，那么能否仅使用for循环解决该问题？肯定是不能。</p>
+<p>如果仅使用for循环，那么一般会怎样做呢？首先，外层for循环遍历每一行。然后就没有办法处理了。对于第一行，总共有 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 个格子，每个格子都有可能放置为皇后，那么第一行需要一个for循环遍历。如果对第一行使用了一个for循环做遍历，那么第二行也有 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 个格子，也是每个格子都有可能放置为皇后，那么第二行也需要一个for循环遍历。这样看起来需要 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 的for循环。这种代码是写不出来的。</p>
+<p>下面放一张<a href="https://programmercarl.com/0051.N%E7%9A%87%E5%90%8E.html">代码随想录</a>中的图片直观感受一下这个过程：</p>
+<div align=center><img src="/j2l81Gp4/assets/02.jpeg" width=70% /></div>
+
+<p>为何该问题无法仅使用for循环解决。因为这个问题的时间复杂度为阶乘复杂度 <span class="arithmatex"><span class="MathJax_Preview">O(n!)</span><script type="math/tex">O(n!)</script></span>，仅使用for循环的话，无论有再多个有限的for循环都是多项式复杂度 <span class="arithmatex"><span class="MathJax_Preview">O(n^k)</span><script type="math/tex">O(n^k)</script></span>，其中 <span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span> 为常数。</p>
+<blockquote>
+<p>这里再强调一下多项式时间复杂度、指数时间复杂度、阶乘时间复杂度之间的关系为：<span class="arithmatex"><span class="MathJax_Preview">O(n^k) &lt; O(k^n) &lt; O(n!)</span><script type="math/tex">O(n^k) < O(k^n) < O(n!)</script></span>，其中 <span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span> 都是常数。</p>
+</blockquote>
+<h4 id="_1">伪代码<a class="headerlink" href="#_1" title="Permanent link">#</a></h4>
+<p>接下来看一个阶乘复杂度的问题如何遍历其所有的可能的状态。注意N皇后问题只要求解出来结果就行，不要求对其做优化，其已经是 <span class="arithmatex"><span class="MathJax_Preview">O(n!)</span><script type="math/tex">O(n!)</script></span> 复杂度的问题了。</p>
+<blockquote>
+<ul>
+<li>
+<p>初始化一个二维矩阵表示棋盘</p>
+</li>
+<li>
+<p>回溯入口：</p>
+<ul>
+<li>
+<p>记当前行为 <span class="arithmatex"><span class="MathJax_Preview">row</span><script type="math/tex">row</script></span></p>
+</li>
+<li>
+<p>边界条件：如果 <span class="arithmatex"><span class="MathJax_Preview">row</span><script type="math/tex">row</script></span> 已经大于总行数，那么就无需继续回溯了；</p>
+</li>
+<li>
+<p>遍历当前行的每一个格子，每个格子的纵坐标为 <span class="arithmatex"><span class="MathJax_Preview">col</span><script type="math/tex">col</script></span>：</p>
+<ul>
+<li>
+<p>判断当前格子是否能够放置皇后：若不能则直接continue；若能则继续执行下面的过程；</p>
+</li>
+<li>
+<p>将当前格子放置皇后</p>
+</li>
+<li>
+<p>到回溯入口处开始回溯，此次回溯的行数为 <span class="arithmatex"><span class="MathJax_Preview">row+1</span><script type="math/tex">row+1</script></span></p>
+</li>
+<li>
+<p>待所有后续状态都回溯完成之后，将当前格子恢复为不放置皇后</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<pre><code class="language-python">class Solution:
+    result = list()
+
+    def is_valid(self, grid, row, col):
+        &quot;&quot;&quot;
+        需要判断的是正上方、左上方、右上方三个方向
+
+        正下方、左下方、右下方、以及同一行是不需要判断的
+        &quot;&quot;&quot;
+
+        # 正上方
+        for i in range(row):
+            if grid[i][col] == &quot;Q&quot;:
+                return False
+        # 左上方
+        i, j = row - 1, col - 1
+        while i &gt;= 0 and j &gt;= 0:
+            if grid[i][j] == &quot;Q&quot;:
+                return False
+            i -= 1
+            j -= 1
+        # 右上方
+        i, j = row - 1, col + 1
+        while i &gt;= 0 and j &lt; len(grid[0]):
+            if grid[i][j] == &quot;Q&quot;:
+                return False
+            i -= 1
+            j += 1
+
+        return True
+
+    def bachtrace(self, grid, row):
+        if row &gt;= len(grid):
+            self.result.append([&quot;&quot;.join(item) for item in grid])
+            return
+
+        max_col = len(grid[row])
+        for col in range(max_col):
+            if not self.is_valid(grid, row, col):
+                continue
+
+            grid[row][col] = &quot;Q&quot;
+            self.bachtrace(grid, row + 1)
+            grid[row][col] = &quot;.&quot;
+
+    def solveNQueens(self, n: int) -&gt; List[List[str]]:
+        self.result = list()
+        grid = [[&quot;.&quot; for _ in range(n)] for _ in range(n)]
+        self.bachtrace(grid, 0)
+        return self.result
+</code></pre></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../../js/base.js" defer></script>
+        <script src="../../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

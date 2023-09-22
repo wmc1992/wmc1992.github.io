@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/005_%E5%B7%A5%E5%85%B7%E6%A1%86%E6%9E%B6/001_huggingface/accelerate/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/sLWQpZX6_no_toc/">隐藏左侧目录栏</a>][<a href="/sLWQpZX6/">显示左侧目录栏</a>]</p>
+
+<h1 id="accelerate">Accelerate<a class="headerlink" href="#accelerate" title="Permanent link">#</a></h1>
+<h2 id="1-config">1、生成配置文件: <code>config</code><a class="headerlink" href="#1-config" title="Permanent link">#</a></h2>
+<blockquote>
+<p>这部分的参考文档为：</p>
+<ul>
+<li><a href="https://huggingface.co/docs/accelerate/quicktour#launching-your-distributed-script">Launching your distributed script</a></li>
+</ul>
+</blockquote>
+<p>生成配置文件命令如下所示，其中 <code>path_to_config.yaml</code> 是生成的配置文件的存储路径：</p>
+<pre><code>accelerate config --config_file path_to_config.yaml
+</code></pre>
+<p>比如生成的一个配置文件的样例为（单节点，2个GPU）：</p>
+<pre><code class="language-yaml">compute_environment: LOCAL_MACHINE
+distributed_type: MULTI_GPU
+downcast_bf16: 'no'
+gpu_ids: all
+machine_rank: 0
+main_training_function: main
+mixed_precision: fp16
+num_machines: 1
+num_processes: 2
+rdzv_backend: static
+same_network: true
+tpu_env: []
+tpu_use_cluster: false
+tpu_use_sudo: false
+use_cpu: false
+</code></pre>
+<h2 id="2">2、运行（两卡数据并行）<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<blockquote>
+<p>这部分的参考文档为：</p>
+<ul>
+<li>
+<p><a href="https://huggingface.co/docs/accelerate/quicktour#launching-your-distributed-script">Launching your distributed script</a></p>
+</li>
+<li>
+<p><a href="https://huggingface.co/docs/accelerate/basic_tutorials/launch">Launching your 🤗 Accelerate scripts</a></p>
+</li>
+</ul>
+</blockquote>
+<h3 id="21">2.1 启动命令说明<a class="headerlink" href="#21" title="Permanent link">#</a></h3>
+<p>运行的命令模版如下所示，首先指定上一步骤生成的 accelerate 的配置文件，然后指定训练的脚本，最后一部分是训练脚本中所需的参数：</p>
+<pre><code>accelerate launch --config_file path_to_config.yaml \
+  path_to_script.py \
+  --args_for_the_script
+</code></pre>
+<p>下面直接使用 accelerate 执行一下训练流程，一方面熟悉一下如何启动，另一方面看一下两卡时的加速效果。使用的机器是有2张 A40 显卡的机器，模型采用 gpt2，数据是某个开源数据，大概3W+条数据，使用的代码是 transformers 库中的样例代码，链接为：<a href="https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_clm.py">run_clm</a>
+。</p>
+<h3 id="22">2.2 单卡与两卡速度对比<a class="headerlink" href="#22" title="Permanent link">#</a></h3>
+<p>分别测试单卡训练和两卡训练，单卡训练和两卡训练的启动命令如下所示。单卡训练没有使用 accelerate 启动，而是直接使用 python 启动；两卡训练使用 accelerate 启动。</p>
+<pre><code># 单卡训练的启动命令
+CUDA_VISIBLE_DEVICES=1 python3 examples/pytorch/language-modeling/run_clm.py \
+  --model_name_or_path gpt2 \
+  --train_file ./data/data.json \
+  --output_dir ./outputs \
+  --do_train \
+  --do_eval \
+  --fp16 \
+  --per_device_train_batch_size 16 \
+  --per_device_eval_batch_size 16 \
+  --gradient_accumulation_steps 4 \
+  --overwrite_output_dir
+
+# 两卡训练的启动命令
+accelerate launch \
+  --config_file ./accelerate/default_accelerate_config.yaml \
+  examples/pytorch/language-modeling/run_clm.py \
+  --model_name_or_path gpt2 \
+  --train_file ./data/data.json \
+  --output_dir ./outputs \
+  --do_train \
+  --do_eval \
+  --fp16 \
+  --per_device_train_batch_size 16 \
+  --per_device_eval_batch_size 16 \
+  --gradient_accumulation_steps 4 \
+  --overwrite_output_dir
+</code></pre>
+<p>训练过程中的截图如下表所示，可以看出无论是单卡还是双卡，GPU的利用率都是比较高的，单卡和两卡的耗时也比较接近两倍关系，加速效果还是比较可观的。</p>
+<table>
+<thead>
+<tr>
+<th>测试环境</th>
+<th>训练时效果截图</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单卡</td>
+<td><img alt="" src="/sLWQpZX6/assets/03.png" /><br><img alt="" src="/sLWQpZX6/assets/04.png" /></td>
+</tr>
+<tr>
+<td>两卡</td>
+<td><img alt="" src="/sLWQpZX6/assets/01.png" /><br><img alt="" src="/sLWQpZX6/assets/02.png" /></td>
+</tr>
+</tbody>
+</table>
+<h2 id="3">3、暂时略过的一些功能<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>如果要在自己的训练代码中使用 accelerate 库，需要修改哪些代码：<a href="https://huggingface.co/docs/accelerate/quicktour#main-use">参考链接1</a>、<a href="https://huggingface.co/docs/accelerate/basic_tutorials/migration">参考链接2</a></p>
+</li>
+<li>
+<p>评估部分如果要做分布式评估，代码需要做哪些修改：<a href="https://huggingface.co/docs/accelerate/quicktour#distributed-evaluation">参考链接</a></p>
+</li>
+<li>
+<p>只在主进程中执行某些代码，比如打印进度条，代码要如何写：<a href="https://huggingface.co/docs/accelerate/quicktour#execute-a-statement-only-on-one-processes">参考链接</a></p>
+</li>
+<li>
+<p>模型的加载和存储：<a href="https://huggingface.co/docs/accelerate/quicktour#savingloading-a-model">参考链接</a></p>
+</li>
+<li>
+<p>训练过程中整个状态的存储和加载：<a href="https://huggingface.co/docs/accelerate/quicktour#savingloading-entire-states">参考链接1</a>、<a href="https://huggingface.co/docs/accelerate/usage_guides/checkpoint">参考链接2</a></p>
+</li>
+<li>
+<p>模型很大而显存不足时如何推理：<a href="https://huggingface.co/docs/accelerate/usage_guides/big_modeling">参考链接</a></p>
+</li>
+<li>
+<p>使用 accelerate 库之后如何实现梯度累积功能：<a href="https://huggingface.co/docs/accelerate/usage_guides/gradient_accumulation">参考链接</a></p>
+</li>
+</ul>
+<h2 id="deepspeed">DeepSpeed<a class="headerlink" href="#deepspeed" title="Permanent link">#</a></h2>
+<p>这个 accelerate 的文档里为什么说对 deepspeed 的支持还在试验中，接口随时会改变，链接: <a href="https://huggingface.co/docs/accelerate/quicktour#deepspeed">https://huggingface.co/docs/accelerate/quicktour#deepspeed</a></p>
+<h2 id="_1">其他<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
+<p>在阅读 accelerate 的文档时，有一个地方很细节，就是在使用混合精度训练时，如果某一次的梯度溢出了，那么会跳过这个 step，在这个 step 中不对权重进行更新。</p>
+<p>到下一个 step 时，根据一定的策略调小参数 <code>loss scaling factor</code>，下一个 step 就可能梯度不再溢出了，然后就继续训练。这个细节的文档为: <a href="https://huggingface.co/docs/accelerate/quicktour#mixed-precision-training">参考链接</a></p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

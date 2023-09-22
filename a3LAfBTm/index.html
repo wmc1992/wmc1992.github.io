@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/002_%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0/04_%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link">线性回归</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、问题描述</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、建立模型</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、代价函数</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4" class="nav-link">4、梯度下降求解</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#41" class="nav-link">4.1求解梯度</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#42" class="nav-link">4.2 梯度下降</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#43" class="nav-link">4.3 随机梯度下降</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#5" class="nav-link">5、直接求解析解</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/a3LAfBTm_no_toc/">隐藏左侧目录栏</a>][<a href="/a3LAfBTm/">显示左侧目录栏</a>]</p>
+<h1 id="_1">线性回归<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<h2 id="1">1、问题描述<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>给定数据集 <span class="arithmatex"><span class="MathJax_Preview">D=\{(\overrightarrow{x^{(1)}}, y^{(1)}), (\overrightarrow{x^{(2)}}, y^{(2)}), ..., (\overrightarrow{x^{(n)}}, y^{(n)})\}</span><script type="math/tex">D=\{(\overrightarrow{x^{(1)}}, y^{(1)}), (\overrightarrow{x^{(2)}}, y^{(2)}), ..., (\overrightarrow{x^{(n)}}, y^{(n)})\}</script></span></p>
+<p>其中：</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">\overrightarrow{x^{(i)}}=(x_1^{(i)}, x_2^{(i)}, x_3^{(i)}, ..., x_d^{(i)})^T \in R^d</span><script type="math/tex">\overrightarrow{x^{(i)}}=(x_1^{(i)}, x_2^{(i)}, x_3^{(i)}, ..., x_d^{(i)})^T \in R^d</script></span> 表示第 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 条数据的特征；</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">d</span><script type="math/tex">d</script></span> 表示每条数据特征的维度；</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 表示总的数据量；</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">y^{(i)} \in R</span><script type="math/tex">y^{(i)} \in R</script></span> 表示第 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 条数据的标签；</p>
+<p><strong>符号说明</strong>：右上角的角标代表第几条数据，右下角的角标代表第几个特征，比如 <span class="arithmatex"><span class="MathJax_Preview">x_j^{(i)}</span><script type="math/tex">x_j^{(i)}</script></span> 表示第 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 条数据的第 <span class="arithmatex"><span class="MathJax_Preview">j</span><script type="math/tex">j</script></span> 个特征的值；</p>
+<h2 id="2">2、建立模型<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{equation}
+\begin{split}   
+h_ \theta (\overrightarrow{x^{(i)}}) &amp;= \theta_0 + \theta_1 x_1^{(i)} + \theta_2 x_2^{(i)} + ... + \theta_d x_d^{(i)} \\
+&amp;= \sum_{j=0}^d \theta_j x_j^{(i)}
+\end{split}
+\end{equation}
+</div>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{split}   
+h_ \theta (\overrightarrow{x^{(i)}}) &= \theta_0 + \theta_1 x_1^{(i)} + \theta_2 x_2^{(i)} + ... + \theta_d x_d^{(i)} \\
+&= \sum_{j=0}^d \theta_j x_j^{(i)}
+\end{split}
+\end{equation}
+</script>
+</div>
+<p>上式中 <span class="arithmatex"><span class="MathJax_Preview">\theta_0</span><script type="math/tex">\theta_0</script></span> 是bias，为了便于计算，假设 <span class="arithmatex"><span class="MathJax_Preview">x_0^{(i)}=1</span><script type="math/tex">x_0^{(i)}=1</script></span>，则可以直接将 <span class="arithmatex"><span class="MathJax_Preview">\theta_0</span><script type="math/tex">\theta_0</script></span> 合并到 <span class="arithmatex"><span class="MathJax_Preview">\sum_{j=0}^d \theta_j x_j^{(i)}</span><script type="math/tex">\sum_{j=0}^d \theta_j x_j^{(i)}</script></span> 中。</p>
+<p>一般的，模型的输出会记为 <span class="arithmatex"><span class="MathJax_Preview">\hat{y}^{(i)}</span><script type="math/tex">\hat{y}^{(i)}</script></span>，则有：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\hat{y}^{(i)}=h_ \theta (\overrightarrow{x^{(i)}})</div>
+<script type="math/tex; mode=display">\hat{y}^{(i)}=h_ \theta (\overrightarrow{x^{(i)}})</script>
+</div>
+<h2 id="3">3、代价函数<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<p>使用最小二乘（least mean squares）作为代价函数，如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">J(\theta) = \frac{1}{2} \sum_{i=1}^n (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)})^2</div>
+<script type="math/tex; mode=display">J(\theta) = \frac{1}{2} \sum_{i=1}^n (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)})^2</script>
+</div>
+<h2 id="4">4、梯度下降求解<a class="headerlink" href="#4" title="Permanent link">#</a></h2>
+<h3 id="41">4.1求解梯度<a class="headerlink" href="#41" title="Permanent link">#</a></h3>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{equation}
+\begin{split}   
+\frac{\partial}{\partial \theta_j} J(\theta) &amp;= \frac{\partial}{\partial \theta_j} \frac{1}{2} \sum_{i=1}^n (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)})^2 \\
+&amp;= \frac{1}{2} \cdot 2 \cdot \sum_{i=1}^n (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)}) \cdot \frac{\partial}{\partial \theta_j} (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)}) \\
+&amp;= \sum_{i=1}^n (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)}) x_j
+\end{split}
+\end{equation}
+</div>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{split}   
+\frac{\partial}{\partial \theta_j} J(\theta) &= \frac{\partial}{\partial \theta_j} \frac{1}{2} \sum_{i=1}^n (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)})^2 \\
+&= \frac{1}{2} \cdot 2 \cdot \sum_{i=1}^n (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)}) \cdot \frac{\partial}{\partial \theta_j} (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)}) \\
+&= \sum_{i=1}^n (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)}) x_j
+\end{split}
+\end{equation}
+</script>
+</div>
+<h3 id="42">4.2 梯度下降<a class="headerlink" href="#42" title="Permanent link">#</a></h3>
+<p>对于权重 <span class="arithmatex"><span class="MathJax_Preview">\theta_j</span><script type="math/tex">\theta_j</script></span> 每次迭代更新的公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{equation}
+\begin{split}   
+\theta_j &amp;:= \theta_j - \gamma \frac{\partial}{\partial \theta_j} J(\theta) \\
+&amp;:= \theta_j - \gamma \sum_{i=1}^n (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)}) x_j
+\end{split}
+\end{equation}
+</div>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{split}   
+\theta_j &:= \theta_j - \gamma \frac{\partial}{\partial \theta_j} J(\theta) \\
+&:= \theta_j - \gamma \sum_{i=1}^n (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)}) x_j
+\end{split}
+\end{equation}
+</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">\gamma</span><script type="math/tex">\gamma</script></span> 为学习率；符号 <span class="arithmatex"><span class="MathJax_Preview">:=</span><script type="math/tex">:=</script></span> 表示赋值运算符；</p>
+<h3 id="43">4.3 随机梯度下降<a class="headerlink" href="#43" title="Permanent link">#</a></h3>
+<p>在梯度下降中，每次对 <span class="arithmatex"><span class="MathJax_Preview">\theta_j</span><script type="math/tex">\theta_j</script></span> 的更新都是求解出 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 条数据在 <span class="arithmatex"><span class="MathJax_Preview">\theta_j</span><script type="math/tex">\theta_j</script></span> 上的所有梯度之后再进行更新。如果每条数据求解出梯度之后都对 <span class="arithmatex"><span class="MathJax_Preview">\theta_j</span><script type="math/tex">\theta_j</script></span> 更新一次，则为随机梯度下降，公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\theta_j := \theta_j - \gamma (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)}) x_j</div>
+<script type="math/tex; mode=display">\theta_j := \theta_j - \gamma (h_ \theta (\overrightarrow{x^{(i)}}) - y_{(i)}) x_j</script>
+</div>
+<h2 id="5">5、直接求解析解<a class="headerlink" href="#5" title="Permanent link">#</a></h2>
+<p>待补充；</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/001_%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E7%89%B9%E5%BE%81%E5%80%BC%E4%B8%8E%E7%89%B9%E5%BE%81%E5%90%91%E9%87%8F/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link">特征值与特征向量</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、求解特征值和特征向量</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、举例求特征值和特征向量</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3abab" class="nav-link">3、AB与A+B的特征值与特征向量</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#31-b" class="nav-link">3.1 当B为单位对角阵的倍数时</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#32-b" class="nav-link">3.2 当B为任意矩阵时</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4" class="nav-link">4、特征值为复数</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#5" class="nav-link">5、重复的特征值</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#refrence" class="nav-link">Refrence</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/4McWKbWA_no_toc/">隐藏左侧目录栏</a>][<a href="/4McWKbWA/">显示左侧目录栏</a>]</p>
+<h1 id="_1">特征值与特征向量<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<p>有一个向量 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span>，找到一个矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span>，使该矩阵乘上向量 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 之后与向量 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 平行，即 </p>
+<div class="arithmatex">
+<div class="MathJax_Preview">Ax=\lambda x</div>
+<script type="math/tex; mode=display">Ax=\lambda x</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">\lambda</span><script type="math/tex">\lambda</script></span> 是标量；</p>
+<p>在上面这个描述中，<span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 称为矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 的特征向量，<span class="arithmatex"><span class="MathJax_Preview">\lambda</span><script type="math/tex">\lambda</script></span> 称为矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 的特征值；</p>
+<h2 id="1">1、求解特征值和特征向量<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>对 <span class="arithmatex"><span class="MathJax_Preview">Ax=\lambda x</span><script type="math/tex">Ax=\lambda x</script></span> 变形得到：<span class="arithmatex"><span class="MathJax_Preview">(A-\lambda I)x=0</span><script type="math/tex">(A-\lambda I)x=0</script></span>，这里的 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">0</span><script type="math/tex">0</script></span> 都是向量；</p>
+<p>公式 <span class="arithmatex"><span class="MathJax_Preview">(A-\lambda I)x=0</span><script type="math/tex">(A-\lambda I)x=0</script></span> 是一个齐次线性方程组，当 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 为零向量时肯定为该方程的一个解，但是零向量作为解没什么意义，所以这里只考虑向量 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 不为零向量时的解；</p>
+<p>对于齐次线性方程组，想要有非零解，那么就要求系数矩阵为奇异矩阵，再由奇异矩阵的行列式为零，可得公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}det(A-\lambda I)=0\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}det(A-\lambda I)=0\end{equation}</script>
+</div>
+<p>该方程就是<strong>特征值方程</strong>，<span class="arithmatex"><span class="MathJax_Preview">det(\cdot)</span><script type="math/tex">det(\cdot)</script></span> 表示行列式；</p>
+<p>这样求解 <span class="arithmatex"><span class="MathJax_Preview">Ax=\lambda x</span><script type="math/tex">Ax=\lambda x</script></span> 的整体思路就有了：</p>
+<ul>
+<li>先根据特征值方程 <span class="arithmatex"><span class="MathJax_Preview">det(A-\lambda I)=0</span><script type="math/tex">det(A-\lambda I)=0</script></span> 解出 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 个特征值 <span class="arithmatex"><span class="MathJax_Preview">\lambda</span><script type="math/tex">\lambda</script></span>；</li>
+<li>再将特征值逐个代入 <span class="arithmatex"><span class="MathJax_Preview">(A-\lambda I)x=0</span><script type="math/tex">(A-\lambda I)x=0</script></span> 解出特征向量 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span>；</li>
+</ul>
+<h2 id="2">2、举例求特征值和特征向量<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>问题：求解 <span class="arithmatex"><span class="MathJax_Preview">A=\begin{bmatrix}3 &amp; 1 \\ 1 &amp; 3\end{bmatrix}</span><script type="math/tex">A=\begin{bmatrix}3 & 1 \\ 1 & 3\end{bmatrix}</script></span> 的特征值和特征向量。</p>
+<p>解：</p>
+<p>按照上述基本步骤，先求解特征值 <span class="arithmatex"><span class="MathJax_Preview">\lambda</span><script type="math/tex">\lambda</script></span>：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+\begin{equation}
+\begin{split}
+det(A-\lambda I) &amp;= det(\begin{bmatrix}3 &amp; 1 \\ 1 &amp; 3\end{bmatrix} - \lambda \begin{bmatrix}1 &amp; 0 \\ 0 &amp; 1\end{bmatrix}) \\
+&amp;= \begin{vmatrix}3-\lambda &amp; 1 \\ 1 &amp; 3 - \lambda\end{vmatrix} \\
+&amp;= (3-\lambda)(3-\lambda) - 1 \\
+&amp;= \lambda^2 - 6\lambda + 8 \\
+&amp;= (\lambda-2)(\lambda-4)
+\end{split}
+\end{equation}
+</div>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{split}
+det(A-\lambda I) &= det(\begin{bmatrix}3 & 1 \\ 1 & 3\end{bmatrix} - \lambda \begin{bmatrix}1 & 0 \\ 0 & 1\end{bmatrix}) \\
+&= \begin{vmatrix}3-\lambda & 1 \\ 1 & 3 - \lambda\end{vmatrix} \\
+&= (3-\lambda)(3-\lambda) - 1 \\
+&= \lambda^2 - 6\lambda + 8 \\
+&= (\lambda-2)(\lambda-4)
+\end{split}
+\end{equation}
+</script>
+</div>
+<p>令 <span class="arithmatex"><span class="MathJax_Preview">det(A-\lambda I)=0</span><script type="math/tex">det(A-\lambda I)=0</script></span> 有 <span class="arithmatex"><span class="MathJax_Preview">(\lambda-2)(\lambda-4)=0</span><script type="math/tex">(\lambda-2)(\lambda-4)=0</script></span>，解得：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\lambda_1=2, \quad \lambda_2=4\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\lambda_1=2, \quad \lambda_2=4\end{equation}</script>
+</div>
+<blockquote>
+<p>说明：在上述的公式（2）中有一步推导过程中得到了 <span class="arithmatex"><span class="MathJax_Preview">det(A-\lambda I)=\lambda^2 - 6\lambda + 8</span><script type="math/tex">det(A-\lambda I)=\lambda^2 - 6\lambda + 8</script></span>，在该式中一次项系数 6 是矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 的迹，常数项 8 是矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 的行列式的值。（这是为啥，还不清楚）</p>
+</blockquote>
+<p>将 <span class="arithmatex"><span class="MathJax_Preview">\lambda_1=2, \lambda_2=4</span><script type="math/tex">\lambda_1=2, \lambda_2=4</script></span> 分别代入 <span class="arithmatex"><span class="MathJax_Preview">(A-\lambda I)=0</span><script type="math/tex">(A-\lambda I)=0</script></span> 中求解特征向量：</p>
+<p><span class="arithmatex"><span class="MathJax_Preview">\lambda_1=2</span><script type="math/tex">\lambda_1=2</script></span>时：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}(\begin{bmatrix}3 &amp; 1 \\ 1 &amp; 3\end{bmatrix}-\begin{bmatrix}2 &amp; 0 \\ 0 &amp; 2\end{bmatrix}) x=0 \Rightarrow x=\begin{bmatrix}1 \\ -1\end{bmatrix}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}(\begin{bmatrix}3 & 1 \\ 1 & 3\end{bmatrix}-\begin{bmatrix}2 & 0 \\ 0 & 2\end{bmatrix}) x=0 \Rightarrow x=\begin{bmatrix}1 \\ -1\end{bmatrix}\end{equation}</script>
+</div>
+<p><span class="arithmatex"><span class="MathJax_Preview">\lambda_1=4</span><script type="math/tex">\lambda_1=4</script></span>时：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}(\begin{bmatrix}3 &amp; 1 \\ 1 &amp; 3\end{bmatrix}-\begin{bmatrix}4 &amp; 0 \\ 0 &amp; 4\end{bmatrix}) x=0 \Rightarrow x=\begin{bmatrix}1 \\ 1\end{bmatrix}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}(\begin{bmatrix}3 & 1 \\ 1 & 3\end{bmatrix}-\begin{bmatrix}4 & 0 \\ 0 & 4\end{bmatrix}) x=0 \Rightarrow x=\begin{bmatrix}1 \\ 1\end{bmatrix}\end{equation}</script>
+</div>
+<p>最终解得的特征值和特征向量分别为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\lambda_1=2, \quad \lambda_2=4, \quad x_1=\begin{bmatrix}1 \\ -1\end{bmatrix}, \quad x_2=\begin{bmatrix}1 \\ 1\end{bmatrix}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\lambda_1=2, \quad \lambda_2=4, \quad x_1=\begin{bmatrix}1 \\ -1\end{bmatrix}, \quad x_2=\begin{bmatrix}1 \\ 1\end{bmatrix}\end{equation}</script>
+</div>
+<p>求解完成。</p>
+<h2 id="3abab">3、AB与A+B的特征值与特征向量<a class="headerlink" href="#3abab" title="Permanent link">#</a></h2>
+<h3 id="31-b">3.1 当B为单位对角阵的倍数时<a class="headerlink" href="#31-b" title="Permanent link">#</a></h3>
+<p>在上面已经求解过了矩阵 <span class="arithmatex"><span class="MathJax_Preview">A=\begin{bmatrix}3 &amp; 1 \\ 1 &amp; 3\end{bmatrix}</span><script type="math/tex">A=\begin{bmatrix}3 & 1 \\ 1 & 3\end{bmatrix}</script></span> 的特征值和特征向量为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\lambda_1=2, \quad \lambda_2=4, \quad x_1=\begin{bmatrix}1 \\ -1\end{bmatrix}, \quad x_2=\begin{bmatrix}1 \\ 1\end{bmatrix}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\lambda_1=2, \quad \lambda_2=4, \quad x_1=\begin{bmatrix}1 \\ -1\end{bmatrix}, \quad x_2=\begin{bmatrix}1 \\ 1\end{bmatrix}\end{equation}</script>
+</div>
+<p>下面再求解一下矩阵  <span class="arithmatex"><span class="MathJax_Preview">A^{\prime}=\begin{bmatrix}0 &amp; 1 \\ 1 &amp; 0\end{bmatrix}</span><script type="math/tex">A^{\prime}=\begin{bmatrix}0 & 1 \\ 1 & 0\end{bmatrix}</script></span> 的特征值和特征向量；求解过程比较简单，我们省略，直接给出求解的结果，如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\lambda_1=-1, \quad \lambda_2=1, \quad x_1=\begin{bmatrix}1 \\ -1\end{bmatrix}, \quad x_2=\begin{bmatrix}1 \\ 1\end{bmatrix}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\lambda_1=-1, \quad \lambda_2=1, \quad x_1=\begin{bmatrix}1 \\ -1\end{bmatrix}, \quad x_2=\begin{bmatrix}1 \\ 1\end{bmatrix}\end{equation}</script>
+</div>
+<p>对比分析矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 与矩阵 <span class="arithmatex"><span class="MathJax_Preview">A^{\prime}</span><script type="math/tex">A^{\prime}</script></span> 的特征值与特征向量可得：</p>
+<ul>
+<li>矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 的特征值等于矩阵 <span class="arithmatex"><span class="MathJax_Preview">A^{\prime}</span><script type="math/tex">A^{\prime}</script></span> 的特征值分别加上3；</li>
+<li>矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 的特征向量与矩阵 <span class="arithmatex"><span class="MathJax_Preview">A^{\prime}</span><script type="math/tex">A^{\prime}</script></span> 的特征向量完全相同；</li>
+</ul>
+<p>再看一下两个矩阵之间的关系，可以发现：<span class="arithmatex"><span class="MathJax_Preview">A=A^{\prime} + 3I</span><script type="math/tex">A=A^{\prime} + 3I</script></span>，其中 <span class="arithmatex"><span class="MathJax_Preview">I</span><script type="math/tex">I</script></span> 表示单位对角阵；</p>
+<p>所以有如下结论：</p>
+<blockquote>
+<p>当矩阵 <span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span> 为单位对角阵的倍数时，即 <span class="arithmatex"><span class="MathJax_Preview">B=a \cdot I</span><script type="math/tex">B=a \cdot I</script></span>，那么：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">A+B</span><script type="math/tex">A+B</script></span> 的特征向量与矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 的特征向量完全相同；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">A+B</span><script type="math/tex">A+B</script></span> 的特征值为矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 的特征值分别加上那个倍数 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>；</li>
+</ul>
+</blockquote>
+<h3 id="32-b">3.2 当B为任意矩阵时<a class="headerlink" href="#32-b" title="Permanent link">#</a></h3>
+<p>在第 3.1 小节已经说明了，对一个矩阵加上单位对角阵的倍数时，其特征向量不变，特征值为分别加上那个倍数；</p>
+<p>那么对一个矩阵加上或者乘上任意一个矩阵时，能否由原矩阵的特征值和特征向量，得出新矩阵的特征值和特征向量；</p>
+<p>即：已知矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 和矩阵 <span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span> 的特征值和特征向量，能够直接求出矩阵 <span class="arithmatex"><span class="MathJax_Preview">AB</span><script type="math/tex">AB</script></span> 或矩阵 <span class="arithmatex"><span class="MathJax_Preview">A+B</span><script type="math/tex">A+B</script></span> 的特征值与特征向量？（这里假设 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 与 <span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span> 是可以做乘法和加法的）</p>
+<p>答案是不能的，我们不能够确定矩阵 <span class="arithmatex"><span class="MathJax_Preview">AB</span><script type="math/tex">AB</script></span> 或矩阵 <span class="arithmatex"><span class="MathJax_Preview">A+B</span><script type="math/tex">A+B</script></span> 的特征值与特征向量与 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span> 的特征值和特征向量之间的关系。</p>
+<p>要想知道 <span class="arithmatex"><span class="MathJax_Preview">AB</span><script type="math/tex">AB</script></span> 或 <span class="arithmatex"><span class="MathJax_Preview">A+B</span><script type="math/tex">A+B</script></span> 的特征值与特征向量，只能通过第 1 小节中的提到的方法对分别进行求解。</p>
+<h2 id="4">4、特征值为复数<a class="headerlink" href="#4" title="Permanent link">#</a></h2>
+<blockquote>
+<p>关于矩阵的特征值有一个性质：特征值之和等于矩阵的迹；特征值之积等于矩阵的行列式的值；</p>
+</blockquote>
+<p>问题：求解旋转矩阵 <span class="arithmatex"><span class="MathJax_Preview">Q=\begin{bmatrix}\cos 90^o &amp; -\sin 90^o \\ \sin 90^o &amp; \cos 90^o\end{bmatrix}=\begin{bmatrix}0 &amp; -1 \\ 1 &amp; 0\end{bmatrix}</span><script type="math/tex">Q=\begin{bmatrix}\cos 90^o & -\sin 90^o \\ \sin 90^o & \cos 90^o\end{bmatrix}=\begin{bmatrix}0 & -1 \\ 1 & 0\end{bmatrix}</script></span> 的特征值和特征向量。</p>
+<p><strong>先直观的思考一下：</strong> </p>
+<p>前面已经说过，矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 的特征向量 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 满足：矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 乘上 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 之后得到的新向量 <span class="arithmatex"><span class="MathJax_Preview">Ax</span><script type="math/tex">Ax</script></span> 与原特征向量 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 方向相同；</p>
+<p>现在有一个旋转矩阵 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span>，其乘上一个向量之后得到的新向量等同于原向量旋转 <span class="arithmatex"><span class="MathJax_Preview">90^o</span><script type="math/tex">90^o</script></span>；所以如果要找矩阵 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 的特征向量，就是在找一个旋转 <span class="arithmatex"><span class="MathJax_Preview">90^o</span><script type="math/tex">90^o</script></span> 之后还与自身平行的向量，好像根本不存在这种向量（还是不考虑零向量）；</p>
+<p><strong>接下来按照标准步骤求解：</strong></p>
+<p>解特征值方程：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}det(Q-\lambda I)=\begin{vmatrix}-\lambda &amp; -1 \\ 1 &amp; \lambda \end{vmatrix}=\lambda^2 + 1=0\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}det(Q-\lambda I)=\begin{vmatrix}-\lambda & -1 \\ 1 & \lambda \end{vmatrix}=\lambda^2 + 1=0\end{equation}</script>
+</div>
+<p>可以解得：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\lambda_1=i, \quad \lambda_2=-i\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\lambda_1=i, \quad \lambda_2=-i\end{equation}</script>
+</div>
+<p>可以看出，特征值 <span class="arithmatex"><span class="MathJax_Preview">\lambda_1</span><script type="math/tex">\lambda_1</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">\lambda_2</span><script type="math/tex">\lambda_2</script></span> 是一对共轭复数；特征向量就不进行求解了。</p>
+<p>由这个旋转矩阵 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 的特征值可以看出：即使矩阵中的所有元素都是实数，其特征值也有可能为复数；</p>
+<p>根据前面的矩阵<span class="arithmatex"><span class="MathJax_Preview">\begin{bmatrix}3 &amp; 1 \\ 1 &amp; 3\end{bmatrix}</span><script type="math/tex">\begin{bmatrix}3 & 1 \\ 1 & 3\end{bmatrix}</script></span>和这里的矩阵<span class="arithmatex"><span class="MathJax_Preview">\begin{bmatrix}0 &amp; -1 \\ 1 &amp; 0\end{bmatrix}</span><script type="math/tex">\begin{bmatrix}0 & -1 \\ 1 & 0\end{bmatrix}</script></span>的特征值，给一个结论：</p>
+<blockquote>
+<ul>
+<li>如果矩阵是对称的，即 <span class="arithmatex"><span class="MathJax_Preview">A=A^T</span><script type="math/tex">A=A^T</script></span>，比如<span class="arithmatex"><span class="MathJax_Preview">\begin{bmatrix}3 &amp; 1 \\ 1 &amp; 3\end{bmatrix}</span><script type="math/tex">\begin{bmatrix}3 & 1 \\ 1 & 3\end{bmatrix}</script></span>，那么其特征值是实数；</li>
+<li>如果矩阵是反对称的，即 <span class="arithmatex"><span class="MathJax_Preview">A=-A^T</span><script type="math/tex">A=-A^T</script></span>，比如<span class="arithmatex"><span class="MathJax_Preview">\begin{bmatrix}0 &amp; -1 \\ 1 &amp; 0\end{bmatrix}</span><script type="math/tex">\begin{bmatrix}0 & -1 \\ 1 & 0\end{bmatrix}</script></span>，那么其特征值为复数；</li>
+<li>对称矩阵和反对称矩阵是两种极端情况，大部分矩阵介于对称与反对称之间，那么其特征值也是介于上述两种情况之间的。</li>
+</ul>
+</blockquote>
+<h2 id="5">5、重复的特征值<a class="headerlink" href="#5" title="Permanent link">#</a></h2>
+<blockquote>
+<p>关于三角矩阵有一个性质：三角矩阵的特征值就是三角矩阵对角线上的元素；</p>
+</blockquote>
+<p>问题：求解 <span class="arithmatex"><span class="MathJax_Preview">A=\begin{bmatrix}3 &amp; 1 \\ 0 &amp; 3\end{bmatrix}</span><script type="math/tex">A=\begin{bmatrix}3 & 1 \\ 0 & 3\end{bmatrix}</script></span> 的特征值和特征向量；</p>
+<p>解：（先不用上面提到的那个三角矩阵的性质，先用第1部分描述的基础的方法求解）</p>
+<p>解特征方程：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}det(A-\lambda I)=\begin{vmatrix}3-\lambda &amp; 1 \\ 0 &amp; 3-\lambda \end{vmatrix}=(3-\lambda) \cdot (3-\lambda)=0\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}det(A-\lambda I)=\begin{vmatrix}3-\lambda & 1 \\ 0 & 3-\lambda \end{vmatrix}=(3-\lambda) \cdot (3-\lambda)=0\end{equation}</script>
+</div>
+<p>可以解得：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\lambda_1=3, \quad \lambda_2=3\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\lambda_1=3, \quad \lambda_2=3\end{equation}</script>
+</div>
+<blockquote>
+<p>由公式（11）的推导来直观的感受一下为什么三角矩阵的特征值就是其对角线上的元素。由于三角矩阵的下三角或上三角的元素全部为零，那么求其行列式时仅有对角线元素连乘这一项，其他的项都是0；这样连因式分解都省了，直接对角线上的每个元素就是对应的 <span class="arithmatex"><span class="MathJax_Preview">\lambda</span><script type="math/tex">\lambda</script></span> 的值。所以三角矩阵的对角线上的元素就是其特征值。</p>
+</blockquote>
+<p>将 <span class="arithmatex"><span class="MathJax_Preview">\lambda_1=3, \lambda_2=3</span><script type="math/tex">\lambda_1=3, \lambda_2=3</script></span> 分别代入 <span class="arithmatex"><span class="MathJax_Preview">(A-\lambda I)=0</span><script type="math/tex">(A-\lambda I)=0</script></span> 中求解特征向量，由于 <span class="arithmatex"><span class="MathJax_Preview">\lambda_1</span><script type="math/tex">\lambda_1</script></span> 与 <span class="arithmatex"><span class="MathJax_Preview">\lambda_2</span><script type="math/tex">\lambda_2</script></span> 相同，所以两个值带入到上式得到的是同一个其次线性方程，如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{bmatrix}0 &amp; 1 \\ 0 &amp; 0\end{bmatrix} x=0\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{bmatrix}0 & 1 \\ 0 & 0\end{bmatrix} x=0\end{equation}</script>
+</div>
+<p>注意这里的 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">0</span><script type="math/tex">0</script></span> 都是向量；</p>
+<p>解该方程只能得到 <span class="arithmatex"><span class="MathJax_Preview">x_1=\begin{bmatrix}1 \\ 0\end{bmatrix}</span><script type="math/tex">x_1=\begin{bmatrix}1 \\ 0\end{bmatrix}</script></span>，找不到另个与 <span class="arithmatex"><span class="MathJax_Preview">x_1</span><script type="math/tex">x_1</script></span> 线性无关的解；</p>
+<p>该例中的矩阵 <span class="arithmatex"><span class="MathJax_Preview">A=\begin{bmatrix}3 &amp; 1 \\ 0 &amp; 3\end{bmatrix}</span><script type="math/tex">A=\begin{bmatrix}3 & 1 \\ 0 & 3\end{bmatrix}</script></span> 是一个<strong>退化矩阵</strong>，其维度为 2，但是却找不到 2 个线性无关的特征向量；重复的特征值在某些情况下造成了特征向量的短缺。</p>
+<p>注意：并不是所有重复的特征值都会导致特征向量短缺。如果特征值都不相同，那么必然能够找到足够的线性无关的特征向量；如果特征值有相同的，那么可能找不到足够的线性无关的特征向量，但也有可能找的到。比如单位矩阵，其特征值都为1，都是相同的，但是其所有的列向量就是其特征向量。</p>
+<h2 id="refrence">Refrence<a class="headerlink" href="#refrence" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://www.bilibili.com/video/BV1zx411g7gq?p=21">https://www.bilibili.com/video/BV1zx411g7gq?p=21</a></p>
+</li>
+<li>
+<p><a href="https://linalg.apachecn.org/#/docs/chapter21">https://linalg.apachecn.org/#/docs/chapter21</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

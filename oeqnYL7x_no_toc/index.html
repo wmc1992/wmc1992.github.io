@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/008_algorithm/007_%E5%9B%9E%E6%BA%AF/%E4%B8%AD%E7%AD%89/1905_%E7%BB%9F%E8%AE%A1%E5%AD%90%E5%B2%9B%E5%B1%BF/">
+        <link rel="shortcut icon" href="../../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/oeqnYL7x_no_toc/">隐藏左侧目录栏</a>][<a href="/oeqnYL7x/">显示左侧目录栏</a>]</p>
+
+<h1 id="1905">1905. 统计子岛屿<a class="headerlink" href="#1905" title="Permanent link">#</a></h1>
+<p>链接: <a href="https://leetcode.cn/problems/count-sub-islands/">https://leetcode.cn/problems/count-sub-islands/</a></p>
+<h2 id="1">1、题目描述<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>给你两个 m x n 的二进制矩阵 grid1 和 grid2 ，它们只包含 0 （表示水域）和 1 （表示陆地）。一个 岛屿 是由 四个方向 （水平或者竖直）上相邻的 1 组成的区域。任何矩阵以外的区域都视为水域。</p>
+<p>如果 grid2 的一个岛屿，被 grid1 的一个岛屿 完全 包含，也就是说 grid2 中该岛屿的每一个格子都被 grid1 中同一个岛屿完全包含，那么我们称 grid2 中的这个岛屿为 子岛屿 。</p>
+<p>请你返回 grid2 中 子岛屿 的 数目 。</p>
+<p>示例 1：</p>
+<div><img src="/oeqnYL7x/assets/01.png" width=60% /></div>
+
+<blockquote>
+<p>输入：grid1 = [</p>
+<p>[1,1,1,0,0],</p>
+<p>[0,1,1,1,1],</p>
+<p>[0,0,0,0,0],</p>
+<p>[1,0,0,0,0],</p>
+<p>[1,1,0,1,1]], </p>
+<p>grid2 = [</p>
+<p>[1,1,1,0,0],</p>
+<p>[0,0,1,1,1],</p>
+<p>[0,1,0,0,0],</p>
+<p>[1,0,1,1,0],</p>
+<p>[0,1,0,1,0]]</p>
+<p>输出：3</p>
+<p>解释：如上图所示，左边为 grid1 ，右边为 grid2 。</p>
+<p>grid2 中标红的 1 区域是子岛屿，总共有 3 个子岛屿。</p>
+</blockquote>
+<p>示例 2：</p>
+<div><img src="/oeqnYL7x/assets/02.png" width=60% /></div>
+
+<blockquote>
+<p>输入：grid1 = [</p>
+<p>[1,0,1,0,1],</p>
+<p>[1,1,1,1,1],</p>
+<p>[0,0,0,0,0],</p>
+<p>[1,1,1,1,1],</p>
+<p>[1,0,1,0,1]], </p>
+<p>grid2 = [</p>
+<p>[0,0,0,0,0],</p>
+<p>[1,1,1,1,1],</p>
+<p>[0,1,0,1,0],</p>
+<p>[0,1,0,1,0],</p>
+<p>[1,0,0,0,1]]</p>
+<p>输出：2 </p>
+<p>解释：如上图所示，左边为 grid1 ，右边为 grid2 。</p>
+<p>grid2 中标红的 1 区域是子岛屿，总共有 2 个子岛屿。</p>
+</blockquote>
+<p>提示：</p>
+<ul>
+<li>m == grid1.length == grid2.length</li>
+<li>n == grid1[i].length == grid2[i].length</li>
+<li>1 &lt;= m, n &lt;= 500</li>
+<li>grid1[i][j] 和 grid2[i][j] 都要么是 0 要么是 1 。</li>
+</ul>
+<h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<pre><code class="language-python">
+</code></pre></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../../js/base.js" defer></script>
+        <script src="../../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

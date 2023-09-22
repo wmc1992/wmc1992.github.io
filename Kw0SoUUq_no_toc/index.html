@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/003_%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/006_%E5%AF%B9%E6%8A%97%E8%AE%AD%E7%BB%83/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/Kw0SoUUq_no_toc/">隐藏左侧目录栏</a>][<a href="/Kw0SoUUq/">显示左侧目录栏</a>]</p>
+
+<h1 id="_1">对抗训练<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<p>对抗训练的一般性原理，可以概括为如下的最大最小化公式。</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\min_{\theta} E_{(Z, y) \backsim D} \big[ \max_{||r_{adv}|| \leq \epsilon} L(f_{\theta}(X+r_{adv}), y) \big]</div>
+<script type="math/tex; mode=display">\min_{\theta} E_{(Z, y) \backsim D} \big[ \max_{||r_{adv}|| \leq \epsilon} L(f_{\theta}(X+r_{adv}), y) \big]</script>
+</div>
+<p>在上述公式中，又有min，又有max，怎么理解？重点需要理解的一点是上述公式中的min和max分别是要调整哪部分来达到min和max的效果。</p>
+<p><strong>先说max：</strong>max要调整的是 <span class="arithmatex"><span class="MathJax_Preview">r_{adv}</span><script type="math/tex">r_{adv}</script></span>，由于 <span class="arithmatex"><span class="MathJax_Preview">r_{adv}</span><script type="math/tex">r_{adv}</script></span> 是加到输入<span class="arithmatex"><span class="MathJax_Preview">X</span><script type="math/tex">X</script></span>上的，所以max其实是要调整输入<span class="arithmatex"><span class="MathJax_Preview">X</span><script type="math/tex">X</script></span>，使得最终的损失最大化；</p>
+<p><strong>再说min：</strong>min要调整的模型的权重<span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span>，它其实是想通过调整模型的权重<span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span>来使最终的损失最小化；</p>
+<p>用一句话形容对抗训练的本质，就是<strong>在输入上进行梯度上升(增大loss)，在参数上进行梯度下降(减小loss)</strong>。</p>
+<p>实际操作时，由于输入会进行embedding lookup，所以实际的做法是<strong>在embedding table上进行梯度上升</strong>。</p>
+<p>理解了上述对抗训练的本质，接下来各种对抗训练的方法就容易理解了，然后各种对抗训练的方法提出基本围绕两部分进行：</p>
+<ul>
+<li>得到更优的扰动：这个对应到公式中就是使得max那部分更大；</li>
+<li>提升训练速度：这个主要是因为加入对抗训练之后速度会大幅降低，所以有不少研究会重点优化对抗训练方法的训练速度；</li>
+</ul>
+<h2 id="1fgsmfast-gradient-sign-method">1、FGSM（Fast Gradient Sign Method）<a class="headerlink" href="#1fgsmfast-gradient-sign-method" title="Permanent link">#</a></h2>
+<p>这个思路非常朴素，假设梯度是 <span class="arithmatex"><span class="MathJax_Preview">g=\nabla L(\theta, x, y)</span><script type="math/tex">g=\nabla L(\theta, x, y)</script></span>，那么扰动就沿着梯度的负方向就可以了，如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">r_{adv} = \epsilon \cdot sign(g)</div>
+<script type="math/tex; mode=display">r_{adv} = \epsilon \cdot sign(g)</script>
+</div>
+<p>其中函数 <span class="arithmatex"><span class="MathJax_Preview">sign(g)</span><script type="math/tex">sign(g)</script></span> 表示取 <span class="arithmatex"><span class="MathJax_Preview">g</span><script type="math/tex">g</script></span> 的符号。</p>
+<p>由其公式可知，每次的步长都是完全相同的，都是 <span class="arithmatex"><span class="MathJax_Preview">\epsilon</span><script type="math/tex">\epsilon</script></span>。</p>
+<h2 id="2fgmfast-gradien-method">2、FGM（Fast Gradien Method）<a class="headerlink" href="#2fgmfast-gradien-method" title="Permanent link">#</a></h2>
+<p>该方法相比于FGSM，主要优化的就是每一步的步长。公式如下所示，它是对获得的梯度做scale，具体方式就是做L2的归一化，用这种方式来获取到比FGSM更好的扰动。</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">r_{adv} = \epsilon \frac{g}{||g||_2}</div>
+<script type="math/tex; mode=display">r_{adv} = \epsilon \frac{g}{||g||_2}</script>
+</div>
+<p>这里的 <span class="arithmatex"><span class="MathJax_Preview">g</span><script type="math/tex">g</script></span> 是embedding层的梯度。</p>
+<h2 id="3pgdprojected-gradient-descent">3、PGD（Projected Gradient Descent）<a class="headerlink" href="#3pgdprojected-gradient-descent" title="Permanent link">#</a></h2>
+<h3 id="31">3.1 原理说明<a class="headerlink" href="#31" title="Permanent link">#</a></h3>
+<blockquote>
+<p>这个PGD中所采用的方式，莫名的觉得其和SGD很相似；</p>
+</blockquote>
+<p>在FGM中，寻找一个输入的扰动的过程是：只求一次梯度，然后就用这个梯度通过公式 <span class="arithmatex"><span class="MathJax_Preview">r_{adv} = \epsilon \cdot sign(g)</span><script type="math/tex">r_{adv} = \epsilon \cdot sign(g)</script></span> 获取扰动，将该扰动添加到输入上；</p>
+<p>该方法可能存在的问题是，通过这种简单粗暴的"一步到位"可能找不到对于当前的输入来说最优的扰动。这种"一步到位"可能由于步子不够长，没有走到最低点；或者由于步子太长，超过了最低点；</p>
+<p>这里需要注意的是：找最优扰动这个步骤里，优化目标是极大化 <span class="arithmatex"><span class="MathJax_Preview">L(f_{\theta}(X+r_{adv}), y)</span><script type="math/tex">L(f_{\theta}(X+r_{adv}), y)</script></span>，可调整的参数是 <span class="arithmatex"><span class="MathJax_Preview">r_{adv}</span><script type="math/tex">r_{adv}</script></span>，在这个步骤中模型的权重 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 是个常数。</p>
+<p>由于FGM方法存在上述问题，所以提出了FGD这种 "小步走，多走几步" 的方法。其公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">r_{adv|t+1} = \alpha \frac{g_t}{||g_t||_2}</div>
+<script type="math/tex; mode=display">r_{adv|t+1} = \alpha \frac{g_t}{||g_t||_2}</script>
+</div>
+<p>且要满足约束 <span class="arithmatex"><span class="MathJax_Preview">||r||_2 \leq \epsilon</span><script type="math/tex">||r||_2 \leq \epsilon</script></span>，这里的 <span class="arithmatex"><span class="MathJax_Preview">g_t</span><script type="math/tex">g_t</script></span> 是embedding层的梯度。</p>
+<p>这个方法由于要迭代多次，而最后获取的最优扰动只用最后一次得到的扰动。有些易混淆的地方，这里我们放一下它的伪代码。</p>
+<p>伪代码：</p>
+<pre><code>对于每个x（每个x表示一条样本）:
+
+    1. 计算x的前向loss、反向传播得到梯度
+
+    2. 备份整个模型的梯度，备份embedding层的权重
+
+    对于每步t:
+
+        3. 根据embedding矩阵的梯度计算出r，并加到当前embedding上，对应公式为x+r（超出范围则投影回epsilon内，也就是上面公式部分的约束）
+
+        4. t不是最后一步: 将梯度归0，根据上一步的x+r计算前后向并得到梯度
+
+        5. t是最后一步: 恢复步骤(2)备份的梯度，计算最后的x+r并将梯度累加到步骤(2)备份的梯度上
+
+    6. 将embedding层的权重恢复为步骤(2)备份的值
+
+    7. 根据步骤(5)得到的梯度对参数进行更新
+</code></pre>
+<p>简单来说，在实际操作时，一般是先将embedding层权重深度拷贝一份备份。在多次迭代的对抗训练过程中，不断把求解出来的梯度r累加到模型的embedding上，多次迭代完之后，使用最后一步的embedding权重做前后向计算得到整个模型的梯度。然后将embedding层的权重使用最初备份的值还原。这里不理解没关系，看完下面的代码解析就理解了。</p>
+<h3 id="32">3.2 代码解析<a class="headerlink" href="#32" title="Permanent link">#</a></h3>
+<p>实现一个完整的PGD的代码并不复杂，整个使用PGD做对抗训练的代码分为两部分：</p>
+<ul>
+<li>一部分是PGD这个类，它里面实现的功能有模型参数的备份、参数的恢复、embedding层梯度的计算和更新等；</li>
+<li>另一部分是在主训练流程中，把PGD这个功能添加进去；</li>
+</ul>
+<p>下面先给出PGD类的定义，以及各个函数的功能，先不细究其实现细节，而是先把整个流程捋顺了。</p>
+<h4 id="321-pgd">3.2.1 定义PGD类<a class="headerlink" href="#321-pgd" title="Permanent link">#</a></h4>
+<p>对抗训练用的PGD类的各个函数的功能如下：</p>
+<pre><code class="language-python">class PGD:
+
+    def __init__(self, model):
+        self.model = model
+
+    def backup_model_grad(self):
+        &quot;&quot;&quot; 对模型 self.model 中所有的梯度做备份 &quot;&quot;&quot;
+
+    def restore_model_grad(self):
+        &quot;&quot;&quot; 使用函数 backup_model_grad() 中备份的值对模型中的梯度进行还原 &quot;&quot;&quot;
+
+    def backup_embedding_data(self):
+        &quot;&quot;&quot; 对模型 embedding 层中的权重进行备份 &quot;&quot;&quot;
+
+    def restore_embedding_data(self):
+        &quot;&quot;&quot; 使用函数 backup_embedding_data() 中备份的值对 embedding 的权重进行还原 &quot;&quot;&quot;
+
+    def attack(self):
+        &quot;&quot;&quot; 按照3.1小节中给的公式计算梯度，并使用该梯度更新 embedding 层的权重 &quot;&quot;&quot;
+
+</code></pre>
+<h4 id="322">3.2.2 将对抗训练添加到主训练流程中<a class="headerlink" href="#322" title="Permanent link">#</a></h4>
+<p>首先，不使用对抗训练的常规训练流程代码如下（这个是简化又简化的版本）：</p>
+<pre><code class="language-python">for batch in data_loader:
+    loss = self.calc_loss(pred=self(**batch), **batch)  # 前向传播并计算损失
+    loss.backward()  # 反向传播计算出梯度并累计
+
+    self.optimizer.step()  # 实用梯度对模型的权重进行更新
+    self.model.zero_grad()  # 清空模型中所有的梯度
+</code></pre>
+<p>然后，按照上面 <strong>3.1</strong> 节中提供的伪代码，逐步进行实现如下。</p>
+<pre><code class="language-python">pgd_k = 3  # 一般设置为3，也可以设置为其他值
+self.pgd = PGD(model=self.model)
+
+for batch in data_loader:
+
+    loss = self.calc_loss(pred=self(**batch), **batch)  # 前向传播并计算损失。对应伪代码中的步骤（1）；
+    loss.backward()  # 反向传播计算出梯度并累计。对应伪代码中的步骤（1）；
+    self.pgd.backup_model_grad()  # 将模型中最初的所有的梯度进行备份。对应伪代码中的步骤（2）；
+    self.pgd.backup_embedding_data(emb_name=&quot;word_embeddings&quot;)  # 对 embedding 层的权重进行备份。对应伪代码中的步骤（2）；
+
+    for _t in range(pgd_k):
+        # 按照3.1小节中给的公式计算梯度，并将该梯度加到模型的embedding上，每执行一次该行代码，embedding层的权重
+        # 就会朝着使loss变大的方向变化一次。对应伪代码中的步骤（3）；
+        self.pgd.attack(is_first_attack=(_t == 0))
+
+        if _t != pgd_k - 1:
+            # 如果当前不是最后一步，将梯度归0，然后继续计算损失和梯度，注意此时 embedding 中的权重已经不是原始
+            # 权重了，而是在函数 pgd.attack() 中更新之后的。对应伪代码中的步骤（4）；
+            self.model.zero_grad()  
+            loss = self.calc_loss(pred=self(**batch), **batch)
+            loss.backward()
+        else:
+            # 如果当前是最后一步，将梯度恢复为最初备份的梯度。并且再次计算一次梯度累加到最初的梯度上。
+            # 对应伪代码中的步骤（5）；
+            self.pgd.restore_model_grad()  
+            loss = self.calc_loss(pred=self(**batch), **batch)
+            loss.backward()
+
+    self.pgd.restore_embedding_data(emb_name=&quot;word_embeddings&quot;)  # 将embedding中的权重恢复为最初备份的值。对应伪代码中的步骤（6）；
+
+    self.optimizer.step()  # 实用经过上述对抗训练得到的梯度更新模型的权重。对应伪代码中的步骤（7）；
+    self.model.zero_grad()
+</code></pre>
+<h4 id="323-pgd">3.2.3 分析PGD类的实现细节<a class="headerlink" href="#323-pgd" title="Permanent link">#</a></h4>
+<p>整个PGD类的源码如下所示：</p>
+<pre><code class="language-python">class PGD:
+
+    def __init__(self, model, eps=1., alpha=0.3):
+        self.model = (model.module if hasattr(model, &quot;module&quot;) else model)
+        self.eps = eps
+        self.alpha = alpha
+        self.emb_backup = {}
+        self.grad_backup = {}
+
+    def backup_model_grad(self):
+        &quot;&quot;&quot; 对模型 self.model 中所有的梯度做备份 &quot;&quot;&quot;
+        for name, param in self.model.named_parameters():
+            if param.requires_grad and param.grad is not None:
+                self.grad_backup[name] = param.grad.clone()
+
+    def restore_model_grad(self):
+        &quot;&quot;&quot; 使用函数 backup_model_grad() 中备份的值对模型中的梯度进行还原 &quot;&quot;&quot;
+        for name, param in self.model.named_parameters():
+            if param.requires_grad and param.grad is not None:
+                param.grad = self.grad_backup[name]
+
+    def backup_embedding_data(self, emb_name=&quot;word_embeddings&quot;):
+        &quot;&quot;&quot; 对模型 embedding 层中的权重进行备份 &quot;&quot;&quot;
+        for name, param in self.model.named_parameters():
+            if param.requires_grad and emb_name in name:
+                self.emb_backup[name] = param.data.clone()
+
+    def restore_embedding_data(self, emb_name=&quot;word_embeddings&quot;):
+        &quot;&quot;&quot; 使用函数 backup_embedding_data() 中备份的值对 embedding 的权重进行还原 &quot;&quot;&quot;
+        for name, param in self.model.named_parameters():
+            if param.requires_grad and emb_name in name:
+                assert name in self.emb_backup
+                param.data = self.emb_backup[name]
+        self.emb_backup = {}
+
+    def attack(self):
+        &quot;&quot;&quot; 按照3.1小节中给的公式计算梯度，并使用该梯度更新 embedding 层的权重 &quot;&quot;&quot;
+        for name, param in self.model.named_parameters():
+            if param.requires_grad and emb_name in name:
+                norm = torch.norm(param.grad)
+                if norm != 0 and not torch.isnan(norm):
+                    r_at = self.alpha * param.grad / norm
+                    param.data.add_(r_at)
+                    param.data = self.project(name, param.data)
+
+    def project(self, param_name, param_data):
+        &quot;&quot;&quot; 这个函数是保证累加到embedding层的梯度不会超过范围，即3.1小节中提到的约束条件 &quot;&quot;&quot;
+        r = param_data - self.emb_backup[param_name]
+        if torch.norm(r) &gt; self.eps:
+            r = self.eps * r / torch.norm(r)
+        return self.emb_backup[param_name] + r
+
+</code></pre>
+<p>其中前四个函数 <code>backup_model_grad()</code>、<code>restore_model_grad()</code>、<code>backup_embedding_data()</code>、<code>restore_embedding_data()</code> 的功能非常清晰，不再解释。</p>
+<p>主要解释一下 <code>attack()</code> 这个函数。这里把该函数对应的公式再写一遍：<span class="arithmatex"><span class="MathJax_Preview">r_{adv|t+1} = \alpha \frac{g_t}{||g_t||_2}</span><script type="math/tex">r_{adv|t+1} = \alpha \frac{g_t}{||g_t||_2}</script></span>，且要满足约束 <span class="arithmatex"><span class="MathJax_Preview">||r||_2 \leq \epsilon</span><script type="math/tex">||r||_2 \leq \epsilon</script></span>，这里的 <span class="arithmatex"><span class="MathJax_Preview">g_t</span><script type="math/tex">g_t</script></span> 是embedding层的梯度。把 <code>attack()</code> 函数拿出来逐行说明：</p>
+<pre><code class="language-python">def attack(self):
+    &quot;&quot;&quot; 按照3.1小节中给的公式计算梯度，并使用该梯度更新 embedding 层的权重 &quot;&quot;&quot;
+    for name, param in self.model.named_parameters():
+        if param.requires_grad and emb_name in name:
+            norm = torch.norm(param.grad)
+            if norm != 0 and not torch.isnan(norm):
+                r_at = self.alpha * param.grad / norm
+                param.data.add_(r_at)
+                param.data = self.project(name, param.data)
+
+def project(self, param_name, param_data):
+    &quot;&quot;&quot; 这个函数是保证累加到embedding层的梯度不会超过范围，即3.1小节中提到的约束条件 &quot;&quot;&quot;
+    r = param_data - self.emb_backup[param_name]
+    if torch.norm(r) &gt; self.eps:
+        r = self.eps * r / torch.norm(r)
+    return self.emb_backup[param_name] + r
+</code></pre>
+<ul>
+<li>第5行为计算梯度 <span class="arithmatex"><span class="MathJax_Preview">g_t</span><script type="math/tex">g_t</script></span> 的 <span class="arithmatex"><span class="MathJax_Preview">L_2</span><script type="math/tex">L_2</script></span> 归一化的结果，对应公式为 <span class="arithmatex"><span class="MathJax_Preview">||g_t||_2</span><script type="math/tex">||g_t||_2</script></span>；</li>
+<li>第7行为计算 <span class="arithmatex"><span class="MathJax_Preview">r_{adv|t+1}</span><script type="math/tex">r_{adv|t+1}</script></span>，对应公式为 <span class="arithmatex"><span class="MathJax_Preview">r_{adv|t+1} = \alpha \frac{g_t}{||g_t||_2}</span><script type="math/tex">r_{adv|t+1} = \alpha \frac{g_t}{||g_t||_2}</script></span>；</li>
+<li>第8行为更新embedding的权重；</li>
+<li>第9行的功能为保证对embedding权重的修改不会超过范围，对应公式为 <span class="arithmatex"><span class="MathJax_Preview">||r||_2 \leq \epsilon</span><script type="math/tex">||r||_2 \leq \epsilon</script></span>；</li>
+</ul>
+<h2 id="_2">总结<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
+<p>本文介绍了对抗学习中的三种方法：<code>FGSM</code>、<code>FGM</code>、<code>PGD</code>。对于方法 <code>FGSM</code> 和 <code>FGM</code> 仅介绍了其原理。对于方法 <code>PGD</code> 除了介绍原理以外还详细分析了其代码如何实现。</p>
+<p><br></p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

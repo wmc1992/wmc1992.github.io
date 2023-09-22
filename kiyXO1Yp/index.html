@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/003_%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/005_Normalize/02_layer_normalize/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#layer-normalize" class="nav-link">Layer Normalize</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1ln" class="nav-link">1、LN的具体操作步骤</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#11" class="nav-link">1.1 简单描述</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#12-ln" class="nav-link">1.2 LN的公式描述</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#13" class="nav-link">1.3 图像描述</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2ln" class="nav-link">2、LN 为了解决什么问题</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3ln" class="nav-link">3、LN 出现之前是如何解决上述问题的</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4ln" class="nav-link">4、LN 的优势</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#5ln" class="nav-link">5、LN效果测试代码</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#6ln" class="nav-link">6、LN实现代码</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#7conditionalln" class="nav-link">7、ConditionalLN实现代码</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#8-conditionalln" class="nav-link">8、从 ConditionalLN 出发几种融合信息的方式</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/kiyXO1Yp_no_toc/">隐藏左侧目录栏</a>][<a href="/kiyXO1Yp/">显示左侧目录栏</a>]</p>
+
+<h1 id="layer-normalize">Layer Normalize<a class="headerlink" href="#layer-normalize" title="Permanent link">#</a></h1>
+<h2 id="1ln">1、LN的具体操作步骤<a class="headerlink" href="#1ln" title="Permanent link">#</a></h2>
+<h3 id="11">1.1 简单描述<a class="headerlink" href="#11" title="Permanent link">#</a></h3>
+<p>layer norm 的计算过程大概有如下几步：</p>
+<ul>
+<li>求每条数据各特征之间的均值和标准差；</li>
+<li>每条数据的每个特征减去各自数据的均值，除上各自数据的标准差；</li>
+<li>对经过上一步骤的输出再经过一个线性变换；</li>
+</ul>
+<p>然后使用公式严谨的描述一下 layer norm 的计算过程。</p>
+<h3 id="12-ln">1.2 LN的公式描述<a class="headerlink" href="#12-ln" title="Permanent link">#</a></h3>
+<p>假设 LN 的输入为 <span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 条样本，每条样本为一个 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 维的向量。则输入数据的集合表示为：<span class="arithmatex"><span class="MathJax_Preview">D = \{\vec{x_1}, \vec{x_2}, ..., \vec{x_m}\}</span><script type="math/tex">D = \{\vec{x_1}, \vec{x_2}, ..., \vec{x_m}\}</script></span>，其shape为 <span class="arithmatex"><span class="MathJax_Preview">(m, n)</span><script type="math/tex">(m, n)</script></span>。其中 <span class="arithmatex"><span class="MathJax_Preview">\vec{x_i} = [x_i^{(1)}, x_i^{(2)}, ..., x_i^{(j)}, ..., x_i^{(n)}]</span><script type="math/tex">\vec{x_i} = [x_i^{(1)}, x_i^{(2)}, ..., x_i^{(j)}, ..., x_i^{(n)}]</script></span>，右上角的 <span class="arithmatex"><span class="MathJax_Preview">\cdot^{(j)}</span><script type="math/tex">\cdot^{(j)}</script></span> 表示该条数据的第 <span class="arithmatex"><span class="MathJax_Preview">j</span><script type="math/tex">j</script></span> 个特征；</p>
+<p>LN 输出的shape与输入是完全相同的，记为 <span class="arithmatex"><span class="MathJax_Preview">\{\vec{y_1}, \vec{y_2}, ..., \vec{y_m}\}</span><script type="math/tex">\{\vec{y_1}, \vec{y_2}, ..., \vec{y_m}\}</script></span>，其shape也为 <span class="arithmatex"><span class="MathJax_Preview">(m, n)</span><script type="math/tex">(m, n)</script></span>。其中 <span class="arithmatex"><span class="MathJax_Preview">\vec{y_i} = [y_i^{(1)}, y_i^{(2)}, ..., y_i^{(j)}, ..., y_i^{(n)}]</span><script type="math/tex">\vec{y_i} = [y_i^{(1)}, y_i^{(2)}, ..., y_i^{(j)}, ..., y_i^{(n)}]</script></span>；</p>
+<p>则 LN 的公式如下所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp;\mu_i = \frac{1}{T} \sum_{j=1}^{T} x_i^{(j)}  \qquad//\text{第 i 条数据各特征的均值} \\
+&amp;\sigma_i^2 = \frac{1}{T} \sum_{j=1}^{T} (x_i^{(j)} - \mu_i)^2  \qquad//\text{第 i 条数据各特征的方差
+} \\
+&amp;\hat{x_i^{(j)}} = \frac{x_i^{(j)} - \mu_i}{\sqrt{\sigma_i^2 + \epsilon}}  \qquad//\text{减去均值，除上标准化，} \epsilon \text{用于避免除数为0} \\
+&amp;y_i^{(j)} = \gamma^{(j)} \hat{x_i^{(j)}} + \beta ^{(j)} \qquad//\text{第 i 条数据第 j 个特征经过LN后的结果}
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+&\mu_i = \frac{1}{T} \sum_{j=1}^{T} x_i^{(j)}  \qquad//\text{第 i 条数据各特征的均值} \\
+&\sigma_i^2 = \frac{1}{T} \sum_{j=1}^{T} (x_i^{(j)} - \mu_i)^2  \qquad//\text{第 i 条数据各特征的方差
+} \\
+&\hat{x_i^{(j)}} = \frac{x_i^{(j)} - \mu_i}{\sqrt{\sigma_i^2 + \epsilon}}  \qquad//\text{减去均值，除上标准化，} \epsilon \text{用于避免除数为0} \\
+&y_i^{(j)} = \gamma^{(j)} \hat{x_i^{(j)}} + \beta ^{(j)} \qquad//\text{第 i 条数据第 j 个特征经过LN后的结果}
+\end{split}\end{equation}</script>
+</div>
+<p>上述最后一个公式的线性变换，是每个特征对应一个 <span class="arithmatex"><span class="MathJax_Preview">\gamma</span><script type="math/tex">\gamma</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">\beta</span><script type="math/tex">\beta</script></span>。在该分析中，由于每条样本有 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 个特征，所以这个的 <span class="arithmatex"><span class="MathJax_Preview">\gamma</span><script type="math/tex">\gamma</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">\beta</span><script type="math/tex">\beta</script></span> 各有 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 个。不同样本的同一个特征共享相同的 <span class="arithmatex"><span class="MathJax_Preview">\gamma</span><script type="math/tex">\gamma</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">\beta</span><script type="math/tex">\beta</script></span>。</p>
+<p>在 PyTorch 的官方文档中给出的公式为下面形式，虽然符号上有些差异，但是本质是相同的：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\hat{x} = \frac{x-E[x]}{\sqrt{Var[x]+\epsilon}} * \gamma + \beta\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\hat{x} = \frac{x-E[x]}{\sqrt{Var[x]+\epsilon}} * \gamma + \beta\end{equation}</script>
+</div>
+<h3 id="13">1.3 图像描述<a class="headerlink" href="#13" title="Permanent link">#</a></h3>
+<p>LN的操作还可以用如下图来表示。其中 "-"、"/"、"<span class="arithmatex"><span class="MathJax_Preview">\times</span><script type="math/tex">\times</script></span>"、"+" 就是常规的减法、除法、乘法、加法。<span class="arithmatex"><span class="MathJax_Preview">Avg</span><script type="math/tex">Avg</script></span> 是均值，<span class="arithmatex"><span class="MathJax_Preview">Std</span><script type="math/tex">Std</script></span> 是标准差。</p>
+<p><img alt="" src="/kiyXO1Yp/assets/layer_normalize.png" /></p>
+<h2 id="2ln">2、LN 为了解决什么问题<a class="headerlink" href="#2ln" title="Permanent link">#</a></h2>
+<ol>
+<li>
+<p>深度模型训练时所需要的计算资源非常大，想要减少训练所需时间的一个方法是：normalize the activities of neurons</p>
+</li>
+<li>
+<p>增加训练过程的稳定性；</p>
+</li>
+</ol>
+<h2 id="3ln">3、LN 出现之前是如何解决上述问题的<a class="headerlink" href="#3ln" title="Permanent link">#</a></h2>
+<p>LN 出现之前通过 BN 解决上述问题；</p>
+<p>BN的优点：</p>
+<ul>
+<li>可以解决 "convariate shift" 问题，缩短了模型训练所需的时间；</li>
+<li>能够使饱和激活函数的输入落在非饱和区，增加了训练的稳定性；</li>
+</ul>
+<p>BN的缺点：</p>
+<ul>
+<li>当 batch size 特别小时，表现不好；</li>
+<li>当每条数据的长度不一致时，比如文本数据，效果不好；</li>
+<li>在 RNN 网络中，表现不好；</li>
+</ul>
+<h2 id="4ln">4、LN 的优势<a class="headerlink" href="#4ln" title="Permanent link">#</a></h2>
+<p>Normalization 的作用：降低了对参数初始化的需求，允许使用更大的学习率，有一定的正则化作用可抗过拟合，使训练更加稳定。</p>
+<p>假设某一层输出的中间结果为 <span class="arithmatex"><span class="MathJax_Preview">[m, T]</span><script type="math/tex">[m, T]</script></span>，<span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 为batch-size，<span class="arithmatex"><span class="MathJax_Preview">T</span><script type="math/tex">T</script></span> 为每条数据的特征数量，那么：</p>
+<ul>
+<li>BN 是对 <span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 这个维度做归一化；</li>
+<li>LN 是对 <span class="arithmatex"><span class="MathJax_Preview">T</span><script type="math/tex">T</script></span> 这个维度做归一化；</li>
+</ul>
+<p>优势（以下都有待考证）：</p>
+<ul>
+<li>在 RNN 网络中，表现较好；</li>
+<li>在 batch size 较小的网络中，表现较好；</li>
+<li>LN 抹杀了不同样本间的大小关系，保留了同一个样本内部的特征之间的大小关系，这对于时间序列任务或NLP任务来说非常重要；</li>
+</ul>
+<h2 id="5ln">5、LN效果测试代码<a class="headerlink" href="#5ln" title="Permanent link">#</a></h2>
+<pre><code class="language-python">import torch
+import torch.nn as nn
+
+# NLP例子，一般在NLP任务中，其维度为[batch_size, seq_len, hidden_dim]，LayerNorm操作仅对最后一个维度做操作
+batch, sentence_length, hidden_dim = 20, 5, 10
+embedding = torch.randn(batch, sentence_length, hidden_dim)
+
+print(&quot;LayerNorm前, 均值: &quot;)
+mean_result = embedding.mean(dim=-1)  # 计算维度 hidden_dim 的均值
+print([f&quot;%.2f&quot; % float(y) for x in mean_result.detach().numpy().tolist() for y in x][:20], &quot;...&quot;)
+print(&quot;LayerNorm前, 方差: &quot;)
+var_result = embedding.var(dim=-1)  # 计算维度 hidden_dim 的方差
+print([f&quot;%.2f&quot; % float(y) for x in var_result.detach().numpy().tolist() for y in x][:20], &quot;...&quot;)
+
+# 该LayerNorm层的input的维度为[*, hidden_dim]，其仅对初始化时给定的hidden_dim这个维度做归一化
+layer_norm = nn.LayerNorm(hidden_dim, elementwise_affine=False)
+embedding = layer_norm(embedding)
+
+print(&quot;LayerNorm后, 均值: &quot;)
+mean_result = embedding.mean(dim=-1)  # 计算维度 hidden_dim 的均值
+print([f&quot;%.2f&quot; % float(y) for x in mean_result.detach().numpy().tolist() for y in x][:20], &quot;...&quot;)
+print(&quot;LayerNorm后, 方差: &quot;)
+var_result = embedding.var(dim=-1)  # 计算维度 hidden_dim 的方差
+print([f&quot;%.2f&quot; % float(y) for x in var_result.detach().numpy().tolist() for y in x][:20], &quot;...&quot;)
+</code></pre>
+<p>输出结果：</p>
+<pre><code>LayerNorm前, 均值: 
+['0.23', '0.23', '0.18', '-0.06', '-0.45', '-0.24', '0.34', '0.23', '-0.47', '-0.44', '0.12', '-0.26', '-0.37', '0.33', '-0.50', '0.11', '0.14', '0.37', '-0.12', '0.31'] ...
+LayerNorm前, 方差: 
+['1.34', '0.51', '1.16', '0.90', '0.17', '0.50', '0.56', '0.61', '0.70', '1.06', '0.85', '1.26', '1.34', '1.45', '1.52', '0.75', '0.63', '1.37', '1.34', '1.51'] ...
+LayerNorm后, 均值: 
+['0.00', '-0.00', '-0.00', '0.00', '0.00', '-0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '-0.00', '0.00', '0.00', '-0.00', '-0.00', '-0.00', '0.00'] ...
+LayerNorm后, 方差: 
+['1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11', '1.11'] ...
+</code></pre>
+<p>可以看出，经过归一化之后，其均值为0，方差为1.11（这里为什么是1.11，而不是1，还没搞清楚）；</p>
+<h2 id="6ln">6、LN实现代码<a class="headerlink" href="#6ln" title="Permanent link">#</a></h2>
+<p>下面是按照自己的理解实现的 LayerNorm 的代码：</p>
+<pre><code class="language-python">import torch
+
+class LayerNorm(torch.nn.Module):
+    &quot;&quot;&quot;
+    该脚本中实现的 LayerNorm 与 pytorch 中的不太一样。pytorch 的 LayerNorm 的输入参数 normalized_shape 可以是
+    整型，也可以是 list，当其为 list 时表示对输入的后 len(normalized_shape) 个维度做归一化。而在该脚本中仅会对最后
+    一个维度做归一化，所以该脚本是一个简化版本。
+    &quot;&quot;&quot;
+
+    def __init__(self, hidden_size, epsilon=None):
+        super().__init__()
+
+        self.epsilon = epsilon if epsilon is not None else 1e-12
+
+        self.gamma = torch.nn.Parameter(torch.nn.ones(hidden_size))
+        self.beta = torch.nn.Parameter(torch.nn.zeros(hidden_size))
+
+    def reset_parameters(self):
+        torch.nn.init.ones_(self.gamma)
+        torch.nn.init.zeros_(self.beta)
+
+    def forward(self, inputs):
+        &quot;&quot;&quot;
+        这里假设输入inputs的维度为: [batch_size, seq_len, hidden_size]，或者是其他高维度的张量，然后直接对
+        最后一个维度进行normalize。
+        &quot;&quot;&quot;
+
+        # ------------------- 各中间变量的维度说明 -------------------
+        # inputs  : [batch_size, seq_len, hidden_size]
+        # avg     : [batch_size, seq_len, 1]
+        # var     : [batch_size, seq_len, 1]
+        # results : [batch_size, seq_len, hidden_size]
+        # results_affine : [batch_size, seq_len, hidden_size]
+        # --------------------------------------------------------
+
+        avg = torch.mean(inputs, dim=-1, keepdim=True)
+        var = torch.var(inputs, dim=-1, keepdim=True)
+        results = (inputs - avg) / torch.sqrt(var + self.epsilon)  # 这里对 avg 和 var 的最后一个维度会进行广播
+        results_affine = self.gamma * results + self.beta
+        return results_affine
+</code></pre>
+<h2 id="7conditionalln">7、ConditionalLN实现代码<a class="headerlink" href="#7conditionalln" title="Permanent link">#</a></h2>
+<p>另外 conditional layer norm 的实现代码也放在这里，原理见：</p>
+<p><a href="https://kexue.fm/archives/7124">https://kexue.fm/archives/7124</a></p>
+<pre><code class="language-python">import torch
+
+class ConditionalLayerNorm(torch.nn.Module):
+
+    def __init__(self, hidden_size, conditional_hidden_size=None, epsilon=None):
+        super().__init__(self)
+
+        self.hidden_size = hidden_size
+        self.conditional_hidden_size = conditional_hidden_size
+        self.epsilon = epsilon if epsilon is not None else 1e-12
+
+        self.gamma = torch.nn.Parameter(torch.ones(hidden_size))
+        self.beta = torch.nn.Parameter(torch.zeros(hidden_size))
+
+        if self.conditional_hidden_size is not None:
+            self.linear_gamma = torch.nn.Linear(conditional_hidden_size, hidden_size)
+            self.linear_beta = torch.nn.Linear(conditional_hidden_size, hidden_size)
+
+    def reset_parameter(self):
+        torch.nn.init.ones_(self.gamma)
+        torch.nn.init.zeors_(self.beta)
+
+    def forward(self, inputs, condition=None):
+        avg = torch.mean(inputs, dim=-1, keepdim=True)
+        var = torch.var(inputs, dim=-1, keepdim=True)
+        results = (inputs - avg) / torch.sqrt(var + self.epsilon)
+
+        if self.conditional_hidden_size is not None and condition is not None:
+            condition_gamma = self.linear_gamma(condition)
+            condition_beta = self.linear_beta(condition)
+            self.gamma = self.gamma + condition_gamma
+            self.beta = self.beta + condition_beta
+
+        results = self.gamma * results + self.beta
+        return results
+</code></pre>
+<h2 id="8-conditionalln">8、从 ConditionalLN 出发几种融合信息的方式<a class="headerlink" href="#8-conditionalln" title="Permanent link">#</a></h2>
+<p>融合到embedding层，这种是离散的，比如词信息、知识图谱信息等；</p>
+<p>融合到信息传递时某个中间层，这种是连续的；</p>
+<p>上述两种都是将新的信息融合到在模型中传递的信息流中，还有一种更特殊的是：将信息融合到模型权重中，比如 ConditionalLN。</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

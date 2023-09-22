@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/004_GPT%E4%B8%8EBERT/002_%E5%87%A0%E7%A7%8Dmask%E7%AD%96%E7%95%A5/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/ArgJBScZ_no_toc/">隐藏左侧目录栏</a>][<a href="/ArgJBScZ/">显示左侧目录栏</a>]</p>
+
+<h1 id="mask">几种mask策略<a class="headerlink" href="#mask" title="Permanent link">#</a></h1>
+<h2 id="1">1、模型结构<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>不同的模型结构对应着不同的 mask 策略，目前主流的模型结构有：</p>
+<ul>
+<li>以 BERT 为代表的纯 Encoder 结构；</li>
+<li>以 T5 为代表的 Encoder-Decoder 结构；</li>
+<li>以 GPT 为代表的纯 Decoder 结构；</li>
+<li>带有 prefix 的 Decoder 结构，比如 GLM；</li>
+</ul>
+<p>下图出自模型 T5 的原始论文，不过该图中没有纯 Encoder 结构，纯 Encoder 结构就是下图中最左侧图中的绿色部分。</p>
+<table>
+<thead>
+<tr>
+<th>图1: 左边为 Encoder-Decoder结构，中间为纯 Decoder 结构，右边为带有 prefix 的 Decoder 结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><div align=center><img src="/ArgJBScZ/assets/01.png" width=100% /></div></td>
+</tr>
+</tbody>
+</table>
+<h2 id="2mask">2、Mask策略<a class="headerlink" href="#2mask" title="Permanent link">#</a></h2>
+<p>目前主流的 mask 策略有三种，如图2所示，图中黑色表示能够看到这里的信息，白色表示无法看到这部分信息：</p>
+<ul>
+<li>图2左侧的mask策略：每个时刻t都可以看到它前面和后面所有位置的信息，使用该种 mask 策略的模型有"纯 Encoder 结构"，"Encoder-Decoder 结构"中的 Encoder 部分；</li>
+<li>图2中间的mask策略：每个时刻t只能够看到它前面位置的信息，使用该种 mask 策略的模型有"纯 Decoder 结构"，"Encoder-Decoder 结构"中的 Decoder 部分；</li>
+<li>图2右侧的mask策略：整个序列中，前i个时刻内，每个时刻都可以看到它前面和后面的信息；而i个时刻以后的部分，每个时刻只能够看到它前面位置的信息，前面的i个位置也就是prefix。使用该种 mask 策略的模型是"带有 prefix 的 Decoder 结构"；</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>图2: 三种mask策略</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><div align=center><img src="/ArgJBScZ/assets/02.png" width=100% /></div></td>
+</tr>
+</tbody>
+</table>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://arxiv.org/pdf/1910.10683.pdf">https://arxiv.org/pdf/1910.10683.pdf</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/88438851">https://zhuanlan.zhihu.com/p/88438851</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/002_%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83/010_WizardLM/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/LO8uep9D_no_toc/">隐藏左侧目录栏</a>][<a href="/LO8uep9D/">显示左侧目录栏</a>]</p>
+
+<h1 id="wizardlm-evol-instruct">WizardLM: Evol-Instruct<a class="headerlink" href="#wizardlm-evol-instruct" title="Permanent link">#</a></h1>
+<blockquote>
+<p>原文链接: <a href="https://arxiv.org/pdf/2304.12244.pdf">https://arxiv.org/pdf/2304.12244.pdf</a></p>
+<p>github链接: <a href="https://github.com/nlpxucan/WizardLM">https://github.com/nlpxucan/WizardLM</a></p>
+</blockquote>
+<p>本文的指令进化分为深度进化和广度进化。深度进化有以下五种：add constraints, deepening, concretizing, increase reasoning steps, complicate input。广度进化为：mutation，比如：基于给定的指令生成全新的指令。广度进化的目的是解决指令数据集中主题缺乏多样性的问题，增加数据集的丰富度。</p>
+<p>指令的进化是调用 LLM 来进行的，所以新生成的指令有可能是有问题的，所以对于生成的指令还会进行一个进化消除（Elimination Evolving）的操作，目的是去掉那些新生成的有问题的指令。</p>
+<p>初始启动时使用的是 Alpaca 的初始数据，即 175 条人工编写的数据，使用 Evol-Instruct 方法获得 250k 指令，采样出 70k 的指令进行训练，训练的模型称为 WizardLM。对比的模型是 Alpaca、Vicuna、ChatGPT。评估时使用的数据集是人工构造的一份新的数据集，该数据集中简单和困难的指令都有，名字为 Evol-Instruct 测试集。</p>
+<h2 id="1">1、指令进化的具体操作<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>分为以下三个步骤：</p>
+<ul>
+<li>指令进化</li>
+<li>生成response</li>
+<li>进化消除</li>
+</ul>
+<h3 id="11">1.1 指令进化<a class="headerlink" href="#11" title="Permanent link">#</a></h3>
+<p>指令进化时的一些原则：</p>
+<ul>
+<li>进化后的指令必须是合理的、人能够理解、并且人能够对该指令写出response。</li>
+<li>指令的难度应该逐步增加，保证整个指令池中简单、中等、困难的指令数量是相对均衡的。</li>
+<li>对于深度进化，为了限制难度的增加，限制每次进化指令最多增加10到20个单词。</li>
+<li>对于广度进化，会要求其生成的指令的难度与原始指令是基本相同的。</li>
+</ul>
+<p>各个深度进化和广度进化使用的具体指令在本文的最后面，或者直接去 <a href="https://arxiv.org/pdf/2304.12244.pdf">论文原文</a> 中查找也可以。</p>
+<h3 id="12-response">1.2 生成response<a class="headerlink" href="#12-response" title="Permanent link">#</a></h3>
+<p>这个操作就非常常规了，略。</p>
+<h3 id="13">1.3 进化消除<a class="headerlink" href="#13" title="Permanent link">#</a></h3>
+<p>按照以下四种方式进行进化消除：</p>
+<ul>
+<li>使用 ChatGPT 判断新生成的指令与原指令相比是否有新的信息，调用 ChatGPT 的指令如下：</li>
+</ul>
+<pre><code class="language-text">Here are two Instructions to ChatGPT AI, do you think they are equal to each other, which meet the following requirements:
+1. They have same constraints and requirments.
+2. They have same depth and breadth of the inquiry.
+The First Prompt: &lt;Here is first instruction.&gt;
+The Second Prompt: &lt;Here is second instruction.&gt;
+Your Judgement (Just answer: Equal or Not Equal. No need to explain the reason.):
+</code></pre>
+<ul>
+<li>
+<p>对进化后的指令使用 LLM 很难生成 response，比如生成的 response 中包含 "抱歉" 或者生成的 response 长度较短（少于80个词），对这种指令做进化消除。</p>
+</li>
+<li>
+<p>新生成的指令中仅包含标点符号、停用词等内容时，对这种指令做进化消除。</p>
+</li>
+<li>
+<p>新生成的指令中明显包含了进化指令中的内容时，比如包含 "given prompt"、"rewritten prompt"、"#Rewritten Prompt#" 等，对这种指令做进化消除。</p>
+</li>
+</ul>
+<h3 id="14">1.4 多轮迭代进化的说明<a class="headerlink" href="#14" title="Permanent link">#</a></h3>
+<p>在多轮迭代时，每一轮都有一个独立的指令池，在迭代时仅使用上一轮迭代的指令池中的指令，不会再使用更前轮次的指令。下面使用符号对这部分进行说明。</p>
+<p>初始人工构建的种子指令池使用符号 <span class="arithmatex"><span class="MathJax_Preview">D^{(0)}</span><script type="math/tex">D^{(0)}</script></span> 表示，第一轮时从 <span class="arithmatex"><span class="MathJax_Preview">D^{(0)}</span><script type="math/tex">D^{(0)}</script></span> 随机选择指令生成新的指令，新生成的指令放到 <span class="arithmatex"><span class="MathJax_Preview">D^{(1)}</span><script type="math/tex">D^{(1)}</script></span>。在第二轮时则从 <span class="arithmatex"><span class="MathJax_Preview">D^{(1)}</span><script type="math/tex">D^{(1)}</script></span> 中随机选择指令，用于生成新的指令，在该轮中不会再从 <span class="arithmatex"><span class="MathJax_Preview">D^{(0)}</span><script type="math/tex">D^{(0)}</script></span> 中选取指令了，新生成的指令放到 <span class="arithmatex"><span class="MathJax_Preview">D^{(2)}</span><script type="math/tex">D^{(2)}</script></span> 中。如此循环重复。</p>
+<p>在最终训练时直接把所有的 <span class="arithmatex"><span class="MathJax_Preview">D^{(0)}</span><script type="math/tex">D^{(0)}</script></span>、<span class="arithmatex"><span class="MathJax_Preview">D^{(1)}</span><script type="math/tex">D^{(1)}</script></span>、...、<span class="arithmatex"><span class="MathJax_Preview">D^{(N)}</span><script type="math/tex">D^{(N)}</script></span> 都混合到一起进行训练。</p>
+<p>之所以采用上述做法的目的是：每个指令池对应一个难度，只要每个指令池中的指令数量基本相同，那么上述这种做法就能够最大程度的保证不同难度的指令的均匀分布。</p>
+<h2 id="2">2、实验结果<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<h3 id="21">2.1 评估数据集分析<a class="headerlink" href="#21" title="Permanent link">#</a></h3>
+<p>下图左侧是 Evol-Instruct 测试集中各个 topic 对应的数据量，总共29个 topic。下图右侧是 Alpaca 的测试集、Vicuna 的测试集、以及本文的 Evol-Instruct 测试集中，各种不同难度的数据的数量。本文的 Evol-Instruct 测试集中包含了更多的 topic，更具多样性。同时相对来说较难的指令占比更多。</p>
+<div align=center><img src="/LO8uep9D/assets/11.png" width=100% /></div>
+
+<h3 id="22">2.2 人工评估<a class="headerlink" href="#22" title="Permanent link">#</a></h3>
+<p>总共10个标注人员，每个指令每人看到四个分别来自于 Alpaca、Vicuna-7b、WizardLM、ChatGPT 输出结果，顺序是打乱的，然后人工进行标注。评估结果如下图所示，绿色表示本文的模型效果更好，黄色表示本文的模型更差，紫色表示两个模型效果持平。可以得到如下一些结论：</p>
+<ul>
+<li>
+<p>相比于 Alpaca、Vicuna-7b，在下述三个测试集上都是 WizardLM 更好一些，尤其是在复杂测试集上，好的更多一些；</p>
+</li>
+<li>
+<p>在复杂测试集上 WizardLM 比 ChatGPT 还要好一些；（这个结论当使用 GPT4 作评估时是相反的）</p>
+</li>
+</ul>
+<div align=center><img src="/LO8uep9D/assets/10.png" width=100% /></div>
+
+<h3 id="23-gpt4">2.3 GPT4评估<a class="headerlink" href="#23-gpt4" title="Permanent link">#</a></h3>
+<p>下图是GPT4评估的结果，其中绿色是 Alpaca 模型、紫色是 Vicuna 模型、红色是本文的 WizardLM 模型、蓝色是 ChatGPT 模型。</p>
+<ul>
+<li>
+<p>可以看出在 Evol-Instruct 测试集上本文的模型 WizardLM 是最优的；在 Vicuna 的测试集上，本文的 WizardLM 则比 Vicuna 模型略逊一些；</p>
+</li>
+<li>
+<p>在 Evol-Instruct 测试集不同难度的样本上模型效果为图(c)，可以看到在困难样本上本文的 WizardLM 模型要比 ChatGPT 模型效果差一些（这个结果和上面的人工评估结果是相反的）。人工标注结果和 GPT4 的标注结果出现了不一致。</p>
+</li>
+</ul>
+<div align=center><img src="/LO8uep9D/assets/12.png" width=100% /></div>
+
+<p>下图是使用GPT4对本文的 WizardLM 模型与 ChatGPT 模型在各个 topic 上的效果对比。可以看出在 22 个 topic 上本文的 WizardLM 模型能够达到 ChatGPT 的 78% 的效果。</p>
+<div align=center><img src="/LO8uep9D/assets/13.png" width=100% /></div>
+
+<h2 id="3">3、进化指令详情<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<p>5个深度进化的指令和1个广度进化的指令。</p>
+<h3 id="add-constraints-prompt">Add Constraints Prompt<a class="headerlink" href="#add-constraints-prompt" title="Permanent link">#</a></h3>
+<div align=center><img src="/LO8uep9D/assets/01.png" width=90% /></div>
+
+<h3 id="deepening-prompt">Deepening Prompt<a class="headerlink" href="#deepening-prompt" title="Permanent link">#</a></h3>
+<div align=center><img src="/LO8uep9D/assets/02.png" width=90% /></div>
+
+<h3 id="concretizing-prompt">Concretizing Prompt<a class="headerlink" href="#concretizing-prompt" title="Permanent link">#</a></h3>
+<div align=center><img src="/LO8uep9D/assets/03.png" width=90% /></div>
+
+<h3 id="increased-reasoning-steps-prompt">Increased Reasoning Steps Prompt<a class="headerlink" href="#increased-reasoning-steps-prompt" title="Permanent link">#</a></h3>
+<div align=center><img src="/LO8uep9D/assets/04.png" width=90% /></div>
+
+<h3 id="complicate-input-prompt">Complicate Input Prompt<a class="headerlink" href="#complicate-input-prompt" title="Permanent link">#</a></h3>
+<p>由于需要放样例，所以该指令比较长，如下述截图：</p>
+<table align=center style="width:90%">
+    <tbody>
+        <tr>
+            <td align="center"><img src="/LO8uep9D/assets/05.png" width=100%/></td>
+        </tr>
+        <tr>
+            <td align="center"><img src="/LO8uep9D/assets/06.png" width=100%/></td>
+        </tr>
+        <tr>
+            <td align="center"><img src="/LO8uep9D/assets/07.png" width=100%/></td>
+        </tr>
+        <tr>
+            <td align="center"><img src="/LO8uep9D/assets/08.png" width=100%/></td>
+        </tr>
+    </tbody>
+</table>
+
+<h3 id="breadth-evolving">Breadth Evolving<a class="headerlink" href="#breadth-evolving" title="Permanent link">#</a></h3>
+<div align=center><img src="/LO8uep9D/assets/09.png" width=90% /></div></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
