@@ -133,7 +133,42 @@
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python">import math
+from typing import Optional
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Solution:
+
+    def recursive(self, node, edges, result):
+        # 当前节点入栈
+        edges.append(node.val)
+
+        # 边界条件：当前节点为叶子节点
+        if node.left is None and node.right is None:
+            my_sum = 0
+            for idx, n in enumerate(edges):
+                my_sum += (n * int(math.pow(10, len(edges) - idx - 1)))
+            result.append(my_sum)
+        else:
+            if node.left is not None:
+                self.recursive(node.left, edges, result)
+            if node.right is not None:
+                self.recursive(node.right, edges, result)
+
+        # 当前节点出栈
+        edges.pop()
+
+    def sumNumbers(self, root: Optional[TreeNode]) -&gt; int:
+        edges = []
+        result = []  # 保存的是每条边对应的数字
+        self.recursive(root, edges, result)
+        return sum(result)
 </code></pre></div>
             </div>
         </div>

@@ -88,8 +88,45 @@
 <li>-1000 &lt;= Node.val &lt;= 1000</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>这个题目和二叉树的最大深度思路是相同的，也是使用后序遍历，这样在处理根节点时，左右子树的最小深度都是已知的了，取其中的较小值然后加1就是当前节点的最小深度。</p>
+<p>和二叉树的最大深度那个题目类似，需要注意不要使用下述这种处理边界条件的方式：</p>
+<pre><code class="language-python">def recursive(node):
+    if node is None:
+        return 0
+    ...
+</code></pre>
+<p>在该题目中，叶子节点才是边界条件，叶子节点的深度为1。如果采用上述代码作为边界条件，那么如果某一个节点没有左孩子，只有右孩子，那么按照上述代码就会出现：当前节点的右孩子深度为真实值，而当前节点的左孩子深度为0。这里的 "左孩子深度为0" 是错误的。</p>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python">from typing import Optional
+
+# Definition for a binary tree node.
+class TreeNode:
+
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Solution:
+
+    def minDepth(self, root: Optional[TreeNode]) -&gt; int:
+        # 边界条件
+        if root is None:
+            return 0
+
+        # 对于叶子节点，其深度为1
+        if root is not None and root.left is None and root.right is None:
+            return 1
+
+        if root.left is not None and root.right is not None:
+            left_deep = self.minDepth(root.left)        
+            right_deep = self.minDepth(root.right)
+            deep = left_deep if left_deep &lt; right_deep else right_deep
+            return deep + 1
+        elif root.left is not None:
+            return self.minDepth(root.left) + 1
+        else:
+            return self.minDepth(root.right) + 1
 </code></pre></div>
             </div>
         </div>

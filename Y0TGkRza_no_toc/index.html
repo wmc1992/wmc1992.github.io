@@ -91,6 +91,9 @@
 <li>-100 &lt;= Node.val &lt;= 100</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>递归遍历的思路比较简单，没什么好说的。</p>
+<p>非递归遍历时使用的数据结构是栈（前中后序遍历使用的数据结构都是栈，只是遍历时的处理方式不同），中序遍历的顺序是左中右，所以要先处理所有的左孩子，再处理根节点。提现在代码中就是：在每次大循环中，先使用一个小循环把所有的左孩子都入栈，然后再处理当前节点。</p>
+<p>注意：另外，在这个代码中，node 这个变量的使用方式和之前的常规思路不太一致，所以这个代码最好直接背下来。</p>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
 <pre><code class="language-python">from typing import Optional, List
 

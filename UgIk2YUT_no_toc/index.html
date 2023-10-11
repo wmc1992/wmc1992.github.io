@@ -92,7 +92,43 @@
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python">from typing import Optional, List
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Solution:
+
+    def buildTree(self, preorder: List[int], inorder: List[int]) -&gt; Optional[TreeNode]:
+        if len(preorder) &lt;= 0 or len(inorder) &lt;= 0:
+            return None
+
+        root_val = preorder[0]
+
+        def get_root_idx(root_val, inorder):
+            for idx in range(len(inorder)):
+                if inorder[idx] == root_val:
+                    return idx
+            # 题意中保证了一定能够找到相应的item，所以不应该走到这里
+            raise RuntimeError(&quot;...&quot;)
+
+        root_idx_inorder = get_root_idx(root_val, inorder)
+        left_len, right_len = root_idx_inorder, len(inorder) - root_idx_inorder - 1
+
+        left_preorder = preorder[1:1+left_len]
+        right_preorder = preorder[1+left_len:]
+        left_inorder = inorder[:left_len]
+        right_inorder = inorder[left_len+1:]
+
+        left_child = self.buildTree(left_preorder, left_inorder)
+        right_child = self.buildTree(right_preorder, right_inorder)
+
+        node = TreeNode(val=root_val, left=left_child, right=right_child)
+        return node
 </code></pre></div>
             </div>
         </div>

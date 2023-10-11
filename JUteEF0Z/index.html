@@ -117,8 +117,29 @@
 <li>-100 &lt;= Node.val &lt;= 100</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>递归方式实现，采用后续遍历即可，处理当前节点时，左孩子和右孩子的最大深度都已经知道了，获取其中较大的深度再加1即可。</p>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<pre><code class="language-python">
+<pre><code class="language-python">from typing import Optional
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Solution:
+
+    # 递归遍历
+    def maxDepth(self, root: Optional[TreeNode]) -&gt; int:
+        if root is None:
+            return 0
+        left_deep = self.maxDepth(root.left)
+        right_deep = self.maxDepth(root.right)
+
+        deep = left_deep if left_deep &gt; right_deep else right_deep
+        deep = deep + 1
+        return deep
 </code></pre></div>
             </div>
         </div>

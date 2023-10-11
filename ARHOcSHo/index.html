@@ -135,6 +135,8 @@
 <li>-100 &lt;= Node.val &lt;= 100</li>
 </ul>
 <h2 id="2">2、思路说明<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>递归方法比较简单，略过。</p>
+<p>非递归方法使用的数据结构是栈，由于前序遍历的顺序是根左右，这个直接符合获取树中各个节点的顺序，所以每次就是先处理当前节点，然后分别将左孩子和右孩子入栈就可以了。</p>
 <h2 id="3">3、代码<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
 <pre><code class="language-python">from typing import Optional, List
 
