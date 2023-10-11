@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/009_AISystem/03_Megatron_LM/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#megatron-lm" class="nav-link">Megatron-LM</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#mlp" class="nav-link">MLP 部分</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#mha" class="nav-link">MHA 部分</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/lPmTuSMz_no_toc/">隐藏左侧目录栏</a>][<a href="/lPmTuSMz/">显示左侧目录栏</a>]</p>
+
+<h1 id="megatron-lm">Megatron-LM<a class="headerlink" href="#megatron-lm" title="Permanent link">#</a></h1>
+<p>Megatron 这片论文中提出的张量并行（也称模型并行），主要是针对 transformer 这种模型结构所设计的。所以其会对 MLP 层和 MHA 层有不同的设计，分别描述如下。</p>
+<h2 id="mlp">MLP 部分<a class="headerlink" href="#mlp" title="Permanent link">#</a></h2>
+<p>原始公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+Y &amp;= \text{GeLU}(X \cdot A) \\
+Z &amp;= \text{Dropout}(Y \cdot B)
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+Y &= \text{GeLU}(X \cdot A) \\
+Z &= \text{Dropout}(Y \cdot B)
+\end{split}\end{equation}</script>
+</div>
+<p>Tensor Parallel 的拆分过程如下图所示，将矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 拆分为 <span class="arithmatex"><span class="MathJax_Preview">[A1, A2]</span><script type="math/tex">[A1, A2]</script></span>，将矩阵 <span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span> 拆分为 <span class="arithmatex"><span class="MathJax_Preview">\begin{bmatrix}B1 \\ B2\end{bmatrix}</span><script type="math/tex">\begin{bmatrix}B1 \\ B2\end{bmatrix}</script></span>：</p>
+<div align=center><img src="/lPmTuSMz/assets/03.png" width=70% /></div>
+
+<p>公式 <span class="arithmatex"><span class="MathJax_Preview">Y = \text{GeLU}(X \cdot A)</span><script type="math/tex">Y = \text{GeLU}(X \cdot A)</script></span> 拆分之后矩阵的形状如下图所示（得到 <span class="arithmatex"><span class="MathJax_Preview">Y1</span><script type="math/tex">Y1</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">Y2</span><script type="math/tex">Y2</script></span> 之后，将这两个矩阵 <strong>concat</strong> 在一起就可以得到矩阵 <span class="arithmatex"><span class="MathJax_Preview">Y</span><script type="math/tex">Y</script></span>，当然实际上不会有这个 concat 操作，因为不需要得到完整的矩阵 <span class="arithmatex"><span class="MathJax_Preview">Y</span><script type="math/tex">Y</script></span>）：</p>
+<table align=center style="width:40%">
+    <thead>
+        <tr>
+            <th>图1</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align="center"><img src="/lPmTuSMz/assets/01.png" width=100%/></td>
+        </tr>
+    </tbody>
+</table>
+
+<p>公式 <span class="arithmatex"><span class="MathJax_Preview">Z = \text{Dropout}(Y \cdot B)</span><script type="math/tex">Z = \text{Dropout}(Y \cdot B)</script></span> 拆分之后矩阵的形状如下图所示，得到 <span class="arithmatex"><span class="MathJax_Preview">Z1</span><script type="math/tex">Z1</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">Z2</span><script type="math/tex">Z2</script></span> 之后，将这两个矩阵 <strong>逐个元素相加</strong> 之后得到矩阵 <span class="arithmatex"><span class="MathJax_Preview">Z</span><script type="math/tex">Z</script></span>（矩阵 <span class="arithmatex"><span class="MathJax_Preview">Z</span><script type="math/tex">Z</script></span>、<span class="arithmatex"><span class="MathJax_Preview">Z1</span><script type="math/tex">Z1</script></span>、<span class="arithmatex"><span class="MathJax_Preview">Z2</span><script type="math/tex">Z2</script></span> 的维度都是相同的）：</p>
+<table align=center style="width:40%">
+    <thead>
+        <tr>
+            <th>图2</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align="center"><img src="/lPmTuSMz/assets/02.png" width=100%/></td>
+        </tr>
+    </tbody>
+</table>
+
+<h2 id="mha">MHA 部分<a class="headerlink" href="#mha" title="Permanent link">#</a></h2>
+<p>原始公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+Y &amp;= \text{Self-Attention}(X) \\
+Z &amp;= \text{Dropout}(Y \cdot B)
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+Y &= \text{Self-Attention}(X) \\
+Z &= \text{Dropout}(Y \cdot B)
+\end{split}\end{equation}</script>
+</div>
+<div align=center><img src="/lPmTuSMz/assets/04.png" width=70% /></div>
+
+<p>上图中的右侧部分也就是图2，如果有多个头时也是基本相同的，比如有四个头时拆分后矩阵的形状如下图所示。将矩阵 <span class="arithmatex"><span class="MathJax_Preview">Z1</span><script type="math/tex">Z1</script></span>、<span class="arithmatex"><span class="MathJax_Preview">Z2</span><script type="math/tex">Z2</script></span>、<span class="arithmatex"><span class="MathJax_Preview">Z3</span><script type="math/tex">Z3</script></span>、<span class="arithmatex"><span class="MathJax_Preview">Z4</span><script type="math/tex">Z4</script></span> 逐个元素相加起来就得到矩阵 <span class="arithmatex"><span class="MathJax_Preview">Z</span><script type="math/tex">Z</script></span>。</p>
+<table align=center style="width:40%">
+    <thead>
+        <tr>
+            <th>图3</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align="center"><img src="/lPmTuSMz/assets/05.png" width=100%/></td>
+        </tr>
+    </tbody>
+</table>
+
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://arxiv.org/abs/1909.08053">https://arxiv.org/abs/1909.08053</a></p>
+</li>
+<li>
+<p><a href="https://www.youtube.com/watch?v=mk8FuiDmf0I">https://www.youtube.com/watch?v=mk8FuiDmf0I</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

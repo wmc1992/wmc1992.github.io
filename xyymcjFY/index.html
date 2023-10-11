@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/009_AISystem/01_ParameterServer/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#parameterserver" class="nav-link">ParameterServer</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1dp" class="nav-link">1、DP</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2ddp" class="nav-link">2、DDP</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#21-ring-allreduce" class="nav-link">2.1 Ring AllReduce方法</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/xyymcjFY_no_toc/">隐藏左侧目录栏</a>][<a href="/xyymcjFY/">显示左侧目录栏</a>]</p>
+
+<h1 id="parameterserver">ParameterServer<a class="headerlink" href="#parameterserver" title="Permanent link">#</a></h1>
+<h2 id="1dp">1、DP<a class="headerlink" href="#1dp" title="Permanent link">#</a></h2>
+<h2 id="2ddp">2、DDP<a class="headerlink" href="#2ddp" title="Permanent link">#</a></h2>
+<h3 id="21-ring-allreduce">2.1 Ring AllReduce方法<a class="headerlink" href="#21-ring-allreduce" title="Permanent link">#</a></h3>
+<p>以三个GPU为例。如下图中的左图为例，将每个 GPU 上存储的梯度划分为三等份，也就是 a0、a1、a2、b0、b1、b2、c0、c1、c2 都是模型总梯度大小的 <span class="arithmatex"><span class="MathJax_Preview">1/3</span><script type="math/tex">1/3</script></span>。最终的目的是每个 GPU 上都有所有梯度之和，也就是如下图中的右图所示。</p>
+<div align=center><img src="/xyymcjFY/assets/01.png" width=100% /></div>
+
+<p>传输过程如下图所示。可以看出，这三等份中每一份的传输过程都是完全相同的，所以只分析其中的一份即可。在 Reduce 过程中，共传输了 2 次（也就是 3-1）；在 AllGather 过程中，也传输了 2 次（也就是 3-1）；每次传输的内容的大小为模型总梯度的 <span class="arithmatex"><span class="MathJax_Preview">1/3</span><script type="math/tex">1/3</script></span>。</p>
+<div align=center><img src="/xyymcjFY/assets/02.png" width=100% /></div>
+
+<p><strong>传输次数和传输量的分析</strong>：</p>
+<p>我们记模型的参数量为 <span class="arithmatex"><span class="MathJax_Preview">\Psi</span><script type="math/tex">\Psi</script></span>，那么梯度的参数量也为 <span class="arithmatex"><span class="MathJax_Preview">\Psi</span><script type="math/tex">\Psi</script></span>，记显卡的数量为 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span>。那么 Reduce 过程会传输 <span class="arithmatex"><span class="MathJax_Preview">N-1</span><script type="math/tex">N-1</script></span> 次，AllGather 过程会传输 <span class="arithmatex"><span class="MathJax_Preview">N-1</span><script type="math/tex">N-1</script></span> 次，每次传输的内容大小为 <span class="arithmatex"><span class="MathJax_Preview">\Psi/N</span><script type="math/tex">\Psi/N</script></span>。总共需传输 <span class="arithmatex"><span class="MathJax_Preview">2(N-1)</span><script type="math/tex">2(N-1)</script></span> 次，总共需传输的参数量大小为 <span class="arithmatex"><span class="MathJax_Preview">\Psi/N * 2(N-1)=2(\Psi - \Psi/N)</span><script type="math/tex">\Psi/N * 2(N-1)=2(\Psi - \Psi/N)</script></span>。</p>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://www.usenix.org/system/files/conference/osdi14/osdi14-paper-li_mu.pdf">https://www.usenix.org/system/files/conference/osdi14/osdi14-paper-li_mu.pdf</a></p>
+</li>
+<li>
+<p><a href="https://www.zhihu.com/question/57799212/answer/292494636">ring allreduce和tree allreduce的具体区别是什么？</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
