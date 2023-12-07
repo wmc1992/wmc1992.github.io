@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/009_AISystem/02_%E9%9D%99%E6%80%81%E6%98%BE%E5%AD%98%E5%88%86%E6%9E%90/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link">静态显存分析</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1-fp32" class="nav-link">1、理论分析-单精度(fp32)训练</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2-" class="nav-link">2、理论分析-混合精度</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、实例分析</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#31-bert-base" class="nav-link">3.1 bert-base</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#32-llama-65b" class="nav-link">3.2 LLAMA-65B</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_2" class="nav-link">总结</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/ss8GDrmf_no_toc/">隐藏左侧目录栏</a>][<a href="/ss8GDrmf/">显示左侧目录栏</a>]</p>
+
+<h1 id="_1">静态显存分析<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<p>首先要明确训练时使用的显存由哪几部分构成，这里把训练时使用的显存分为如下几部分：</p>
+<ol>
+<li>
+<p>在训练时显卡中的第一份显存肯定要先分配给初始化环境的框架，比如 Pytorch，这部分显存的大小与显卡的型号、Pytorch 的版本号都有关系，想要确定的话直接测试一下即可。</p>
+</li>
+<li>
+<p>模型参数消耗的显存，梯度消耗的显存，优化器消耗的显存；</p>
+</li>
+<li>
+<p>中间激活状态消耗的显存；</p>
+</li>
+<li>
+<p>临时缓冲区占用的显存，以及其他零散的显存；</p>
+</li>
+</ol>
+<p>在上诉四部分显存中，第一部分显存可以直接进行测试。第二部分的显存是本文的分析重点。第三部分的显存在下一篇文章<a href="/4KTgtnFc/">中间激活值显存分析</a>中进行分析。第四部分显存无法直接分析，同时它相比于前面部分所占用的显存要小很多。</p>
+<p>本文主要分析模型参数占用的显存大小，梯度占用的显存大小，以及优化器占用的显存大小。</p>
+<h2 id="1-fp32">1、理论分析-单精度(fp32)训练<a class="headerlink" href="#1-fp32" title="Permanent link">#</a></h2>
+<p>假设模型的参数量为 <span class="arithmatex"><span class="MathJax_Preview">\Phi</span><script type="math/tex">\Phi</script></span>。</p>
+<p><strong>模型的参数消耗的显存</strong>：所有的模型参数需要存储到显存中，使用 fp32 存储，则需要消耗的显存为 <span class="arithmatex"><span class="MathJax_Preview">4\Phi</span><script type="math/tex">4\Phi</script></span>；</p>
+<p><strong>梯度消耗的显存</strong>：梯度和模型参数的量是完全相同的，使用 fp32 存储，则需要消耗的显存为 <span class="arithmatex"><span class="MathJax_Preview">4\Phi</span><script type="math/tex">4\Phi</script></span>；</p>
+<p><strong>优化器消耗的显存</strong>：以 Adam 为例，这里还是使用单精度（fp32）进行训练。使用单精度（fp32）进行训练，Adam 中会存储 averaged momentum 和 variance 两部分，都和模型的参数量是相同的，即 <span class="arithmatex"><span class="MathJax_Preview">\Phi</span><script type="math/tex">\Phi</script></span>。所以优化器消耗的显存为 <span class="arithmatex"><span class="MathJax_Preview">2 * 4\Phi</span><script type="math/tex">2 * 4\Phi</script></span>。</p>
+<p>这样，模型的参数消耗的显存、梯度消耗的显存、优化器消耗的显存分别为：<span class="arithmatex"><span class="MathJax_Preview">4\Phi</span><script type="math/tex">4\Phi</script></span>、<span class="arithmatex"><span class="MathJax_Preview">4\Phi</span><script type="math/tex">4\Phi</script></span>、<span class="arithmatex"><span class="MathJax_Preview">4\Phi * 2</span><script type="math/tex">4\Phi * 2</script></span>，总计为 <span class="arithmatex"><span class="MathJax_Preview">16\Phi</span><script type="math/tex">16\Phi</script></span>。以 1.5B 的 GPT-2 为例，总大小为 1.5B * (4 + 4 + 4 * 2) = 24G</p>
+<h2 id="2-">2、理论分析-混合精度<a class="headerlink" href="#2-" title="Permanent link">#</a></h2>
+<p>假设模型的参数量为 <span class="arithmatex"><span class="MathJax_Preview">\Phi</span><script type="math/tex">\Phi</script></span>。</p>
+<p><strong>模型的参数消耗的显存</strong>：所有的模型参数需要存储到显存中，使用 fp16 存储，则需要的显存为 <span class="arithmatex"><span class="MathJax_Preview">2\Phi</span><script type="math/tex">2\Phi</script></span>；</p>
+<p><strong>梯度消耗的显存</strong>：梯度和模型参数的量是完全相同的，使用 fp16 存储，则需要的显存为 <span class="arithmatex"><span class="MathJax_Preview">2\Phi</span><script type="math/tex">2\Phi</script></span>；</p>
+<p><strong>优化器消耗的显存</strong>：以 Adam 为例，使用混合精度进行训练。使用混合精度进行训练，模型参数和梯度都是使用 fp16 存储，Adam 中会使用 fp32 存储一份模型参数的备份，并且使用 fp32 存储 averaged momentum 和 variance 两部分。所以优化器需要消耗的显存为 <span class="arithmatex"><span class="MathJax_Preview">3 * 4\Phi</span><script type="math/tex">3 * 4\Phi</script></span>。</p>
+<p>这样，模型的参数消耗的显存、梯度消耗的显存、优化器消耗的显存分别为：<span class="arithmatex"><span class="MathJax_Preview">2\Phi</span><script type="math/tex">2\Phi</script></span>、<span class="arithmatex"><span class="MathJax_Preview">2\Phi</span><script type="math/tex">2\Phi</script></span>、<span class="arithmatex"><span class="MathJax_Preview">4\Phi * 3</span><script type="math/tex">4\Phi * 3</script></span>，总计为 <span class="arithmatex"><span class="MathJax_Preview">16\Phi</span><script type="math/tex">16\Phi</script></span>。以 1.5B 的 GPT-2 为例，总大小为 1.5B * (2 + 2 + 4 * 3) = 24G</p>
+<p>也就是说，对于参数、梯度、优化器三者消耗的显存之和，在使用单精度和混合精度时是相同的。</p>
+<h2 id="3">3、实例分析<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<h3 id="31-bert-base">3.1 bert-base<a class="headerlink" href="#31-bert-base" title="Permanent link">#</a></h3>
+<p>bert-base 的参数量为 110M。假设使用 Adam 优化器和混合精度训练，按照上述结论分析一下 bert-base 模型需要的显存。</p>
+<p>模型参数 110M * 2 = 220M</p>
+<p>梯度 110M * 2 = 220M</p>
+<p>优化器 110M * (4 + 4 + 4) = 1.32G</p>
+<p>总计需要 220M + 220M + 1.32G = 1.76G</p>
+<h3 id="32-llama-65b">3.2 LLAMA-65B<a class="headerlink" href="#32-llama-65b" title="Permanent link">#</a></h3>
+<p>LLAMA-65B 的参数量为 65B。假设使用 Adam 优化器和混合精度训练，按照上述结论分析一下 LLAMA-65B 模型需要的显存。</p>
+<p>模型参数 65B * 2 = 130G</p>
+<p>梯度 65B * 2 = 130G</p>
+<p>优化器 65B * (4 + 4 + 4) = 780G</p>
+<p>总计需要 130 + 130 + 780 = 1040G</p>
+<h2 id="_2">总结<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
+<p>本文分析了在单精度和混合精度下，模型参数、梯度、优化器状态这三部分静态显存如何计算。并以 bert-base 和 llama-65B 为例估算其所需的静态显存的大小。</p>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/639872915">LLM训练指南(二):模型参数、计算量、显存、计算时间计算</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/624740065">分析transformer模型的参数量、计算量、中间激活、KV cache</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/424180513">BertLarge 中间激活值分析</a></p>
+</li>
+<li>
+<p><a href="https://arxiv.org/pdf/1910.02054.pdf">ZeRO: Memory Optimizations Toward Training Trillion Parameter Models</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

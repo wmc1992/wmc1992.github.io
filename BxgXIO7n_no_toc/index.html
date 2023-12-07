@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/006_LLM/009_AISystem/04_ZeRO/">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/009_AISystem/08_ZeRO/">
         <link rel="shortcut icon" href="../../../img/favicon.ico">
         <title>Index - 算法工程师笔记</title>
         <link href="../../../css/bootstrap.min.css" rel="stylesheet">
@@ -68,6 +68,9 @@
 <p>由于 ZeRO 本质是数据并行，所以需要了解 DDP 的原理之后才能够比较容易的理解 ZeRO，关于 DDP 的说明文档见：<a href="/xyymcjFY/">DDP</a></p>
 <p>在说明时假设显卡数量为 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span>，模型的参数量为 <span class="arithmatex"><span class="MathJax_Preview">\Psi</span><script type="math/tex">\Psi</script></span>。下述的图片都是以两张显卡为例绘制的。</p>
 <p>下面说明一下 DDP、ZeRO1、ZeRO2、ZeRO3 这几种不同的技术具体是如何操作的。这里的重点是何时做数据同步，训练过程主要有 "前向传播"、"反向传播"、"优化器更新权重参数" 这三部分，下面在描述时也是按照这三部分进行描述。</p>
+<blockquote>
+<p>参数量：模型参数量是指一个神经网络或机器学习模型中可以进行学习和调整的参数的数量。这些参数包括权重（weights）和偏置（biases），它们在训练过程中会不断地更新以优化模型的性能。</p>
+</blockquote>
 <h2 id="1ddp">1、DDP<a class="headerlink" href="#1ddp" title="Permanent link">#</a></h2>
 <p>模型的权重 <span class="arithmatex"><span class="MathJax_Preview">w</span><script type="math/tex">w</script></span>、梯度 <span class="arithmatex"><span class="MathJax_Preview">g</span><script type="math/tex">g</script></span>、优化器状态 <span class="arithmatex"><span class="MathJax_Preview">op</span><script type="math/tex">op</script></span> 都是在每张显卡上存储完整的一份，每张显卡上是不同的 mini-batch 的数据。训练时：</p>
 <ul>
