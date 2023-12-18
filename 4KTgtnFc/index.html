@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/006_LLM/009_AISystem/03_%E4%B8%AD%E9%97%B4%E6%BF%80%E6%B4%BB%E5%80%BC%E6%98%BE%E5%AD%98%E5%88%86%E6%9E%90/">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/009_AISystem/04_%E4%B8%AD%E9%97%B4%E6%BF%80%E6%B4%BB%E5%80%BC%E6%98%BE%E5%AD%98%E5%88%86%E6%9E%90/">
         <link rel="shortcut icon" href="../../../img/favicon.ico">
         <title>Index - 算法工程师笔记</title>
         <link href="../../../css/bootstrap.min.css" rel="stylesheet">
@@ -162,7 +162,7 @@ l &= (y - x_4)^2
 <p>那么对于 <span class="arithmatex"><span class="MathJax_Preview">W_i</span><script type="math/tex">W_i</script></span> 的梯度计算公式就变为了 <span class="arithmatex"><span class="MathJax_Preview">\frac{\partial l}{\partial W_i} = l_{i+1} \cdot x_{i-1}</span><script type="math/tex">\frac{\partial l}{\partial W_i} = l_{i+1} \cdot x_{i-1}</script></span>，这里的 <span class="arithmatex"><span class="MathJax_Preview">l_{i+1}</span><script type="math/tex">l_{i+1}</script></span> 是第 <span class="arithmatex"><span class="MathJax_Preview">i+1</span><script type="math/tex">i+1</script></span> 层反传过来的，所以计算第 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 层的梯度时只需要做一次矩阵乘法即可。这里的 <span class="arithmatex"><span class="MathJax_Preview">x_{i-1}</span><script type="math/tex">x_{i-1}</script></span> 正是在前向传播时计算出来的中间状态，比较官方的术语为 <strong>中间激活值</strong>。</p>
 <h2 id="2">2、中间激活值显存分析<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
 <h3 id="21-tranformer">2.1 tranformer 的结构<a class="headerlink" href="#21-tranformer" title="Permanent link">#</a></h3>
-<p>这里假设对 transformer 的结构比较熟悉，直接给出公式。把 transformer 层分为两部分，一部分是 MHA 层，一部分是 FFN 层。下面分别写一下这两部分的公式。</p>
+<p>这里假设对 transformer 的结构比较熟悉，直接给出公式。把 transformer 层分为两部分，一部分是 MHA 层，一部分是 FFN 层。下面分别写一下这两部分的公式。一般的资料中关于 transformer 的公式仅写主要的部分，像dropout、normalize、激活函数都会被省略，但是这里由于需要分析中间激活值的显存，所以会把整个 transformer 的所有操作都体现到公式中，如下。</p>
 <p>MHA 层的公式如下：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}\begin{split}

@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/006_LLM/009_AISystem/07_Megatron/">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/009_AISystem/08_Megatron/">
         <link rel="shortcut icon" href="../../../img/favicon.ico">
         <title>Index - 算法工程师笔记</title>
         <link href="../../../css/bootstrap.min.css" rel="stylesheet">
@@ -109,6 +109,9 @@ Z &= \text{Dropout}(Y \cdot B)
     </tbody>
 </table>
 
+<blockquote>
+<p>上面是以两张卡为例进行介绍的，矩阵都是被划分为了两份，那么如果是有三张卡，矩阵需要被划分为三份的话，应该如何操作？并且矩阵划分为的三份的维度必须要完全一致吗？</p>
+</blockquote>
 <h2 id="mha">MHA 部分<a class="headerlink" href="#mha" title="Permanent link">#</a></h2>
 <p>原始公式：</p>
 <div class="arithmatex">

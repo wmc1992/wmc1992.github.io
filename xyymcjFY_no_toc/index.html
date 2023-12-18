@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/006_LLM/009_AISystem/05_ParameterServer/">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/009_AISystem/06_ParameterServer/">
         <link rel="shortcut icon" href="../../../img/favicon.ico">
         <title>Index - 算法工程师笔记</title>
         <link href="../../../css/bootstrap.min.css" rel="stylesheet">
@@ -76,6 +76,7 @@
 
 <p><strong>传输次数和传输量的分析</strong>：</p>
 <p>我们记模型的参数量为 <span class="arithmatex"><span class="MathJax_Preview">\Psi</span><script type="math/tex">\Psi</script></span>，那么梯度的参数量也为 <span class="arithmatex"><span class="MathJax_Preview">\Psi</span><script type="math/tex">\Psi</script></span>，记显卡的数量为 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span>。那么 Reduce 过程会传输 <span class="arithmatex"><span class="MathJax_Preview">N-1</span><script type="math/tex">N-1</script></span> 次，AllGather 过程会传输 <span class="arithmatex"><span class="MathJax_Preview">N-1</span><script type="math/tex">N-1</script></span> 次，每次传输的内容大小为 <span class="arithmatex"><span class="MathJax_Preview">\Psi/N</span><script type="math/tex">\Psi/N</script></span>。总共需传输 <span class="arithmatex"><span class="MathJax_Preview">2(N-1)</span><script type="math/tex">2(N-1)</script></span> 次，总共需传输的参数量大小为 <span class="arithmatex"><span class="MathJax_Preview">\Psi/N * 2(N-1)=2(\Psi - \Psi/N)</span><script type="math/tex">\Psi/N * 2(N-1)=2(\Psi - \Psi/N)</script></span>。</p>
+<p>当 <span class="arithmatex"><span class="MathJax_Preview">N</span><script type="math/tex">N</script></span> 的值比较大时，计算时会做一些近似，会将总共需传输的 <span class="arithmatex"><span class="MathJax_Preview">2(N-1)</span><script type="math/tex">2(N-1)</script></span> 次近似为 <span class="arithmatex"><span class="MathJax_Preview">2N</span><script type="math/tex">2N</script></span> 次。那么总共需传输的参数量大小为 <span class="arithmatex"><span class="MathJax_Preview">\Psi/N * 2N = 2\Psi</span><script type="math/tex">\Psi/N * 2N = 2\Psi</script></span></p>
 <h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
 <ul>
 <li>
