@@ -122,17 +122,17 @@
 </div>
 <p>有些研究，比如T5，将实验中的偏置项去掉了，这样FFN就变为了如下形式：</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\text{FFN}_{\text{ReLU}}(x, W_1, W_2, b_1, b_2) = \text{ReLU}(xW_1)W_2\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\text{FFN}_{\text{ReLU}}(x, W_1, W_2, b_1, b_2) = \text{ReLU}(xW_1)W_2\end{equation}</script>
+<div class="MathJax_Preview">\begin{equation}\text{FFN}_{\text{ReLU}}(x, W_1, W_2) = \text{ReLU}(xW_1)W_2\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\text{FFN}_{\text{ReLU}}(x, W_1, W_2) = \text{ReLU}(xW_1)W_2\end{equation}</script>
 </div>
 <p>把这里的激活函数由 ReLU 替换为 GeLU 或 Swish 之后，就得到两种新的FFN，公式如下，下面这两种也都有相应的实验结果。</p>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\text{FFN}_{\text{GeLU}}(x, W_1, W_2, b_1, b_2) = \text{GeLU}(xW_1)W_2\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\text{FFN}_{\text{GeLU}}(x, W_1, W_2, b_1, b_2) = \text{GeLU}(xW_1)W_2\end{equation}</script>
+<div class="MathJax_Preview">\begin{equation}\text{FFN}_{\text{GeLU}}(x, W_1, W_2) = \text{GeLU}(xW_1)W_2\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\text{FFN}_{\text{GeLU}}(x, W_1, W_2) = \text{GeLU}(xW_1)W_2\end{equation}</script>
 </div>
 <div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\text{FFN}_{\text{Swish}}(x, W_1, W_2, b_1, b_2) = \text{Swish}(xW_1)W_2\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\text{FFN}_{\text{Swish}}(x, W_1, W_2, b_1, b_2) = \text{Swish}(xW_1)W_2\end{equation}</script>
+<div class="MathJax_Preview">\begin{equation}\text{FFN}_{\text{Swish}}(x, W_1, W_2) = \text{Swish}(xW_1)W_2\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\text{FFN}_{\text{Swish}}(x, W_1, W_2) = \text{Swish}(xW_1)W_2\end{equation}</script>
 </div>
 <blockquote>
 <p>从这里来看，深度学习还是穷举各种情况挨个试一遍：ReLU、GeLU、Swish，以及本文的 GLU。</p>
