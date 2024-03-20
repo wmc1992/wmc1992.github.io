@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/006_LLM/009_AISystem/05_%E8%AE%A1%E7%AE%97%E9%87%8F%E5%88%86%E6%9E%90/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 算法工程师笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link">计算量分析</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、矩阵相乘的计算量</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2transformer" class="nav-link">2、transformer结构中计算方式分类</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3linear" class="nav-link">3、Linear的计算量</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4" class="nav-link">4、逐元素运算符的计算量</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#5" class="nav-link">5、注意力矩阵的计算量</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#6transformer" class="nav-link">6、transformer 结构分析</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/XLad2SfS_no_toc/">隐藏左侧目录栏</a>][<a href="/XLad2SfS/">显示左侧目录栏</a>]</p>
+
+<h1 id="_1">计算量分析<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<p>为了方便描述，首先定义各符号的含义：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span>：表示batch_size；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span>：表示seq_length，为文本长度；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span>：表示hidden_dim，为隐藏层的维度；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>：表示多头注意力中有多个头；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">h_a</span><script type="math/tex">h_a</script></span>：表示hidden_dim_per_head，为多头注意力中每个头的隐藏层维度；</li>
+</ul>
+<p>另外，在实际使用时一般都有 <span class="arithmatex"><span class="MathJax_Preview">h_a * a = h</span><script type="math/tex">h_a * a = h</script></span> 成立。</p>
+<h2 id="1">1、矩阵相乘的计算量<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>通过一个例子来说明两个矩阵相乘时所需要的计算量。现在有矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 和矩阵 <span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span>，这两个矩阵如下所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">A = \begin{bmatrix}
+   a_1 &amp; a_2 &amp; a_3 \\
+   a_4 &amp; a_5 &amp; a_6
+\end{bmatrix}</div>
+<script type="math/tex; mode=display">A = \begin{bmatrix}
+   a_1 & a_2 & a_3 \\
+   a_4 & a_5 & a_6
+\end{bmatrix}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">B = \begin{bmatrix}
+   b_1 &amp; b_2 &amp; b_3 &amp; b_4 \\
+   b_5 &amp; b_6 &amp; b_7 &amp; b_8 \\
+   b_9 &amp; b_{10} &amp; b_{11} &amp; b_{12}
+\end{bmatrix}</div>
+<script type="math/tex; mode=display">B = \begin{bmatrix}
+   b_1 & b_2 & b_3 & b_4 \\
+   b_5 & b_6 & b_7 & b_8 \\
+   b_9 & b_{10} & b_{11} & b_{12}
+\end{bmatrix}</script>
+</div>
+<p>将这两个矩阵相乘之后得到如下结果：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">AB = \begin{bmatrix}
+   a_1b_1+a_2b_5+a_3b_9 &amp; a_1b_2+a_2b_6+a_3b_{10} &amp; a_1b_3+a_2b_7+a_3b_{11} &amp; a_1b_4+a_2b_8+a_3b_{12} \\
+   a_4b_1+a_5b_5+a_6b_9 &amp; a_4b_2+a_5b_6+a_6b_{10} &amp; a_4b_3+a_5b_7+a_6b_{11} &amp; a_4b_4+a_5b_8+a_6b_{12}
+\end{bmatrix}</div>
+<script type="math/tex; mode=display">AB = \begin{bmatrix}
+   a_1b_1+a_2b_5+a_3b_9 & a_1b_2+a_2b_6+a_3b_{10} & a_1b_3+a_2b_7+a_3b_{11} & a_1b_4+a_2b_8+a_3b_{12} \\
+   a_4b_1+a_5b_5+a_6b_9 & a_4b_2+a_5b_6+a_6b_{10} & a_4b_3+a_5b_7+a_6b_{11} & a_4b_4+a_5b_8+a_6b_{12}
+\end{bmatrix}</script>
+</div>
+<p>可以看出矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 的维度为 <span class="arithmatex"><span class="MathJax_Preview">[2,3]</span><script type="math/tex">[2,3]</script></span>，矩阵 <span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span> 的维度为 <span class="arithmatex"><span class="MathJax_Preview">[3,4]</span><script type="math/tex">[3,4]</script></span>，相乘结果的矩阵维度为 <span class="arithmatex"><span class="MathJax_Preview">[2,4]</span><script type="math/tex">[2,4]</script></span>。结果矩阵中每个元素中有 <span class="arithmatex"><span class="MathJax_Preview">3</span><script type="math/tex">3</script></span> 次乘法运算和 <span class="arithmatex"><span class="MathJax_Preview">(3-1=2)</span><script type="math/tex">(3-1=2)</script></span> 次加法运算。所以矩阵 <span class="arithmatex"><span class="MathJax_Preview">A</span><script type="math/tex">A</script></span> 乘以矩阵 <span class="arithmatex"><span class="MathJax_Preview">B</span><script type="math/tex">B</script></span> 总共有 <span class="arithmatex"><span class="MathJax_Preview">2*4*3</span><script type="math/tex">2*4*3</script></span> 次乘法运算，总共有 <span class="arithmatex"><span class="MathJax_Preview">2*4*(3-1)</span><script type="math/tex">2*4*(3-1)</script></span> 次加法运算。</p>
+<p>假设矩阵 A 的维度为 <span class="arithmatex"><span class="MathJax_Preview">[m,n]</span><script type="math/tex">[m,n]</script></span>，假设矩阵 B 的维度为 <span class="arithmatex"><span class="MathJax_Preview">[n,p]</span><script type="math/tex">[n,p]</script></span>，那么两个矩阵相乘 <span class="arithmatex"><span class="MathJax_Preview">AB</span><script type="math/tex">AB</script></span> 总共有 <span class="arithmatex"><span class="MathJax_Preview">m \cdot p \cdot n</span><script type="math/tex">m \cdot p \cdot n</script></span> 次乘法运算，总共有 <span class="arithmatex"><span class="MathJax_Preview">m \cdot p \cdot (n-1)</span><script type="math/tex">m \cdot p \cdot (n-1)</script></span> 次加法运算，由于 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 一般远大于1，所以会把减一部分忽略掉。即有如下成立：</p>
+<blockquote>
+<p>对于 <span class="arithmatex"><span class="MathJax_Preview">A \in R^{m*n}</span><script type="math/tex">A \in R^{m*n}</script></span>，<span class="arithmatex"><span class="MathJax_Preview">B \in R^{n*p}</span><script type="math/tex">B \in R^{n*p}</script></span>，计算出 <span class="arithmatex"><span class="MathJax_Preview">AB</span><script type="math/tex">AB</script></span> 所需要的运算次数为 <span class="arithmatex"><span class="MathJax_Preview">2mnp</span><script type="math/tex">2mnp</script></span></p>
+</blockquote>
+<p>这里所提到的每次运算就是浮点运算。</p>
+<h2 id="2transformer">2、transformer结构中计算方式分类<a class="headerlink" href="#2transformer" title="Permanent link">#</a></h2>
+<p>为了估计计算量，transformer 结构中总共有三种类型的计算：</p>
+<ul>
+<li>
+<p>第一种是模型中的 Linear 层，该计算是矩阵乘法运算，即 <span class="arithmatex"><span class="MathJax_Preview">x \cdot W</span><script type="math/tex">x \cdot W</script></span>，此时计算量与 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">W</span><script type="math/tex">W</script></span> 有关。</p>
+</li>
+<li>
+<p>第二种是逐个元素的计算方式，比如softmax、dropout、normalize、残差连接、激活函数等。</p>
+</li>
+<li>
+<p>第三种是注意力权重矩阵部分的计算，即 <span class="arithmatex"><span class="MathJax_Preview">Q \cdot K^T</span><script type="math/tex">Q \cdot K^T</script></span>，该计算也是矩阵乘法运算，但是参与相乘的两个矩阵都是中间激活值，与模型的参数量无关。</p>
+</li>
+</ul>
+<p>下面先逐类型阐述上述每种计算类型的计算量如何计算，然后针对 transformer 结构的计算量做整体估计。</p>
+<h2 id="3linear">3、Linear的计算量<a class="headerlink" href="#3linear" title="Permanent link">#</a></h2>
+<p>假设 Linear 层的输入维度为 <span class="arithmatex"><span class="MathJax_Preview">[b,s,h]</span><script type="math/tex">[b,s,h]</script></span>，Linear 的权重参数维度为 <span class="arithmatex"><span class="MathJax_Preview">[h,h]</span><script type="math/tex">[h,h]</script></span>，前向传播的公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">y = x \cdot W</div>
+<script type="math/tex; mode=display">y = x \cdot W</script>
+</div>
+<p>维度变化为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">[b,s,h] \cdot [h,h] \rightarrow [b,s,h]</div>
+<script type="math/tex; mode=display">[b,s,h] \cdot [h,h] \rightarrow [b,s,h]</script>
+</div>
+<p>所以，对于 Linear 模型结构，一次前向传播的计算量为 <span class="arithmatex"><span class="MathJax_Preview">2 \cdot b \cdot s \cdot h \cdot h=2bsh^2</span><script type="math/tex">2 \cdot b \cdot s \cdot h \cdot h=2bsh^2</script></span></p>
+<p>在文章 <a href="/FqrdDdEm/">反向传播实现说明</a> 中已经说明过，Linear 的反向传播求解梯度的过程为两次矩阵乘法，所以一次反向传播中的计算量是一次前向传播的计算量的两倍，即：<span class="arithmatex"><span class="MathJax_Preview">4bsh^2</span><script type="math/tex">4bsh^2</script></span></p>
+<p>如果是一次前向传播和一次反向传播完成训练的话，那么 Linear 层的总计算量为 <span class="arithmatex"><span class="MathJax_Preview">6bsh^2</span><script type="math/tex">6bsh^2</script></span>。如果使用了梯度检查技术，那么还需要再增加一次前向传播才能完成训练，那么总计算量为 <span class="arithmatex"><span class="MathJax_Preview">8bsh^2</span><script type="math/tex">8bsh^2</script></span>。</p>
+<p>接下来将计算量与 token 数量和模型的参数量做一下关联。</p>
+<p>输入矩阵 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 的维度是 <span class="arithmatex"><span class="MathJax_Preview">[b,s,h]</span><script type="math/tex">[b,s,h]</script></span>，其对应的 token 数量为 <span class="arithmatex"><span class="MathJax_Preview">b \cdot s</span><script type="math/tex">b \cdot s</script></span>；权重矩阵 <span class="arithmatex"><span class="MathJax_Preview">W</span><script type="math/tex">W</script></span> 的维度是 <span class="arithmatex"><span class="MathJax_Preview">[h,h]</span><script type="math/tex">[h,h]</script></span>，其对应的参数量为 <span class="arithmatex"><span class="MathJax_Preview">h \cdot h</span><script type="math/tex">h \cdot h</script></span>。直接将 token 的数量与参数量相乘可得 <span class="arithmatex"><span class="MathJax_Preview">bsh^2</span><script type="math/tex">bsh^2</script></span>，可以看出该结果刚好等于计算量中除去系数的部分。</p>
+<p>所以对于 Linear 层部分的网络的计算量可以直接使用如下公式进行估计：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\text{计算量} = 8 * \text{token} * \text{param}</div>
+<script type="math/tex; mode=display">\text{计算量} = 8 * \text{token} * \text{param}</script>
+</div>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">\text{token}</span><script type="math/tex">\text{token}</script></span> 表示参与训练的 token 的数量，<span class="arithmatex"><span class="MathJax_Preview">\text{param}</span><script type="math/tex">\text{param}</script></span> 表示模型的参数量。</p>
+<blockquote>
+<p>注意：上述公式仅用于估计 Linear 网络结构的计算量，其他网络结构并不适用。</p>
+</blockquote>
+<h2 id="4">4、逐元素运算符的计算量<a class="headerlink" href="#4" title="Permanent link">#</a></h2>
+<p>在深度神经网络中有两个矩阵相乘的操作，也有针对矩阵中每个元素进行运算的操作，比如softmax、dropout、normalize、残差连接、激活函数等。这些逐元素的运算不涉及两个矩阵，而是对单个矩阵中的每个元素进行运算。以 sigmoid 为例来看。</p>
+<p>比如 sigmoid 公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\sigma(z) = \frac{1}{1 + e^{-z}}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\sigma(z) = \frac{1}{1 + e^{-z}}\end{equation}</script>
+</div>
+<p>sigmoid 的导数公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\sigma'(z) = \sigma(z)(1-\sigma(z))\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\sigma'(z) = \sigma(z)(1-\sigma(z))\end{equation}</script>
+</div>
+<p>假设输入矩阵 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 的维度为 <span class="arithmatex"><span class="MathJax_Preview">[b,s,h]</span><script type="math/tex">[b,s,h]</script></span>，那么无论是前向传播，还是反向传播求梯度，这类操作的计算量都为 <span class="arithmatex"><span class="MathJax_Preview">C \cdot bsh</span><script type="math/tex">C \cdot bsh</script></span>，这里的 <span class="arithmatex"><span class="MathJax_Preview">C</span><script type="math/tex">C</script></span> 是一个常数。</p>
+<p>上一小节已经说明了对于两个矩阵相乘的计算量为 <span class="arithmatex"><span class="MathJax_Preview">2bsh^2</span><script type="math/tex">2bsh^2</script></span>，可以看出逐元素运算的计算量要比两个矩阵相乘的计算两少了一个维度 <span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span>，一般来说也就差了三到四个数量级，比如 LLAMA-65B 的隐藏层维度为 8192。所以在估计整个网络的计算量时，所有的逐元素运算符的计算量可以忽略掉。</p>
+<h2 id="5">5、注意力矩阵的计算量<a class="headerlink" href="#5" title="Permanent link">#</a></h2>
+<p>注意力矩阵部分的计算公式如下所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+x_{\text{self}} &amp;= \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \cdot V
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+x_{\text{self}} &= \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \cdot V
+\end{split}\end{equation}</script>
+</div>
+<p>对于 <span class="arithmatex"><span class="MathJax_Preview">Q \cdot K^T</span><script type="math/tex">Q \cdot K^T</script></span>，矩阵 <span class="arithmatex"><span class="MathJax_Preview">Q</span><script type="math/tex">Q</script></span> 和矩阵 <span class="arithmatex"><span class="MathJax_Preview">K</span><script type="math/tex">K</script></span> 的维度都是 <span class="arithmatex"><span class="MathJax_Preview">[b, a, s, h_a]</span><script type="math/tex">[b, a, s, h_a]</script></span>，计算时的维度变化为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">[b, a, s, h_a] * [b, a, h_a, s] \rightarrow [b, a, s, s]</div>
+<script type="math/tex; mode=display">[b, a, s, h_a] * [b, a, h_a, s] \rightarrow [b, a, s, s]</script>
+</div>
+<p>计算量为 <span class="arithmatex"><span class="MathJax_Preview">2 \cdot bash_as = 2bs^2h</span><script type="math/tex">2 \cdot bash_as = 2bs^2h</script></span></p>
+<p>除以 <span class="arithmatex"><span class="MathJax_Preview">\sqrt{d}</span><script type="math/tex">\sqrt{d}</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">\text{softmax}()</span><script type="math/tex">\text{softmax}()</script></span> 操作都是逐元素运算，这里直接忽略。直接看乘以矩阵 <span class="arithmatex"><span class="MathJax_Preview">V</span><script type="math/tex">V</script></span> 的维度变化：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">[b,a,s,s] * [b,a,s,h_a] \rightarrow [b,a,s,h_a]</div>
+<script type="math/tex; mode=display">[b,a,s,s] * [b,a,s,h_a] \rightarrow [b,a,s,h_a]</script>
+</div>
+<p>计算量为 <span class="arithmatex"><span class="MathJax_Preview">2 \cdot bas^2h_a=2bs^2h</span><script type="math/tex">2 \cdot bas^2h_a=2bs^2h</script></span></p>
+<p>所以注意力矩阵这部分网络结构，一次前向传播计算量为 <span class="arithmatex"><span class="MathJax_Preview">4bs^2h</span><script type="math/tex">4bs^2h</script></span>。反向传播的计算量为前向传播的两倍，那么反向传播的计算量为 <span class="arithmatex"><span class="MathJax_Preview">8bs^2h</span><script type="math/tex">8bs^2h</script></span>。</p>
+<h2 id="6transformer">6、transformer 结构分析<a class="headerlink" href="#6transformer" title="Permanent link">#</a></h2>
+<p>有了第3、4、5小节的分析之后，汇总来估计一个完整的 transformer 结构的计算量。这里先只分析前向传播的计算量，因为反向传播的计算量只要乘以两倍就可以得到。</p>
+<p>transformer 层的公式如下所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+Q &amp;= x \cdot W_Q, \quad K = x \cdot W_k, \quad V = x \cdot W_v \\
+x_{\text{self}} &amp;= \text{Dropout}\Big[ \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \Big] \cdot V \\
+x_{\text{attn}} &amp;= \text{LN}\Big[ \text{Dropout}\big(x_{\text{self}} \cdot w_o \big) + x \Big] \\
+x_{\text{ffn}} &amp;= \text{GeLU}(x_{\text{attn}} \cdot W_{\text{ff1}}) \cdot W_{\text{ff2}} \\ 
+x_o &amp;= \text{LN}\Big[\text{Dropout}\big(x_{\text{ffn}} \big) + x_{\text{attn}} \Big]
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+Q &= x \cdot W_Q, \quad K = x \cdot W_k, \quad V = x \cdot W_v \\
+x_{\text{self}} &= \text{Dropout}\Big[ \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \Big] \cdot V \\
+x_{\text{attn}} &= \text{LN}\Big[ \text{Dropout}\big(x_{\text{self}} \cdot w_o \big) + x \Big] \\
+x_{\text{ffn}} &= \text{GeLU}(x_{\text{attn}} \cdot W_{\text{ff1}}) \cdot W_{\text{ff2}} \\ 
+x_o &= \text{LN}\Big[\text{Dropout}\big(x_{\text{ffn}} \big) + x_{\text{attn}} \Big]
+\end{split}\end{equation}</script>
+</div>
+<p>在估计计算量时，像 softmax、dropout、normalize、残差连接、激活函数等结构都是针对矩阵中的某个元素做的运算。模型中这些结构的运算量相比于矩阵相乘要低几个数量级，所以在估计计算量时忽略这部分结构的计算量。于是，简化后的公式如下所示（下述简化只是为了方便估算计算量）：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+Q &amp;= x \cdot W_Q, \quad K = x \cdot W_k, \quad V = x \cdot W_v \\
+x_{\text{self}} &amp;= \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \cdot V \\
+x_{\text{attn}} &amp;= (x_{\text{self}} \cdot w_o) + x \\
+x_o &amp;= (x_{\text{attn}} \cdot W_{\text{ff1}}) \cdot W_{\text{ff2}} + x_{\text{attn}}
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+Q &= x \cdot W_Q, \quad K = x \cdot W_k, \quad V = x \cdot W_v \\
+x_{\text{self}} &= \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \cdot V \\
+x_{\text{attn}} &= (x_{\text{self}} \cdot w_o) + x \\
+x_o &= (x_{\text{attn}} \cdot W_{\text{ff1}}) \cdot W_{\text{ff2}} + x_{\text{attn}}
+\end{split}\end{equation}</script>
+</div>
+<p>在后续估计计算量时，上述公式中的 <span class="arithmatex"><span class="MathJax_Preview">\text{softmax}(\cdot)</span><script type="math/tex">\text{softmax}(\cdot)</script></span> 和残差连接的计算量是被忽略的。</p>
+<p>对于下述三个公式，维度变化都是 <span class="arithmatex"><span class="MathJax_Preview">[b,s,h] * [h,h] \rightarrow [b,s,h]</span><script type="math/tex">[b,s,h] * [h,h] \rightarrow [b,s,h]</script></span>，按照第3小节的分析，这三个公式总计算量为 <span class="arithmatex"><span class="MathJax_Preview">3 * 2bsh^2=6bsh^2</span><script type="math/tex">3 * 2bsh^2=6bsh^2</script></span></p>
+<div class="arithmatex">
+<div class="MathJax_Preview">Q = x \cdot W_Q, \quad K = x \cdot W_k, \quad V = x \cdot W_v</div>
+<script type="math/tex; mode=display">Q = x \cdot W_Q, \quad K = x \cdot W_k, \quad V = x \cdot W_v</script>
+</div>
+<p>对于下述公式，在第4小节已经分析过了，其计算量为 <span class="arithmatex"><span class="MathJax_Preview">4bs^2h</span><script type="math/tex">4bs^2h</script></span></p>
+<div class="arithmatex">
+<div class="MathJax_Preview">x_{\text{attn}} = \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \cdot V + x</div>
+<script type="math/tex; mode=display">x_{\text{attn}} = \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \cdot V + x</script>
+</div>
+<p>对于下述公式，维度变化为 <span class="arithmatex"><span class="MathJax_Preview">[b,s,h] * [h,h] \rightarrow [b,s,h]</span><script type="math/tex">[b,s,h] * [h,h] \rightarrow [b,s,h]</script></span>，按照第3小节的分析，计算量为 <span class="arithmatex"><span class="MathJax_Preview">2bsh^2</span><script type="math/tex">2bsh^2</script></span></p>
+<div class="arithmatex">
+<div class="MathJax_Preview">x_{\text{attn}} = (x_{\text{self}} \cdot w_o) + x</div>
+<script type="math/tex; mode=display">x_{\text{attn}} = (x_{\text{self}} \cdot w_o) + x</script>
+</div>
+<p>对于下述公式，先乘矩阵 <span class="arithmatex"><span class="MathJax_Preview">W_{ff1}</span><script type="math/tex">W_{ff1}</script></span>，再乘矩阵 <span class="arithmatex"><span class="MathJax_Preview">w_{ff2}</span><script type="math/tex">w_{ff2}</script></span>，维度变化为 <span class="arithmatex"><span class="MathJax_Preview">[b,s,h] * [h,4h] \rightarrow [b,s,4h]</span><script type="math/tex">[b,s,h] * [h,4h] \rightarrow [b,s,4h]</script></span>、<span class="arithmatex"><span class="MathJax_Preview">[b,s,4h] * [4h,h] \rightarrow [b,s,h]</span><script type="math/tex">[b,s,4h] * [4h,h] \rightarrow [b,s,h]</script></span>，按照第3小节的分析，总计算量为 <span class="arithmatex"><span class="MathJax_Preview">2 * bsh * 4h + 2 * bs * 4h * h=16bsh^2</span><script type="math/tex">2 * bsh * 4h + 2 * bs * 4h * h=16bsh^2</script></span></p>
+<div class="arithmatex">
+<div class="MathJax_Preview">x_o = (x_{\text{attn}} \cdot W_{\text{ff1}}) \cdot W_{\text{ff2}} + x_{\text{attn}}</div>
+<script type="math/tex; mode=display">x_o = (x_{\text{attn}} \cdot W_{\text{ff1}}) \cdot W_{\text{ff2}} + x_{\text{attn}}</script>
+</div>
+<p>将上述四部分加起来得到 transformer 结构的总计算量为 <span class="arithmatex"><span class="MathJax_Preview">6bsh^2+4bs^2h+2bsh^2+16bsh^2=24bsh^2+4bs^2h</span><script type="math/tex">6bsh^2+4bs^2h+2bsh^2+16bsh^2=24bsh^2+4bs^2h</script></span>。</p>
+<p>综上，transformer 结构一次前向传播计算量为 <span class="arithmatex"><span class="MathJax_Preview">24bsh^2+4bs^2h</span><script type="math/tex">24bsh^2+4bs^2h</script></span>，反向传播的计算量为其两倍，再考虑上梯度检查，最终完成训练所需的总计算量为 <span class="arithmatex"><span class="MathJax_Preview">4 *(24bsh^2+4bs^2h)</span><script type="math/tex">4 *(24bsh^2+4bs^2h)</script></span>。</p>
+<p>如果只是为了粗略估计的话，一般会把上述结果公式中的 <span class="arithmatex"><span class="MathJax_Preview">4bs^2h</span><script type="math/tex">4bs^2h</script></span> 部分省略掉，仅保留 <span class="arithmatex"><span class="MathJax_Preview">4 * 24bsh^2</span><script type="math/tex">4 * 24bsh^2</script></span> 这部分。我们知道 token 的数量为 <span class="arithmatex"><span class="MathJax_Preview">bs</span><script type="math/tex">bs</script></span>，并且在文章 <a href="/jowmyicd/#11-bert">参数量分析</a> 中分析得出 transformer 的参数量为 <span class="arithmatex"><span class="MathJax_Preview">12h^2</span><script type="math/tex">12h^2</script></span>，所以关于计算量有如下式成立：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\text{计算量}=4 * 24bsh^2=8 * bs * 12h^2 = 8 * \text{token} * \text{param}</div>
+<script type="math/tex; mode=display">\text{计算量}=4 * 24bsh^2=8 * bs * 12h^2 = 8 * \text{token} * \text{param}</script>
+</div>
+<p>这也就是第3小节提到的公式。</p>
+<blockquote>
+<p>关于公式 <span class="arithmatex"><span class="MathJax_Preview">4 *(24bsh^2+4bs^2h)</span><script type="math/tex">4 *(24bsh^2+4bs^2h)</script></span>，中的 <span class="arithmatex"><span class="MathJax_Preview">4bs^2h</span><script type="math/tex">4bs^2h</script></span> 是否是远小于 <span class="arithmatex"><span class="MathJax_Preview">24bsh^2</span><script type="math/tex">24bsh^2</script></span>，这个其实并不是一定满足的，只是省略掉该项之后会很容易估算。</p>
+</blockquote>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/639872915">LLM训练指南(二):模型参数、计算量、显存、计算时间计算</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/624740065">分析transformer模型的参数量、计算量、中间激活、KV cache</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

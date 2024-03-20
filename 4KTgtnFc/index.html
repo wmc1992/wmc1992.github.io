@@ -93,7 +93,11 @@
             </li>
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、实例分析</a>
+            <li class="nav-item" data-level="2"><a href="#3bert-base" class="nav-link">3、实例分析之bert-base</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4llama-65b" class="nav-link">4、实例分析之LLAMA-65B</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -162,20 +166,16 @@ l &= (y - x_4)^2
 <p>那么对于 <span class="arithmatex"><span class="MathJax_Preview">W_i</span><script type="math/tex">W_i</script></span> 的梯度计算公式就变为了 <span class="arithmatex"><span class="MathJax_Preview">\frac{\partial l}{\partial W_i} = l_{i+1} \cdot x_{i-1}</span><script type="math/tex">\frac{\partial l}{\partial W_i} = l_{i+1} \cdot x_{i-1}</script></span>，这里的 <span class="arithmatex"><span class="MathJax_Preview">l_{i+1}</span><script type="math/tex">l_{i+1}</script></span> 是第 <span class="arithmatex"><span class="MathJax_Preview">i+1</span><script type="math/tex">i+1</script></span> 层反传过来的，所以计算第 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 层的梯度时只需要做一次矩阵乘法即可。这里的 <span class="arithmatex"><span class="MathJax_Preview">x_{i-1}</span><script type="math/tex">x_{i-1}</script></span> 正是在前向传播时计算出来的中间状态，比较官方的术语为 <strong>中间激活值</strong>。</p>
 <h2 id="2">2、中间激活值显存分析<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
 <h3 id="21-tranformer">2.1 tranformer 的结构<a class="headerlink" href="#21-tranformer" title="Permanent link">#</a></h3>
-<p>这里假设对 transformer 的结构比较熟悉，直接给出公式。把 transformer 层分为两部分，一部分是 MHA 层，一部分是 FFN 层。下面分别写一下这两部分的公式。一般的资料中关于 transformer 的公式仅写主要的部分，像dropout、normalize、激活函数都会被省略，但是这里由于需要分析中间激活值的显存，所以会把整个 transformer 的所有操作都体现到公式中，如下。</p>
+<p>这里把 transformer 层分为两部分，一部分是 MHA 层，一部分是 FFN 层。下面分别写一下这两部分的公式。一般的资料中关于 transformer 的公式仅写主要的部分，像dropout、normalize、激活函数都会被省略，但是这里由于需要分析中间激活值的显存，所以会把整个 transformer 的所有操作都体现到公式中，如下。</p>
 <p>MHA 层的公式如下：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}\begin{split}
-Q &amp;= x \cdot W_Q \\
-K &amp;= x \cdot W_k \\
-V &amp;= x \cdot W_v \\
+Q &amp;= x \cdot W_Q, \quad K = x \cdot W_k, \quad V = x \cdot W_v \\
 x_{\text{self}} &amp;= \text{Dropout}\Big[ \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \Big] \cdot V \\
 x_{\text{attn}} &amp;= \text{LN}\Big[ \text{Dropout}\big(x_{\text{self}} \cdot w_o \big) + x \Big]
 \end{split}\end{equation}</div>
 <script type="math/tex; mode=display">\begin{equation}\begin{split}
-Q &= x \cdot W_Q \\
-K &= x \cdot W_k \\
-V &= x \cdot W_v \\
+Q &= x \cdot W_Q, \quad K = x \cdot W_k, \quad V = x \cdot W_v \\
 x_{\text{self}} &= \text{Dropout}\Big[ \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \Big] \cdot V \\
 x_{\text{attn}} &= \text{LN}\Big[ \text{Dropout}\big(x_{\text{self}} \cdot w_o \big) + x \Big]
 \end{split}\end{equation}</script>
@@ -262,8 +262,8 @@ x_{\text{ffn}} = \text{GeLU}(x_{\text{attn}} \cdot W_{\text{ff1}}) \cdot W_{\tex
 <p>上面仅分析了多个 transformer 对应的中间激活值消耗的显存的大小。模型中还会有 embedding 层和解码层。其中解码层没有对应的中间激活值，只需要分析一下 embedding 层即可。</p>
 <p>embedding 层的功能是将输入的 token ID 转为向量，其输出的矩阵维度为 [batch_size, seq_length, hidden_size]，即 [b, s, h]，该中间激活值占用的显存为 <span class="arithmatex"><span class="MathJax_Preview">2bsh</span><script type="math/tex">2bsh</script></span>。</p>
 <p>综上所述，整个模型所有的中间激活值的大小为 <span class="arithmatex"><span class="MathJax_Preview">l * (34bsh + 5bas^2) + 2bsh</span><script type="math/tex">l * (34bsh + 5bas^2) + 2bsh</script></span>。随着模型越来越大，<span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 是比较大的，所以有时会忽略 <span class="arithmatex"><span class="MathJax_Preview">2bsh</span><script type="math/tex">2bsh</script></span> 这一项，直接使用 <span class="arithmatex"><span class="MathJax_Preview">l*(34bsh+5bas^2)</span><script type="math/tex">l*(34bsh+5bas^2)</script></span> 来估计模型的中间激活值的大小。</p>
-<h2 id="3">3、实例分析<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
-<p>以 bert-base 为例分析其中间激活值所需要的显存的大小。在文章 <a href="/ss8GDrmf/#31-bert-base">静态显存分析</a> 中已经得出对于 bert-base 来说，模型参数、梯度、优化器状态三部分总共需要的显存为 1.76G，下面分析一下该模型的中间激活值所需要的显存。</p>
+<h2 id="3bert-base">3、实例分析之bert-base<a class="headerlink" href="#3bert-base" title="Permanent link">#</a></h2>
+<p>以 bert-base 为例分析其中间激活值所需要的显存的大小。在文章 <a href="/ss8GDrmf/#3bert-base">静态显存分析</a> 中已经得出对于 bert-base 来说，模型参数、梯度、优化器状态三部分总共需要的显存为 1.76G，下面分析一下该模型的中间激活值所需要的显存。</p>
 <p>计算的公式为 <span class="arithmatex"><span class="MathJax_Preview">l * (34bsh + 5bas^2) + 2bsh</span><script type="math/tex">l * (34bsh + 5bas^2) + 2bsh</script></span>，先来看这里的每个值分别是多少：</p>
 <ul>
 <li>
@@ -282,21 +282,6 @@ x_{\text{ffn}} = \text{GeLU}(x_{\text{attn}} \cdot W_{\text{ff1}}) \cdot W_{\tex
 <p><span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 为多头注意力层的 head 个数，为 12；</p>
 </li>
 </ul>
-<p>当 batch_size 为 16 时，计算结果如下：</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">\begin{equation}\begin{split}
-&amp;12 * (34 * 16 * 512 * 768 + 5 * 16 * 12 * 512 * 512) + 2 * 16 * 512 * 768 \\
-= &amp;12 * (213M + 251M) + 12M \\
-= &amp;12 * 464M + 12M \\
-= &amp;5.58G
-\end{split}\end{equation}</div>
-<script type="math/tex; mode=display">\begin{equation}\begin{split}
-&12 * (34 * 16 * 512 * 768 + 5 * 16 * 12 * 512 * 512) + 2 * 16 * 512 * 768 \\
-= &12 * (213M + 251M) + 12M \\
-= &12 * 464M + 12M \\
-= &5.58G
-\end{split}\end{equation}</script>
-</div>
 <p>当 batch_size 为 1 时，计算结果如下：</p>
 <div class="arithmatex">
 <div class="MathJax_Preview">\begin{equation}\begin{split}
@@ -312,11 +297,79 @@ x_{\text{ffn}} = \text{GeLU}(x_{\text{attn}} \cdot W_{\text{ff1}}) \cdot W_{\tex
 = &250M
 \end{split}\end{equation}</script>
 </div>
+<p>当 batch_size 为 16 时，计算结果如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp;12 * (34 * 16 * 512 * 768 + 5 * 16 * 12 * 512 * 512) + 2 * 16 * 512 * 768 \\
+= &amp;12 * (213M + 251M) + 12M \\
+= &amp;12 * 464M + 12M \\
+= &amp;5.58G
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+&12 * (34 * 16 * 512 * 768 + 5 * 16 * 12 * 512 * 512) + 2 * 16 * 512 * 768 \\
+= &12 * (213M + 251M) + 12M \\
+= &12 * 464M + 12M \\
+= &5.58G
+\end{split}\end{equation}</script>
+</div>
 <p>从公式 <span class="arithmatex"><span class="MathJax_Preview">l * (34bsh + 5bas^2) + 2bsh</span><script type="math/tex">l * (34bsh + 5bas^2) + 2bsh</script></span> 中就可以看出，中间激活值消耗的显存的大小与 batch_size 是正相关的，在 bert-base 这个模型中，batch_size 每增加 1，那么中间激活值所需要的显存就会增加大约 250M 左右。</p>
 <p>可以看到当 batch_size 为 16 时，中间激活值所需要的显存为 5.58G，而静态显存只有 1.76G，中间激活值比这部分静态显存还要大。</p>
 <p>在实际训练时，遇到显存不足时，调小 batch_size 实际减少的就是中间激活值这部分所需要的显存。而模型参数、梯度、优化器这部分静态显存与 batch_size 是无关的，调小 batch_size 不会影响这里所需要的显存。</p>
+<h2 id="4llama-65b">4、实例分析之LLAMA-65B<a class="headerlink" href="#4llama-65b" title="Permanent link">#</a></h2>
+<p>以 LLAMA-65B 为例分析其中间激活值所需要的显存的大小。在文章 <a href="/ss8GDrmf/#4llama-65b">静态显存分析</a> 中已经得出对于 LLAMA-65B 来说，模型参数、梯度、优化器状态三部分总共需要的显存为 1040G，下面分析一下该模型的中间激活值所需要的显存。</p>
+<p>计算的公式为 <span class="arithmatex"><span class="MathJax_Preview">l * (34bsh + 5bas^2) + 2bsh</span><script type="math/tex">l * (34bsh + 5bas^2) + 2bsh</script></span>，先来看这里的每个值分别是多少：</p>
+<ul>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 为 tranformer 的层数，LLAMA-65B 为 80 层；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span> 为 batch_size，这里分别取 batch_size 为 16 和 1 计算两个不同 batch_size 下所需要显存的差别；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 为 seq_length，模型 LLAMA-65B 的最大长度为 2048；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span> 为隐藏层的维度，为 8192；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 为多头注意力层的 head 个数，为 64；</p>
+</li>
+</ul>
+<p>当 batch_size 为 1 时，计算结果如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp;80 * (34 * 1 * 2048 * 8192 + 5 * 1 * 64 * 2048 * 2048) + 2 * 1 * 2048 * 8192 \\
+= &amp;80 * (570M + 1342M) + 33M \\
+= &amp;80 * 1912M + 33M \\
+= &amp;153G
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+&80 * (34 * 1 * 2048 * 8192 + 5 * 1 * 64 * 2048 * 2048) + 2 * 1 * 2048 * 8192 \\
+= &80 * (570M + 1342M) + 33M \\
+= &80 * 1912M + 33M \\
+= &153G
+\end{split}\end{equation}</script>
+</div>
+<p>当 batch_size 为 16 时，计算结果如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp;80 * (34 * 16 * 2048 * 8192 + 5 * 16 * 64 * 2048 * 2048) + 2 * 16 * 2048 * 8192 \\
+= &amp;80 * (9.13G + 21.47G) + 536M \\
+= &amp;80 * 30.6G + 536M \\
+= &amp;2448G
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+&80 * (34 * 16 * 2048 * 8192 + 5 * 16 * 64 * 2048 * 2048) + 2 * 16 * 2048 * 8192 \\
+= &80 * (9.13G + 21.47G) + 536M \\
+= &80 * 30.6G + 536M \\
+= &2448G
+\end{split}\end{equation}</script>
+</div>
+<p>从公式 <span class="arithmatex"><span class="MathJax_Preview">l * (34bsh + 5bas^2) + 2bsh</span><script type="math/tex">l * (34bsh + 5bas^2) + 2bsh</script></span> 中就可以看出，中间激活值消耗的显存的大小与 batch_size 是正相关的，在 LLAMA-65B 这个模型中，batch_size 每增加 1，那么中间激活值所需要的显存就会增加大约 153G 左右。</p>
+<p>可以看到当 batch_size 为 16 时，中间激活值所需要的显存为 2448G，而静态显存只有 1040G，中间激活值比这部分静态显存还要大。</p>
+<p>对于大模型，在实际训练时，现在基本都会使用梯度检查技术，这样中间激活值这里需要的显存就会大幅减少，所以实际训练时并不会真实消耗这么多的显存。</p>
 <h2 id="_2">总结<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
-<p>本文介绍了在训练阶段中，哪一部分是中间激活值；以及中间激活值的大小如何估算；最后以模型 bert-base 为例计算了其训练时中间激活值所需的显存。</p>
+<p>本文介绍了在训练阶段中，哪一部分是中间激活值；以及中间激活值的大小如何估算；最后以模型 bert-base 和 LLAMA-65B 为例计算了其训练时中间激活值所需的显存。</p>
 <h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
 <ul>
 <li>
