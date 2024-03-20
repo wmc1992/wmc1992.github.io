@@ -6,9 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="mingchao.wang">
-        <link rel="canonical" href="https://mingchao.wang/003_%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/001_%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/06_%E5%9D%87%E6%96%B9%E5%B7%AE%E6%8D%9F%E5%A4%B1%E4%B8%8E%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8D%9F%E5%A4%B1%E5%BC%82%E5%90%8C/">
+        <link rel="canonical" href="https://mingchao.wang/006_DL%E5%9F%BA%E7%A1%80%E6%8A%80%E6%9C%AF%E4%BD%93%E7%B3%BB/001_%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/06_%E5%9D%87%E6%96%B9%E5%B7%AE%E6%8D%9F%E5%A4%B1%E4%B8%8E%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8D%9F%E5%A4%B1%E5%BC%82%E5%90%8C/">
         <link rel="shortcut icon" href="../../../img/favicon.ico">
-        <title>Index - 算法工程师笔记</title>
+        <title>Index - 笔记</title>
         <link href="../../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../../css/base.css" rel="stylesheet">
@@ -35,7 +35,7 @@
     <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="../../..">算法工程师笔记</a>
+                <a class="navbar-brand" href="../../..">笔记</a>
                 <!-- Expander button -->
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -203,7 +203,7 @@
 \end{split}\end{equation}</script>
 </div>
 <p>先分析Sigmoid函数的性质。下图为Sigmoid函数的图像，可以看出当 <span class="arithmatex"><span class="MathJax_Preview">z_i</span><script type="math/tex">z_i</script></span> 比较小或者比较大时， <span class="arithmatex"><span class="MathJax_Preview">\sigma^{\prime}(z_i)</span><script type="math/tex">\sigma^{\prime}(z_i)</script></span> 的值（即下图曲线的斜率）都趋于0；也就是说当 <span class="arithmatex"><span class="MathJax_Preview">z_i</span><script type="math/tex">z_i</script></span> 比较小或者比较大时，其梯度也是趋于0的。</p>
-<p><img alt="" src="/003_深度学习/001_损失函数/06_均方差损失与交叉熵损失异同/assets/01.png" /></p>
+<p><img alt="" src="/006_DL基础技术体系/001_损失函数/assets/01.png" /></p>
 <p>在做梯度下降时，希望当离目标较远时，每次更新的步长要大一些，可以快速收敛；当离目标较近时，每次更新的步长要小一些，可以防止在目标值附近震荡；</p>
 <p>对比交叉熵损失和均方差损失的梯度，可以看出它们两个只差一个 <span class="arithmatex"><span class="MathJax_Preview">\sigma^{\prime}(z^{(i)})</span><script type="math/tex">\sigma^{\prime}(z^{(i)})</script></span> ，所以有如下结论：</p>
 <ul>

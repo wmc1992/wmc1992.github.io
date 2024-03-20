@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/004_LLM%E5%B7%A5%E7%A8%8B/012_deepspeed/001_%E5%88%9D%E7%BA%A7%E7%AC%94%E8%AE%B0/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#deepspeed" class="nav-link">deepspeed 初级笔记</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#deepspeed_1" class="nav-link">一、DeepSpeed目前支持的功能</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#deepspeed_2" class="nav-link">二、DeepSpeed的使用</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#21" class="nav-link">2.1 调用方法</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#22-deepspeed" class="nav-link">2.2 为什么单卡的情况，也可以使用deepspeed？</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#23" class="nav-link">2.3 传递参数</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#zero" class="nav-link">三、ZeRO中的配置</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#zero-2" class="nav-link">ZeRO-2</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#zero-3" class="nav-link">ZeRO-3</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#zero-stage-0" class="nav-link">ZeRO-stage-0</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#zero-stage-1" class="nav-link">ZeRO-stage-1</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#nvme-support" class="nav-link">NVMe Support</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#zero-stageoffload" class="nav-link">如何选择不同的Zero stage和offload</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_1" class="nav-link">四、调参步骤</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#_2" class="nav-link">一些其他建议</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_3" class="nav-link">五、优化器和调度器</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#51" class="nav-link">5.1 优化器</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#52" class="nav-link">5.2 调度器</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_4" class="nav-link">六、训练精度</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#_5" class="nav-link">自动混合精度</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#nccl" class="nav-link">NCCL</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#apex" class="nav-link">apex</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_6" class="nav-link">七、获取模型参数</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#zero-3-and-infinity-nuances" class="nav-link">ZeRO-3 and Infinity Nuances</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#zero-inference" class="nav-link">八、ZeRO inference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_7" class="nav-link">九、估算需要的显存</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_8" class="nav-link">十、可能遇到的问题</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/NOBJm5gx_no_toc/">隐藏左侧目录栏</a>][<a href="/NOBJm5gx/">显示左侧目录栏</a>]</p>
+
+<h1 id="deepspeed">deepspeed 初级笔记<a class="headerlink" href="#deepspeed" title="Permanent link">#</a></h1>
+<h2 id="deepspeed_1">一、DeepSpeed目前支持的功能<a class="headerlink" href="#deepspeed_1" title="Permanent link">#</a></h2>
+<ul>
+<li>Optimizer state partitioning (ZeRO stage 1)</li>
+<li>Gradient partitioning (ZeRO stage 2)</li>
+<li>Parameter partitioning (ZeRO stage 3)</li>
+<li>Custom mixed precision training handling</li>
+<li>A range of fast CUDA-extension-based optimizers</li>
+<li>ZeRO-Offload to CPU and NVMe</li>
+</ul>
+<h2 id="deepspeed_2">二、DeepSpeed的使用<a class="headerlink" href="#deepspeed_2" title="Permanent link">#</a></h2>
+<h3 id="21">2.1 调用方法<a class="headerlink" href="#21" title="Permanent link">#</a></h3>
+<pre><code class="language-shell"># 单卡的使用方法
+deepspeed --num_gpus=1 examples/pytorch/translation/run_translation.py ...
+# 单卡，并指定对应的GPU
+deepspeed --include localhost:1 examples/pytorch/translation/run_translation.py ...
+​
+# 多GPU的使用方法1
+torch.distributed.run --nproc_per_node=2 your_program.py &lt;normal cl args&gt; --deepspeed ds_config.json
+# 多GPU的使用方法2
+deepspeed --num_gpus=2 your_program.py &lt;normal cl args&gt; --deepspeed ds_config.json
+​
+# 多节点多卡方法1，需要在多个节点上手动启动
+python -m torch.distributed.run --nproc_per_node=8 --nnode=2 --node_rank=0 --master_addr=hostname1 --master_port=9901 your_program.py &lt;normal cl args&gt; --deepspeed ds_config.json
+# 多节点多卡方法2，需要创建一个 hostfile 文件，只需在一个节点上启动
+hostname1 slots=8
+hostname2 slots=8
+# 然后运行
+deepspeed --num_gpus 8 --num_nodes 2 --hostfile hostfile --master_addr hostname1 --master_port=9901 your_program.py &lt;normal cl args&gt; --deepspeed ds_config.json
+​
+# 在SLURM上运行，略，参见原始文档
+# 在jupyter中运行，略，参见原始文档
+</code></pre>
+<h3 id="22-deepspeed">2.2 为什么单卡的情况，也可以使用deepspeed？<a class="headerlink" href="#22-deepspeed" title="Permanent link">#</a></h3>
+<p>使用ZeRO-offload，将部分数据offload到CPU，降低对显存的需求</p>
+<p>提供了对显存的管理，减少显存中的碎片</p>
+<h3 id="23">2.3 传递参数<a class="headerlink" href="#23" title="Permanent link">#</a></h3>
+<pre><code class="language-shell">TrainingArguments(..., deepspeed=&quot;/path/to/ds_config.json&quot;)
+​
+# or
+ds_config_dict = dict(scheduler=scheduler_params, optimizer=optimizer_params)
+TrainingArguments(..., deepspeed=ds_config_dict)
+</code></pre>
+<h2 id="zero">三、ZeRO中的配置<a class="headerlink" href="#zero" title="Permanent link">#</a></h2>
+<h3 id="zero-2">ZeRO-2<a class="headerlink" href="#zero-2" title="Permanent link">#</a></h3>
+<ul>
+<li>一个配置示例</li>
+</ul>
+<pre><code class="language-json">{
+    &quot;fp16&quot;: {
+        &quot;enabled&quot;: &quot;auto&quot;,
+        &quot;loss_scale&quot;: 0,
+        &quot;loss_scale_window&quot;: 1000,
+        &quot;initial_scale_power&quot;: 16,
+        &quot;hysteresis&quot;: 2,
+        &quot;min_loss_scale&quot;: 1
+    },
+
+    &quot;optimizer&quot;: {
+        &quot;type&quot;: &quot;AdamW&quot;,
+        &quot;params&quot;: {
+            &quot;lr&quot;: &quot;auto&quot;,
+            &quot;betas&quot;: &quot;auto&quot;,
+            &quot;eps&quot;: &quot;auto&quot;,
+            &quot;weight_decay&quot;: &quot;auto&quot;
+        }
+    },
+
+    &quot;scheduler&quot;: {
+        &quot;type&quot;: &quot;WarmupLR&quot;,
+        &quot;params&quot;: {
+            &quot;warmup_min_lr&quot;: &quot;auto&quot;,
+            &quot;warmup_max_lr&quot;: &quot;auto&quot;,
+            &quot;warmup_num_steps&quot;: &quot;auto&quot;
+        }
+    },
+
+    &quot;zero_optimization&quot;: {
+        &quot;stage&quot;: 2,
+        &quot;offload_optimizer&quot;: {
+            &quot;device&quot;: &quot;cpu&quot;,
+            &quot;pin_memory&quot;: true
+        },
+        &quot;allgather_partitions&quot;: true,
+        &quot;allgather_bucket_size&quot;: 2e8,
+        &quot;overlap_comm&quot;: true,
+        &quot;reduce_scatter&quot;: true,
+        &quot;reduce_bucket_size&quot;: 2e8,
+        &quot;contiguous_gradients&quot;: true
+    },
+
+    &quot;gradient_accumulation_steps&quot;: &quot;auto&quot;,
+    &quot;gradient_clipping&quot;: &quot;auto&quot;,
+    &quot;steps_per_print&quot;: 2000,
+    &quot;train_batch_size&quot;: &quot;auto&quot;,
+    &quot;train_micro_batch_size_per_gpu&quot;: &quot;auto&quot;,
+    &quot;wall_clock_breakdown&quot;: false
+}
+</code></pre>
+<ul>
+<li>
+<p>overlap_comm：控制是否使用通信与计算的重叠。当设置为True时，DeepSpeed将在梯度计算时尝试并行执行梯度通信。可以有效地减少通信时间，从而加速整个训练过程。</p>
+</li>
+<li>
+<p>allgather_bucket_size：用于控制Allgather操作的分桶大小。Allgather操作是指在分布式训练中，每个进程收集其他所有进程的张量，并将这些张量按顺序拼接起来。通过将张量划分为较小的桶（buckets），可以在通信过程中更高效地传输数据。allgather_bucket_size值越大，每个桶的大小越大，通信操作可能会变得更快，但也需要更多的内存来存储中间结果。合适的桶大小要根据实际情况调整。</p>
+</li>
+<li>
+<p>reduce_bucket_size：类似于allgather_bucket_size，用于控制Allreduce操作的分桶大小。Allreduce操作是将所有进程的某个张量进行规约（例如求和），并将结果广播回所有进程。通过将张量划分为较小的桶，可以更高效地传输数据。reduce_bucket_size值越大，每个桶的大小越大，通信操作可能会变得更快，但同时也需要更多的内存来存储中间结果。合适的桶大小需要根据实际情况进行调整。</p>
+</li>
+<li>
+<p>overlap_comm使用的是allgather_bucket_size和reduce_bucket_size值的4.5倍。如果它们被设置为5e8，需要9GB显存（5e8 x 2Bytes x 2 x 4.5）。如果内存大小是8GB或更小，需要将这些参数减少到约2e8，从而避免OOM，这需要3.6GB显存。如果在大容量GPU上也出现OOM，也需要做同样的调整。</p>
+</li>
+<li>
+<p>在deepspeed==0.4.4中新增了 round_robin_gradients 选项，可以并行化CPU的offload。当梯度累积的步数增加，或者GPU数量增加时，会有更好的性能优势。</p>
+</li>
+</ul>
+<h3 id="zero-3">ZeRO-3<a class="headerlink" href="#zero-3" title="Permanent link">#</a></h3>
+<ul>
+<li>一个配置示例</li>
+</ul>
+<pre><code class="language-json">{
+    &quot;fp16&quot;: {
+        &quot;enabled&quot;: &quot;auto&quot;,
+        &quot;loss_scale&quot;: 0,
+        &quot;loss_scale_window&quot;: 1000,
+        &quot;initial_scale_power&quot;: 16,
+        &quot;hysteresis&quot;: 2,
+        &quot;min_loss_scale&quot;: 1
+    },
+
+    &quot;optimizer&quot;: {
+        &quot;type&quot;: &quot;AdamW&quot;,
+        &quot;params&quot;: {
+            &quot;lr&quot;: &quot;auto&quot;,
+            &quot;betas&quot;: &quot;auto&quot;,
+            &quot;eps&quot;: &quot;auto&quot;,
+            &quot;weight_decay&quot;: &quot;auto&quot;
+        }
+    },
+
+    &quot;scheduler&quot;: {
+        &quot;type&quot;: &quot;WarmupLR&quot;,
+        &quot;params&quot;: {
+            &quot;warmup_min_lr&quot;: &quot;auto&quot;,
+            &quot;warmup_max_lr&quot;: &quot;auto&quot;,
+            &quot;warmup_num_steps&quot;: &quot;auto&quot;
+        }
+    },
+
+    &quot;zero_optimization&quot;: {
+        &quot;stage&quot;: 3,
+        &quot;offload_optimizer&quot;: {
+            &quot;device&quot;: &quot;cpu&quot;,
+            &quot;pin_memory&quot;: true
+        },
+        &quot;offload_param&quot;: {
+            &quot;device&quot;: &quot;cpu&quot;,
+            &quot;pin_memory&quot;: true
+        },
+        &quot;overlap_comm&quot;: true,
+        &quot;contiguous_gradients&quot;: true,
+        &quot;sub_group_size&quot;: 1e9,
+        &quot;reduce_bucket_size&quot;: &quot;auto&quot;,
+        &quot;stage3_prefetch_bucket_size&quot;: &quot;auto&quot;,
+        &quot;stage3_param_persistence_threshold&quot;: &quot;auto&quot;,
+        &quot;stage3_max_live_parameters&quot;: 1e9,
+        &quot;stage3_max_reuse_distance&quot;: 1e9,
+        &quot;stage3_gather_16bit_weights_on_model_save&quot;: true
+    },
+
+    &quot;gradient_accumulation_steps&quot;: &quot;auto&quot;,
+    &quot;gradient_clipping&quot;: &quot;auto&quot;,
+    &quot;steps_per_print&quot;: 2000,
+    &quot;train_batch_size&quot;: &quot;auto&quot;,
+    &quot;train_micro_batch_size_per_gpu&quot;: &quot;auto&quot;,
+    &quot;wall_clock_breakdown&quot;: false
+}
+</code></pre>
+<ul>
+<li>
+<p>stage3_max_live_parameters 是保留在 GPU 上的完整参数数量的上限。</p>
+</li>
+<li>
+<p>stage3_max_reuse_distance 是指将来何时再次使用参数的指标，从而决定是丢弃参数还是保留参数。 如果一个参数在不久的将来要再次使用（小于 stage3_max_reuse_distance），可以保留以减少通信开销。 使用activation checkpointing时，这一点非常有用。</p>
+</li>
+<li>
+<p>如果遇到 OOM，可以减少 stage3_max_live_parameters 和 stage3_max_reuse_distance。 除非正在使用activation checkpointing，否则它们对性能的影响应该很小。 1e9 会消耗 ~2GB。 内存由 stage3_max_live_parameters 和 stage3_max_reuse_distance 共享，所以不是相加的，一共 2GB。</p>
+</li>
+<li>
+<p>stage3_gather_16bit_weights_on_model_save 在保存模型时启用模型 fp16 权重合并。 对大型模型和多GPU，在内存和速度方面都是一项昂贵的操作。 如果打算恢复训练，目前需要使用它。 未来的更新将消除此限制。</p>
+</li>
+<li>
+<p>sub_group_size 控制在optimizer steps中更新参数的粒度。 参数被分组到 sub_group_size 的桶中，每个桶一次更新一个。 当与 ZeRO-Infinity 中的 NVMe offload一起使用时，sub_group_size 控制模型状态在optimizer steps期间从 NVMe 移入和移出 CPU 内存的粒度。 防止超大模型耗尽 CPU 内存。不使用NVMe offload时，使其保持默认值。出现OOM时，减小sub_group_size。当优化器迭代很慢时，可以增大sub_group_size 。</p>
+</li>
+<li>
+<p>ZeRO-3 中未使用 allgather_partitions、allgather_bucket_size 和 reduce_scatter 配置参数</p>
+</li>
+</ul>
+<h3 id="zero-stage-0">ZeRO-stage-0<a class="headerlink" href="#zero-stage-0" title="Permanent link">#</a></h3>
+<ul>
+<li>stage 0会禁用所有的分片，然后把DeepSpeed当作时DDP来使用。</li>
+</ul>
+<pre><code class="language-json">{
+    &quot;zero_optimization&quot;: {
+        &quot;stage&quot;: 0
+    }
+}
+</code></pre>
+<h3 id="zero-stage-1">ZeRO-stage-1<a class="headerlink" href="#zero-stage-1" title="Permanent link">#</a></h3>
+<p>只对优化器参数进行分片，可以加速一丢丢</p>
+<pre><code class="language-json">{
+    &quot;zero_optimization&quot;: {
+        &quot;stage&quot;: 1
+    }
+}
+</code></pre>
+<h3 id="nvme-support">NVMe Support<a class="headerlink" href="#nvme-support" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>ZeRO-Infinity 需要使用 ZeRO-3</p>
+</li>
+<li>
+<p>ZeRO-3 会比 ZeRO-2 慢很多。使用以下策略，可以使得ZeRO-3 的速度更接近ZeRO-2</p>
+</li>
+<li>
+<p>将stage3_param_persistence_threshold参数设置的很大，比如6 * hidden_size * hidden_size</p>
+</li>
+<li>
+<p>将offload_params参数关闭（可以极大改善性能）</p>
+</li>
+</ul>
+<h3 id="zero-stageoffload">如何选择不同的Zero stage和offload<a class="headerlink" href="#zero-stageoffload" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>从左到右，越来越慢：Stage 0 (DDP) &gt; Stage 1 &gt; Stage 2 &gt; Stage 2 + offload &gt; Stage 3 &gt; Stage 3 + offloads</p>
+</li>
+<li>
+<p>从左到右，所需GPU显存越来越少：Stage 0 (DDP) &lt; Stage 1 &lt; Stage 2 &lt; Stage 2 + offload &lt; Stage 3 &lt; Stage 3 + offloads</p>
+</li>
+</ul>
+<h2 id="_1">四、调参步骤<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>将batch_size设置为1，通过梯度累积实现任意的有效batch_size</p>
+</li>
+<li>
+<p>如果OOM则，设置--gradient_checkpointing 1 (HF Trainer)，或者 model.gradient_checkpointing_enable()</p>
+</li>
+<li>
+<p>如果OOM则，尝试ZeRO stage 2</p>
+</li>
+<li>
+<p>如果OOM则，尝试ZeRO stage 2 + offload_optimizer</p>
+</li>
+<li>
+<p>如果OOM则，尝试ZeRO stage 3</p>
+</li>
+<li>
+<p>如果OOM则，尝试offload_param到CPU</p>
+</li>
+<li>
+<p>如果OOM则，尝试offload_optimizer到CPU</p>
+</li>
+<li>
+<p>如果OOM则，尝试降低一些默认参数。比如使用generate时，减小beam search的搜索范围</p>
+</li>
+<li>
+<p>如果OOM则，使用混合精度训练，在Ampere的GPU上使用bf16，在旧版本GPU上使用fp16</p>
+</li>
+<li>
+<p>如果仍然OOM，则使用ZeRO-Infinity ，使用offload_param和offload_optimizer到NVME</p>
+</li>
+<li>
+<p>一旦使用batch_size=1时，没有导致OOM，测量此时的有效吞吐量，然后尽可能增大batch_size</p>
+</li>
+<li>
+<p>开始优化参数，可以关闭offload参数，或者降低ZeRO stage，然后调整batch_size，然后继续测量吞吐量，直到性能比较满意（调参可以增加66%的性能）</p>
+</li>
+</ul>
+<h3 id="_2">一些其他建议<a class="headerlink" href="#_2" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>如果训模型from scratch，hidden size最好可以被16整除</p>
+</li>
+<li>
+<p>batch size最好可以被2整除</p>
+</li>
+</ul>
+<h2 id="_3">五、优化器和调度器<a class="headerlink" href="#_3" title="Permanent link">#</a></h2>
+<ul>
+<li>当不使用offload_optimizer 时，可以按照下表，混合使用HF和DS的优化器和迭代器，除了HF Scheduler和DS Optimizer这一种情况。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Combos</th>
+<th>HF Scheduler</th>
+<th>DS Scheduler</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HF Optimizer</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>DS Optimizer</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="51">5.1 优化器<a class="headerlink" href="#51" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>启用 offload_optimizer 时可以使用非 DeepSpeed 的优化器，只要它同时具有 CPU 和 GPU 的实现（LAMB 除外）。</p>
+</li>
+<li>
+<p>DeepSpeed 的主要优化器是 Adam、AdamW、OneBitAdam 和 Lamb。 这些已通过 ZeRO 进行了彻底测试，建议使用。</p>
+</li>
+<li>
+<p>如果没有在配置文件中配置优化器参数，Trainer 将自动将其设置为 AdamW，并将使用命令行参数的默认值：--learning_rate、--adam_beta1、--adam_beta2、 --adam_epsilon 和 --weight_decay。</p>
+</li>
+<li>
+<p>与 AdamW 类似，可以配置其他官方支持的优化器。 请记住，它们可能具有不同的配置值。 例如 对于 Adam，需要将 weight_decay 设置为 0.01 左右。</p>
+</li>
+<li>
+<p>此外，offload在与 Deepspeed 的 CPU Adam 优化器一起使用时效果最佳。 如果想对offload使用不同的优化器，deepspeed==0.8.3 以后的版本，还需要添加：</p>
+</li>
+</ul>
+<pre><code class="language-json">{
+    &quot;zero_force_ds_cpu_optimizer&quot;: false
+}
+</code></pre>
+<h3 id="52">5.2 调度器<a class="headerlink" href="#52" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>DeepSpeed 支持 LRRangeTest、OneCycle、WarmupLR 和 WarmupDecayLR 学习率调度器。</p>
+</li>
+<li>
+<p>Transformers和DeepSpeed中调度器的overlap</p>
+</li>
+</ul>
+<pre><code>WarmupLR 使用 --lr_scheduler_type constant_with_warmup
+
+WarmupDecayLR 使用 --lr_scheduler_type linear
+</code></pre>
+<h2 id="_4">六、训练精度<a class="headerlink" href="#_4" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>由于 fp16 混合精度大大减少了内存需求，并可以实现更快的速度，因此只有在在此训练模式下表现不佳时，才考虑不使用混合精度训练。 通常，当模型未在 fp16 混合精度中进行预训练时，会出现这种情况（例如，使用 bf16 预训练的模型）。 这样的模型可能会溢出，导致loss为NaN。 如果是这种情况，使用完整的 fp32 模式。</p>
+</li>
+<li>
+<p>如果是基于 Ampere 架构的 GPU，pytorch 1.7 及更高版本将自动切换为使用更高效的 tf32 格式进行某些操作，但结果仍将采用 fp32。</p>
+</li>
+<li>
+<p>使用 Trainer，可以使用 --tf32 启用它，或使用 --tf32 0 或 --no_tf32 禁用它。 PyTorch 默认值是使用tf32。</p>
+</li>
+</ul>
+<h3 id="_5">自动混合精度<a class="headerlink" href="#_5" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>fp16</p>
+<ul>
+<li>
+<p>可以使用 pytorch-like AMP 方式或者 apex-like 方式</p>
+</li>
+<li>
+<p>使用 --fp16--fp16_backend amp 或 --fp16_full_eval 命令行参数时启用此模式</p>
+</li>
+</ul>
+</li>
+<li>
+<p>bf16</p>
+<ul>
+<li>使用--bf16 or --bf16_full_eval 命令行参数时启用此模式</li>
+</ul>
+</li>
+</ul>
+<h3 id="nccl">NCCL<a class="headerlink" href="#nccl" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>通讯会采用一种单独的数据类型</p>
+</li>
+<li>
+<p>默认情况下，半精度训练使用 fp16 作为reduction操作的默认值</p>
+</li>
+<li>
+<p>可以增加一个小的开销并确保reduction将使用 fp32 作为累积数据类型</p>
+</li>
+</ul>
+<pre><code class="language-json">{
+    &quot;communication_data_type&quot;: &quot;fp32&quot;
+}
+</code></pre>
+<h3 id="apex">apex<a class="headerlink" href="#apex" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>Apex 是一个在 PyTorch 深度学习框架下用于加速训练和提高性能的库。Apex 提供了混合精度训练、分布式训练和内存优化等功能，帮助用户提高训练速度、扩展训练规模以及优化 GPU 资源利用率。</p>
+</li>
+<li>
+<p>使用--fp16、 --fp16_backend apex、 --fp16_opt_level 01 命令行参数时启用此模式</p>
+</li>
+</ul>
+<pre><code class="language-json">&quot;amp&quot;: {
+     &quot;enabled&quot;: &quot;auto&quot;,
+     &quot;opt_level&quot;: &quot;auto&quot;
+}
+</code></pre>
+<h2 id="_6">七、获取模型参数<a class="headerlink" href="#_6" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>deepspeed会在优化器参数中存储模型的主参数，存储在global_step<em>/</em>optim_states.pt 文件中，数据类型为fp32。因此，想要从checkpoint中恢复训练，则保持默认即可</p>
+</li>
+<li>
+<p>如果模型是在ZeRO-2模式下保存的，模型参数会以fp16的形式存储在pytorch_model.bin中</p>
+</li>
+<li>
+<p>如果模型是在ZeRO-3模式下保存的，需要如下所示设置参数，否则pytorch_model.bin将不会被创建</p>
+</li>
+</ul>
+<pre><code class="language-json">{
+  &quot;zero_optimization&quot;: {
+         &quot;stage3_gather_16bit_weights_on_model_save&quot;: true
+    }
+}
+</code></pre>
+<ul>
+<li>
+<p>在线fp32权重恢复（需要很多的RAM）略</p>
+</li>
+<li>
+<p>离线获取fp32权重</p>
+</li>
+</ul>
+<pre><code class="language-shell">python zero_to_fp32.py . pytorch_model.bin
+</code></pre>
+<h3 id="zero-3-and-infinity-nuances">ZeRO-3 and Infinity Nuances<a class="headerlink" href="#zero-3-and-infinity-nuances" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>构造超大模型（略）</p>
+</li>
+<li>
+<p>搜集参数（略）</p>
+</li>
+</ul>
+<h2 id="zero-inference">八、ZeRO inference<a class="headerlink" href="#zero-inference" title="Permanent link">#</a></h2>
+<p>只有ZeRO-3是有意义的，因为可以将参数分片：</p>
+<pre><code class="language-shell">deepspeed --num_gpus=2 your_program.py &lt;normal cl args&gt; --do_eval --deepspeed ds_config.json
+</code></pre>
+<h2 id="_7">九、估算需要的显存<a class="headerlink" href="#_7" title="Permanent link">#</a></h2>
+<p>可以通过下面的代码，先估算不同配置需要的显存数量，从而决定开始尝试的ZeRO stage。</p>
+<pre><code class="language-shell">python -c 'from transformers import AutoModel; \
+from deepspeed.runtime.zero.stage3 import estimate_zero3_model_states_mem_needs_all_live; \
+model = AutoModel.from_pretrained(&quot;bigscience/T0_3B&quot;); \
+estimate_zero3_model_states_mem_needs_all_live(model, num_gpus_per_node=2, num_nodes=1)'
+[...]
+Estimated memory needed for params, optim states and gradients for a:
+HW: Setup with 1 node, 2 GPUs per node.
+SW: Model with 2783M total params, 65M largest layer params.
+  per CPU  |  per GPU |   Options
+ 70.00GB |   0.25GB | offload_param=cpu , offload_optimizer=cpu , zero_init=1
+ 70.00GB |   0.25GB | offload_param=cpu , offload_optimizer=cpu , zero_init=0
+ 62.23GB |   2.84GB | offload_param=none, offload_optimizer=cpu , zero_init=1
+ 62.23GB |   2.84GB | offload_param=none, offload_optimizer=cpu , zero_init=0
+ 0.74GB |  23.58GB | offload_param=none, offload_optimizer=none, zero_init=1
+ 31.11GB |  23.58GB | offload_param=none, offload_optimizer=none, zero_init=0
+</code></pre>
+<h2 id="_8">十、可能遇到的问题<a class="headerlink" href="#_8" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>启动时，进程被杀死，并且没有打印出traceback：CPU显存不够</p>
+</li>
+<li>
+<p>loss是NaN：训练时用的是bf16，使用时是fp16。常常发生于google在TPU上train的模型，如T5。此时需要使用fp32或者bf16。</p>
+</li>
+</ul>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://huggingface.co/docs/transformers/main/main_classes/deepspeed">https://huggingface.co/docs/transformers/main/main_classes/deepspeed</a></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

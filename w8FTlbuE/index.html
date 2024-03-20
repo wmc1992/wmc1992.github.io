@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/003_LLM%E5%B8%B8%E8%A7%84%E6%8A%80%E6%9C%AF/008_MoE/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#moe" class="nav-link">混合专家模型 (MoE)</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#12017" class="nav-link">1、年份2017</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#11" class="nav-link">1.1 结构基础说明</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#12-gate" class="nav-link">1.2 Gate部分</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2switch-transformers" class="nav-link">2、Switch Transformers</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/w8FTlbuE_no_toc/">隐藏左侧目录栏</a>][<a href="/w8FTlbuE/">显示左侧目录栏</a>]</p>
+
+<h1 id="moe">混合专家模型 (MoE)<a class="headerlink" href="#moe" title="Permanent link">#</a></h1>
+<h2 id="12017">1、年份2017<a class="headerlink" href="#12017" title="Permanent link">#</a></h2>
+<p>论文：<a href="https://arxiv.org/abs/1701.06538">outrageously large neural networks: the sparsely-gated mixture-of-experts layer</a></p>
+<p>模型结构如下图所示：</p>
+<div align=center><img src="/003_LLM常规技术/008_MoE/asserts/001.png" width=70% /></div>
+
+<h3 id="11">1.1 结构基础说明<a class="headerlink" href="#11" title="Permanent link">#</a></h3>
+<p>使用 <span class="arithmatex"><span class="MathJax_Preview">E</span><script type="math/tex">E</script></span> 表示上图中expert部分的网络，使用 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 表示上图中的门结构。向量 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 表示一个token对应的embedding的向量，为 MoE layer 部分的输入。</p>
+<p>符号 <span class="arithmatex"><span class="MathJax_Preview">G(x)</span><script type="math/tex">G(x)</script></span> 表示某个token经过门结构后的输出。符号 <span class="arithmatex"><span class="MathJax_Preview">E_i(x)</span><script type="math/tex">E_i(x)</script></span> 表示该token经过第 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 个expert之后的输出。</p>
+<p>那么 MoE layer 部分的输出结果为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}y = \sum_{i=1}^{n} G(x)_iE_i(x)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}y = \sum_{i=1}^{n} G(x)_iE_i(x)\end{equation}</script>
+</div>
+<p>在上式中 <span class="arithmatex"><span class="MathJax_Preview">G(x)</span><script type="math/tex">G(x)</script></span> 中的每个元素都在[0,1]之间，并且所有的元素和为1，每个元素也就是 <span class="arithmatex"><span class="MathJax_Preview">E_i(x)</span><script type="math/tex">E_i(x)</script></span> 的权重。</p>
+<p>从该公式中很容易看出，当某个expert的 <span class="arithmatex"><span class="MathJax_Preview">G(x)_i</span><script type="math/tex">G(x)_i</script></span> 为0时，那么输入向量 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 其实根本不需要经过该expert。所以门结构的输出 <span class="arithmatex"><span class="MathJax_Preview">G(x)</span><script type="math/tex">G(x)</script></span> 才会在上图中使用了两次，上图中expert结构前使用 <span class="arithmatex"><span class="MathJax_Preview">G(x)</span><script type="math/tex">G(x)</script></span> 的目的是筛选出向量 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 需要过哪些expert。上图中expert结构后使用 <span class="arithmatex"><span class="MathJax_Preview">G(x)</span><script type="math/tex">G(x)</script></span> 的目的是按照公式（1）做加权求和。</p>
+<h3 id="12-gate">1.2 Gate部分<a class="headerlink" href="#12-gate" title="Permanent link">#</a></h3>
+<p>上图中的门结构最容易想到的是下式。即经过一个全连接层之后做softmax操作：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}G(x)=\text{softmax}(x \cdot W)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}G(x)=\text{softmax}(x \cdot W)\end{equation}</script>
+</div>
+<p>在本论文中还设计了一些其他的不同的门结构，见原论文。</p>
+<h2 id="2switch-transformers">2、Switch Transformers<a class="headerlink" href="#2switch-transformers" title="Permanent link">#</a></h2>
+<p>论文：<a href="https://arxiv.org/pdf/2101.03961.pdf">Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity</a></p>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/674698482">混合专家模型 (MoE) 详解</a></p>
+</li>
+<li>
+<p><a href="https://arxiv.org/abs/1701.06538">https://arxiv.org/abs/1701.06538</a></p>
+</li>
+<li>
+<p><a href="https://arxiv.org/pdf/2101.03961.pdf">https://arxiv.org/pdf/2101.03961.pdf</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

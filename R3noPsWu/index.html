@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/005_RLHF%E5%8F%8A%E5%90%84%E7%A7%8D%E5%8F%98%E4%BD%93/001_%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%AE%80%E4%BB%8B/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link">强化学习简介</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、基础概念</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2" class="nav-link">2、对比有监督学习与强化学习</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#reference" class="nav-link">Reference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/R3noPsWu_no_toc/">隐藏左侧目录栏</a>][<a href="/R3noPsWu/">显示左侧目录栏</a>]</p>
+
+<h1 id="_1">强化学习简介<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<blockquote>
+<p>本文并不完备，这里仅记录几个关键点。</p>
+</blockquote>
+<h2 id="1">1、基础概念<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>奖励（reward）：智能体和环境进行交互时，每一次交互都会产生一个奖励（reward），一般使用 <span class="arithmatex"><span class="MathJax_Preview">r</span><script type="math/tex">r</script></span> 表示；</p>
+<p>回报（reward）：将每一次交互的奖励进行累加，得到整理的回报（reward），一般使用 <span class="arithmatex"><span class="MathJax_Preview">R</span><script type="math/tex">R</script></span> 表示；</p>
+<p>价值（value）：即使智能体的策略和环境不做改变，多次实验最终得到的回报也可能不同，所以更关注回报的期望，将其命名为价值（value），一般使用 <span class="arithmatex"><span class="MathJax_Preview">V</span><script type="math/tex">V</script></span> 表示；</p>
+<p>占用度量（occupancy measure）：归一化的占用度量用于衡量在一个智能体决策与一个动态环境的交互过程中，采样一个具体状态对的概率分布，一般使用 <span class="arithmatex"><span class="MathJax_Preview">p(s, a)</span><script type="math/tex">p(s, a)</script></span> 表示，这里的 <span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 是单词 state 的首字母，<span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 是单词 action 的首字母；</p>
+<blockquote>
+<p>这里占用度量的符号不一定对，看到后面时再回来修改。</p>
+</blockquote>
+<p>占用度量的性质：给定两个策略与一个动态环境交互得到的占用度量，那么当且仅当这两个占用度量相同时，这两个策略相同。当策略发生了改变时，那么占用度量也会发生改变。</p>
+<h2 id="2">2、对比有监督学习与强化学习<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<p>在有监督学习中，输入数据是 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span>，标签是 <span class="arithmatex"><span class="MathJax_Preview">y</span><script type="math/tex">y</script></span>，模型要学习的分布是 <span class="arithmatex"><span class="MathJax_Preview">p(y|x)</span><script type="math/tex">p(y|x)</script></span>；</p>
+<p>在强化学习中，输入数据是一个环境与一个策略的状态对 <span class="arithmatex"><span class="MathJax_Preview">(s,a)</span><script type="math/tex">(s,a)</script></span>，优化目标是最大化奖励的期望。由占用度量的性质可知，当策略改变时，占用度量也会改变。也就是说，在强化学习过程中，策略在被优化的过程中不断改变，相应的，占用度量也在改变，所以模型的输入数据 <span class="arithmatex"><span class="MathJax_Preview">(s, a)</span><script type="math/tex">(s, a)</script></span> 的分布也在不断变化。这正是强化学习的一大难点。</p>
+<p>下面看一下形式化的有监督学习和强化学习的学习目标。</p>
+<p>有监督学习的学习目标：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\text{最优模型}=\text{argmin}_{模型} E_{\text{(特征,标签 )} \backsim \text{数据分布}} \Big[ \text{损失函数(特征,标签)} \Big]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\text{最优模型}=\text{argmin}_{模型} E_{\text{(特征,标签 )} \backsim \text{数据分布}} \Big[ \text{损失函数(特征,标签)} \Big]\end{equation}</script>
+</div>
+<p>强化学习的学习目标：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\text{最优策略}=\text{argmax}_{\text{策略}}E_{\text{(状态,动作)} \backsim \text{策略的占用度量}} \Big[ \text{奖励函数(状态,动作)} \Big]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\text{最优策略}=\text{argmax}_{\text{策略}}E_{\text{(状态,动作)} \backsim \text{策略的占用度量}} \Big[ \text{奖励函数(状态,动作)} \Big]\end{equation}</script>
+</div>
+<p>在上述的两个公式中，有监督学习公式中的 "数据分布" 是不会变化的，而强化学习公式中的 "策略的占用度量" 是在学习过程中不断变化的。</p>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://hrl.boyuai.com/chapter/1/%E5%88%9D%E6%8E%A2%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0">https://hrl.boyuai.com/chapter/1/%E5%88%9D%E6%8E%A2%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0</a></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

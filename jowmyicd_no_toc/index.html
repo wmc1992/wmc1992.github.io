@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/004_LLM%E5%B7%A5%E7%A8%8B/002_%E5%8F%82%E6%95%B0%E9%87%8F%E5%88%86%E6%9E%90/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/jowmyicd_no_toc/">隐藏左侧目录栏</a>][<a href="/jowmyicd/">显示左侧目录栏</a>]</p>
+
+<h1 id="_1">参数量分析<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<p>为了方便描述，首先定义各符号的含义：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">v</span><script type="math/tex">v</script></span>：表示embedding层有多少个词；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span>：表示batch_size；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span>：表示seq_length，为文本长度；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span>：表示hidden_dim，为隐藏层的维度；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>：表示多头注意力中有多个头；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">h_a</span><script type="math/tex">h_a</script></span>：表示hidden_dim_per_head，为多头注意力中每个头的隐藏层维度；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span>：表示总共有 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 层 transformer；</li>
+</ul>
+<p>另外，在实际使用时一般都有 <span class="arithmatex"><span class="MathJax_Preview">h_a * a = h</span><script type="math/tex">h_a * a = h</script></span> 成立。</p>
+<h2 id="1bert">1、BERT 参数量<a class="headerlink" href="#1bert" title="Permanent link">#</a></h2>
+<h3 id="11-bert">1.1 BERT类模型<a class="headerlink" href="#11-bert" title="Permanent link">#</a></h3>
+<p><strong>embedding 层</strong>：参数量为 <span class="arithmatex"><span class="MathJax_Preview">vh</span><script type="math/tex">vh</script></span></p>
+<p><strong>MHA 层</strong>：这一层带有参数的有三部分，分别为 QKV 的权重矩阵、dense 层、Layer Norm层，分别计算：</p>
+<ul>
+<li>
+<p>QKV 的权重矩阵：每个权重矩阵的输入向量的维度为 <span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span>，有 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 个 head，每个 head 的隐层维度是 <span class="arithmatex"><span class="MathJax_Preview">h_a</span><script type="math/tex">h_a</script></span>，则参数量为 <span class="arithmatex"><span class="MathJax_Preview">hah_a=h^2</span><script type="math/tex">hah_a=h^2</script></span>，三个权重矩阵的参数量就是再乘以3，即 <span class="arithmatex"><span class="MathJax_Preview">3h^2</span><script type="math/tex">3h^2</script></span></p>
+</li>
+<li>
+<p>dense 层：这个比较简单，直接就是 <span class="arithmatex"><span class="MathJax_Preview">h^2</span><script type="math/tex">h^2</script></span></p>
+</li>
+<li>
+<p>Layer Norm层：这一层里面不是矩阵乘法，而是向量的相应位置的元素相乘，所以 <span class="arithmatex"><span class="MathJax_Preview">\gamma</span><script type="math/tex">\gamma</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">\beta</span><script type="math/tex">\beta</script></span> 的参数量是 <span class="arithmatex"><span class="MathJax_Preview">2h</span><script type="math/tex">2h</script></span></p>
+</li>
+</ul>
+<p><strong>FFN 层</strong>：这一层包含两个 dense 层，这两个 dense 层先将维度由 <span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span> 升到 <span class="arithmatex"><span class="MathJax_Preview">4h</span><script type="math/tex">4h</script></span>，再由 <span class="arithmatex"><span class="MathJax_Preview">4h</span><script type="math/tex">4h</script></span> 降到 <span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span>，然后接一个 Layer Norm 层，所以参数量为 <span class="arithmatex"><span class="MathJax_Preview">h*4h+4h*h+2h=8h^2+2h</span><script type="math/tex">h*4h+4h*h+2h=8h^2+2h</script></span></p>
+<p>将上述几部分加起来得到每层 transformer 的参数量为 <span class="arithmatex"><span class="MathJax_Preview">12h^2+4h</span><script type="math/tex">12h^2+4h</script></span>，一般会把 <span class="arithmatex"><span class="MathJax_Preview">4h</span><script type="math/tex">4h</script></span> 忽略掉，则参数量为 <span class="arithmatex"><span class="MathJax_Preview">12h^2</span><script type="math/tex">12h^2</script></span>。</p>
+<p>将 embedding 层和 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 层 transformer 加起来总的参数量为 <span class="arithmatex"><span class="MathJax_Preview">n \cdot (12h^2+4h) + vh</span><script type="math/tex">n \cdot (12h^2+4h) + vh</script></span></p>
+<h3 id="12-bert">1.2 BERT 模型结构<a class="headerlink" href="#12-bert" title="Permanent link">#</a></h3>
+<p>BERT 的模型结构为：vocab 总共有 21128 个，隐藏层维度为 768，12 层 transformer，MHA 中是 12 个 head，每个 head 的隐层维度是 64。官方论文中总参数量为 110M。</p>
+<p>将这些参数代入到上一小节的公式中得到：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{split}
+&amp;12 * (12 * 768 * 768 + 4 * 768) + 21128 * 768 \\
+= &amp;12*(7077888+3072)+16226304 \\ 
+= &amp;101197824 \\
+= &amp;101M
+\end{split}</div>
+<script type="math/tex; mode=display">\begin{split}
+&12 * (12 * 768 * 768 + 4 * 768) + 21128 * 768 \\
+= &12*(7077888+3072)+16226304 \\ 
+= &101197824 \\
+= &101M
+\end{split}</script>
+</div>
+<p>也就是说大概 101M 的参数量，相比于官方所说的 110M，这其中的差距主要包括最后的分类器层，以及上述计算过程中都没有考虑偏置项（bias）。</p>
+<p>BERT结构如下所示：</p>
+<pre><code>BertModel(
+  (embeddings): BertEmbeddings(
+    (word_embeddings): Embedding(21128, 768, padding_idx=0)
+    (position_embeddings): Embedding(512, 768)
+    (token_type_embeddings): Embedding(2, 768)
+    (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+    (dropout): Dropout(p=0.1, inplace=False)
+  )
+  (encoder): BertEncoder(
+    (layer): ModuleList(
+      (0-11): 12 x BertLayer(
+        (attention): BertAttention(
+          (self): BertSelfAttention(
+            (query): Linear(in_features=768, out_features=768, bias=True)
+            (key): Linear(in_features=768, out_features=768, bias=True)
+            (value): Linear(in_features=768, out_features=768, bias=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+          )
+          (output): BertSelfOutput(
+            (dense): Linear(in_features=768, out_features=768, bias=True)
+            (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+          )
+        )
+        (intermediate): BertIntermediate(
+          (dense): Linear(in_features=768, out_features=3072, bias=True)
+          (intermediate_act_fn): GELUActivation()
+        )
+        (output): BertOutput(
+          (dense): Linear(in_features=3072, out_features=768, bias=True)
+          (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+        )
+      )
+    )
+  )
+  (pooler): BertPooler(
+    (dense): Linear(in_features=768, out_features=768, bias=True)
+    (activation): Tanh()
+  )
+)
+</code></pre>
+<h2 id="2llama-65b">2、LLAMA-65B 参数量<a class="headerlink" href="#2llama-65b" title="Permanent link">#</a></h2>
+<h3 id="21-llama-65b">2.1 LLAMA-65B 参数量<a class="headerlink" href="#21-llama-65b" title="Permanent link">#</a></h3>
+<p>LLAMA 中会使用 SWiGLU 结构，增加一个新的符号：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">h_{\text{swi}}</span><script type="math/tex">h_{\text{swi}}</script></span>：表示 SWiGLU 中隐藏层的维度；</li>
+</ul>
+<p><strong>embedding 层</strong>：参数量为 <span class="arithmatex"><span class="MathJax_Preview">vh</span><script type="math/tex">vh</script></span></p>
+<p><strong>MHA 层</strong>：这一层带有参数的有三部分，分别为 QKV 的权重矩阵、dense 层、Layer Norm层，分别计算</p>
+<ul>
+<li>
+<p>QKV 的权重矩阵：每个权重矩阵的输入向量的维度为 <span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span>，有 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 个 head，每个 head 的隐层维度是 <span class="arithmatex"><span class="MathJax_Preview">h_a</span><script type="math/tex">h_a</script></span>，则参数量为 <span class="arithmatex"><span class="MathJax_Preview">hah_a=h^2</span><script type="math/tex">hah_a=h^2</script></span>，三个权重矩阵的参数量就是再乘以3，即 <span class="arithmatex"><span class="MathJax_Preview">3h^2</span><script type="math/tex">3h^2</script></span></p>
+</li>
+<li>
+<p>dense 层：这个比较简单，直接就是 <span class="arithmatex"><span class="MathJax_Preview">h^2</span><script type="math/tex">h^2</script></span></p>
+</li>
+<li>
+<p>Layer Norm层：这一层里面不是矩阵乘法，而是向量的相应位置的元素相乘，所以 <span class="arithmatex"><span class="MathJax_Preview">\gamma</span><script type="math/tex">\gamma</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">\beta</span><script type="math/tex">\beta</script></span> 的参数量是 <span class="arithmatex"><span class="MathJax_Preview">2h</span><script type="math/tex">2h</script></span></p>
+</li>
+</ul>
+<p><strong>MLP 层</strong>：LLAMA 中的 MLP 层使用的是 <a href="/1fb1JNJ6/">SWiGLU 结构</a>，从 2.2 小节中可以看到有三个 Linear 结构，总的参数量为：<span class="arithmatex"><span class="MathJax_Preview">3*h*h_{\text{swi}}</span><script type="math/tex">3*h*h_{\text{swi}}</script></span></p>
+<p>将上述几部分加起来得到每层 transformer 的参数量为 <span class="arithmatex"><span class="MathJax_Preview">4h^2+3hh_{\text{swi}}+4h</span><script type="math/tex">4h^2+3hh_{\text{swi}}+4h</script></span>，一般会把 <span class="arithmatex"><span class="MathJax_Preview">4h</span><script type="math/tex">4h</script></span> 忽略掉，则参数量为 <span class="arithmatex"><span class="MathJax_Preview">4h^2+3hh_{\text{swi}}</span><script type="math/tex">4h^2+3hh_{\text{swi}}</script></span>。</p>
+<p>将 embedding 层和 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> 层 transformer 加起来总的参数量为 <span class="arithmatex"><span class="MathJax_Preview">n \cdot (4h^2+3hh_{\text{swi}}+4h) + vh</span><script type="math/tex">n \cdot (4h^2+3hh_{\text{swi}}+4h) + vh</script></span></p>
+<h3 id="22-llama-65b">2.2 LLAMA-65B 模型结构<a class="headerlink" href="#22-llama-65b" title="Permanent link">#</a></h3>
+<p>vocab 总共有 32000 个，隐藏层维度为 8192，80 层 transformer，MHA 中是 64 个 head，每个 head 的隐层维度是 128。</p>
+<p>将这些参数代入到上一小节的公式中得到：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{split}
+&amp;80 * (4 * 8192 * 8192 + 3 * 8192 * 22016 + 4 * 8192) + 32000 * 8192 \\
+= &amp;80*(268435456+541065216+32768)+262144000 \\ 
+= &amp;65024819200 \\
+= &amp;65B
+\end{split}</div>
+<script type="math/tex; mode=display">\begin{split}
+&80 * (4 * 8192 * 8192 + 3 * 8192 * 22016 + 4 * 8192) + 32000 * 8192 \\
+= &80*(268435456+541065216+32768)+262144000 \\ 
+= &65024819200 \\
+= &65B
+\end{split}</script>
+</div>
+<p>也就是说大概 65B 的参数量。</p>
+<p>结构如下所示：</p>
+<pre><code>LlamaForCausalLM(
+  (model): LlamaModel(
+    (embed_tokens): Embedding(32000, 8192, padding_idx=0)
+    (layers): ModuleList(
+      (0-79): 80 x LlamaDecoderLayer(
+        (input_layernorm): LlamaRMSNorm()
+        (self_attn): LlamaAttention(
+          (q_proj): Linear4bit(in_features=8192, out_features=8192, bias=False)
+          (k_proj): Linear4bit(in_features=8192, out_features=8192, bias=False)
+          (v_proj): Linear4bit(in_features=8192, out_features=8192, bias=False)
+          (o_proj): Linear4bit(in_features=8192, out_features=8192, bias=False)
+          (rotary_emb): LlamaRotaryEmbedding()
+        )
+        (post_attention_layernorm): LlamaRMSNorm()
+        (mlp): LlamaMLP(
+          (gate_proj): Linear4bit(in_features=8192, out_features=22016, bias=False)
+          (down_proj): Linear4bit(in_features=22016, out_features=8192, bias=False)
+          (up_proj): Linear4bit(in_features=8192, out_features=22016, bias=False)
+          (act_fn): SiLUActivation()
+        )
+      )
+    )
+    (norm): LlamaRMSNorm()
+  )
+  (lm_head): Linear(in_features=8192, out_features=32000, bias=False)
+)
+</code></pre>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/639872915">https://zhuanlan.zhihu.com/p/639872915</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/624740065">https://zhuanlan.zhihu.com/p/624740065</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/424180513">BertLarge 中间激活值分析</a></p>
+</li>
+<li>
+<p><a href="https://arxiv.org/pdf/1910.02054.pdf">ZeRO: Memory Optimizations Toward Training Trillion Parameter Models</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

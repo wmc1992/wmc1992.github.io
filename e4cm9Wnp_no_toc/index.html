@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/005_RLHF%E5%8F%8A%E5%90%84%E7%A7%8D%E5%8F%98%E4%BD%93/008_Actor_Critic/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/e4cm9Wnp_no_toc/">隐藏左侧目录栏</a>][<a href="/e4cm9Wnp/">显示左侧目录栏</a>]</p>
+
+<h1 id="actor-critic">Actor-Critic<a class="headerlink" href="#actor-critic" title="Permanent link">#</a></h1>
+<h2 id="1policy-gradient">1、Policy Gradient 回顾<a class="headerlink" href="#1policy-gradient" title="Permanent link">#</a></h2>
+<p>在 policy gradient 中，求解梯度使用的是下式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big( \sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big) \nabla \text{log}p_{\theta}(a_t^n|s_t^n)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big( \sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big) \nabla \text{log}p_{\theta}(a_t^n|s_t^n)\end{equation}</script>
+</div>
+<p>在上述公式中 <span class="arithmatex"><span class="MathJax_Preview">\sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n</span><script type="math/tex">\sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n</script></span> 这一项表示的是给定状态 <span class="arithmatex"><span class="MathJax_Preview">s_t^n</span><script type="math/tex">s_t^n</script></span> 之后策略采取了动作 <span class="arithmatex"><span class="MathJax_Preview">a_t^n</span><script type="math/tex">a_t^n</script></span> 所能够获取到的回报G。减去 <span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span> 的作用是让括号里的这一项有正有负。</p>
+<p>另外还把 <span class="arithmatex"><span class="MathJax_Preview">\Big( \sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big)</span><script type="math/tex">\Big( \sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n - b \Big)</script></span> 这一项使用符号 <span class="arithmatex"><span class="MathJax_Preview">A^n(s_t^n, a_t^n)</span><script type="math/tex">A^n(s_t^n, a_t^n)</script></span> 表示，称为 advantage function。</p>
+<p>在之前的内容中已经讨论过了，梯度公式中的 <span class="arithmatex"><span class="MathJax_Preview">\sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n</span><script type="math/tex">\sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n</script></span> 这一项，也就是回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的方差非常大，方差大就导致训练起来非常困难。而如果这里使用回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的期望替代的话，就不会有方差太大的问题了。</p>
+<p>之前介绍的 Q-learning 方法就是在估计价值函数，而价值函数的定义正是回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的期望，所以就会想到使用 Q-learning 方法替换掉这里的 <span class="arithmatex"><span class="MathJax_Preview">\sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n</span><script type="math/tex">\sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n</script></span>。</p>
+<h2 id="2actor-critic">2、Actor-Critic<a class="headerlink" href="#2actor-critic" title="Permanent link">#</a></h2>
+<h3 id="21-actor-critic">2.1 Actor-Critic<a class="headerlink" href="#21-actor-critic" title="Permanent link">#</a></h3>
+<p>先来回顾一下之前的价值函数的公式和其含义。</p>
+<p>动作价值函数的公式如下，其含义为给定了某个状态且策略采取了某个动作之后，所获得的回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的期望：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}Q^\pi(s, a) = E_{\pi}[G_t|s_t=s,a_t=a]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}Q^\pi(s, a) = E_{\pi}[G_t|s_t=s,a_t=a]\end{equation}</script>
+</div>
+<p>状态价值函数的公式如下，其含义为给定了某个状态之后，所获得的回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的期望：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}V^{\pi}(s) = E_{\pi}[G_t|s_t=s]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}V^{\pi}(s) = E_{\pi}[G_t|s_t=s]\end{equation}</script>
+</div>
+<p>状态价值函数与动作价值函数的转换公式如下，在这里状态价值函数可以看作是动作价值函数的期望：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}V^{\pi}(s) = \sum_{a\in A} \pi(a|s) Q^\pi(s, a) = E_{a \in A}[Q^\pi(s, a)]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}V^{\pi}(s) = \sum_{a\in A} \pi(a|s) Q^\pi(s, a) = E_{a \in A}[Q^\pi(s, a)]\end{equation}</script>
+</div>
+<p>当然状态价值函数和动作价值函数之间的转换关系还有下式，不过在这里没有使用到这个公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}Q^\pi(s, a) = r(s,a) + \sum_{s^\prime \in S} p(s^\prime | s, a) V^\pi(s^\prime) = E_{s^\prime \in S} \Big[r(s, a) + V^\pi(s^\prime) \Big]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}Q^\pi(s, a) = r(s,a) + \sum_{s^\prime \in S} p(s^\prime | s, a) V^\pi(s^\prime) = E_{s^\prime \in S} \Big[r(s, a) + V^\pi(s^\prime) \Big]\end{equation}</script>
+</div>
+<p>接下来就可以分析一下了。在公式（1）中的 <span class="arithmatex"><span class="MathJax_Preview">\sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n</span><script type="math/tex">\sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n</script></span>，也就是回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的方差较大，想替换为期望，而动作价值函数的公式（2）就是给定了某个状态且策略采取了某个动作之后，所获得的回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的期望。所以这里可以使用动作价值函数替换掉 <span class="arithmatex"><span class="MathJax_Preview">\sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n</span><script type="math/tex">\sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n</script></span>。然后在公式（1）中还有减去 <span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span> 这么一个操作，在之前的讨论中 <span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span> 一般是 <span class="arithmatex"><span class="MathJax_Preview">\sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n</span><script type="math/tex">\sum_{t^\prime=t}^{T_n} \gamma^{t^\prime - t} r_{t^\prime}^n</script></span> 的期望，这样能够保证减去 <span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span> 之后有正有负，现在替换成动作价值函数 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi(s, a)</span><script type="math/tex">Q^\pi(s, a)</script></span> 之后，这里的 <span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span> 就最好是 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi(s, a)</span><script type="math/tex">Q^\pi(s, a)</script></span> 的期望。由公式（4）可以看出状态价值函数 <span class="arithmatex"><span class="MathJax_Preview">V^\pi(s)</span><script type="math/tex">V^\pi(s)</script></span> 就可以看作是动作价值函数的期望，所以这里的 <span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span> 就采取状态价值函数。替换完之后的梯度公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ Q^\pi(s_t^n, a_t^n) - V^\pi(s_t^n) \Big] \nabla \text{log} p_{\theta}(a_t^n|s_t^n)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ Q^\pi(s_t^n, a_t^n) - V^\pi(s_t^n) \Big] \nabla \text{log} p_{\theta}(a_t^n|s_t^n)\end{equation}</script>
+</div>
+<p>这个公式就是结合了"基于策略的算法"与"基于值的算法"之后的结果。</p>
+<h3 id="22-a2c">2.2 A2C<a class="headerlink" href="#22-a2c" title="Permanent link">#</a></h3>
+<p>A2C 的全称为 Advantage Actor-Critic，就是 Actor-Critic 的改进版。公式（6）里面用到了两个价值函数：<span class="arithmatex"><span class="MathJax_Preview">Q^\pi</span><script type="math/tex">Q^\pi</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">V^\pi</span><script type="math/tex">V^\pi</script></span>，也就对应着两个模型。再加上 actor 对应的模型，总共需要训练三个模型。模型越多，系统越复杂，也就越难以训练，所以这里考虑对两个价值函数变形，最终使用一个价值函数实现。</p>
+<p>上一小节里面的公式（5）是动作价值函数与状态价值函数之间的转换关系，在这里主要是利用该公式。利用该公式将公式（6）中的 <span class="arithmatex"><span class="MathJax_Preview">Q^\pi(s_t^n, a_t^n)</span><script type="math/tex">Q^\pi(s_t^n, a_t^n)</script></span> 部分做如下的一些转换：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+Q^\pi(s_t^n, a_t^n) &amp;= E \Big[ r_t^n + V^\pi (s_{t+1}^n) \Big] \\
+&amp;\rightarrow r_t^n + V^\pi (s_{t+1}^n)
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+Q^\pi(s_t^n, a_t^n) &= E \Big[ r_t^n + V^\pi (s_{t+1}^n) \Big] \\
+&\rightarrow r_t^n + V^\pi (s_{t+1}^n)
+\end{split}\end{equation}</script>
+</div>
+<p>上述公式中的第一行就是由公式（5）得到的，这个不需要解释。第二行就不是恒等变换了，所以上面使用箭头来表示。箭头的左侧是一个期望，箭头的右侧是直接把期望符号去掉了，等于是某次采样值。使用单次采样值替换掉原来的期望值从理论上来说是近似相等的，它带来的问题是原来的期望值是比较稳定的，而采样值则是随机变量，相比起期望值就没有那么的稳定了。使用期望值的话，方差可以看作是0，而使用随机变量的话，方差肯定是大于0的。</p>
+<p>将公式（7）带入到公式（6）里面之后得到新的梯度计算公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ r_t^n + V^\pi (s_{t+1}^n) - V^\pi(s_t^n) \Big] \nabla \text{log} p_{\theta}(a_t^n|s_t^n)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\nabla \bar{R}_{\theta} = \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^{T_n} \Big[ r_t^n + V^\pi (s_{t+1}^n) - V^\pi(s_t^n) \Big] \nabla \text{log} p_{\theta}(a_t^n|s_t^n)\end{equation}</script>
+</div>
+<p>使用该公式就只需要一个模型来估计价值函数，以及一个 actor 对应的模型，总共需要训练两个模型，比之前少了一个。</p>
+<p>关于这个改进，单从理论上来说，它的优点是将原来需要训练3个模型的系统简化为了需要训练2个模型的系统；它的缺点是将原来的期望变为了随机变量，也就是公式（7），这增加了训练的难度。所以从理论上来看不能完全说该改进一定有效。但是实验结果胜于理论，经过大量实验证明，经过该改进之后，最终训练出来的模型的效果是要明显优于改进之前的。</p>
+<h3 id="23">2.3 一些其他说明<a class="headerlink" href="#23" title="Permanent link">#</a></h3>
+<p>上面在介绍 Actor-Critic 方法时，是在"基于策略的算法"上引出来的。首先，有一个基于策略的方法，比如 policy gradient，该方法的梯度公式中需要求解回报 <span class="arithmatex"><span class="MathJax_Preview">G</span><script type="math/tex">G</script></span> 的期望，该值不容易直接求解，于是使用一个模型来估计该值。从这个角度来看，Actor-Critic 更像是一个基于策略的方法。</p>
+<p>其实 Actor-Critic 还可以从另一个角度进行理解。首先，有一个基于值的算法，比如 DQN，该方法能够估计出一个动作价值函数。有了动作价值函数之后，只需要按照公式 <span class="arithmatex"><span class="MathJax_Preview">a=\text{argmax}_a Q^\pi(s, a)</span><script type="math/tex">a=\text{argmax}_a Q^\pi(s, a)</script></span> 就可以获得策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 了，但是这个公式直接求解不好求，于是使用一个模型（也就是 actor 模型）来对该式进行求解。从这个角度来看，Actor-Critic 更像是一个基于值的方法。</p>
+<p>总体来说，Actor-Critic 是结合了基于策略的算法和基于值的算法的，是目前来说效果最好的强化学习方案。</p>
+<h3 id="24-a2c">2.4 A2C 算法过程<a class="headerlink" href="#24-a2c" title="Permanent link">#</a></h3>
+<p>算法过程简述如下：</p>
+<ul>
+<li>
+<p>使用策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span>（也就是 actor 模型）与环境互动采样数据；</p>
+</li>
+<li>
+<p>使用上一步采样到的数据 <span class="arithmatex"><span class="MathJax_Preview">(s_t, a_t, r_t, s_{t+1})</span><script type="math/tex">(s_t, a_t, r_t, s_{t+1})</script></span> 训练更新 critic 模型；</p>
+</li>
+<li>
+<p>使用 critic 模型计算出的 advantage 训练更新 actor 模型；</p>
+</li>
+</ul>
+<p>这里记录几个之前一直存在疑惑的点：</p>
+<ul>
+<li>
+<p>critic 模型训练时的监督信号是由环境提供的。无论策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 选出来的策略是好的还是坏的，环境对其的反馈 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span> 是完全准确的，critic 模型拟合的是这个 <span class="arithmatex"><span class="MathJax_Preview">r_t</span><script type="math/tex">r_t</script></span>。所以，在训练 critic 模型时，策略 <span class="arithmatex"><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span> 仅提供一个动作 <span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>，至于这个策略是否是最优的，从理论上来说对于 critic 模型的训练是没有影响的；</p>
+</li>
+<li>
+<p>actor 模型训练时的监督信号是由 critic 模型提供的。</p>
+</li>
+</ul>
+<p>总体来说：环境提供监督信号用于训练 critic 模型，然后 critic 模型提供监督信号用于训练 actor 模型。</p>
+<h2 id="3a3c">3、A3C<a class="headerlink" href="#3a3c" title="Permanent link">#</a></h2>
+<p>A3C 的全称为 Asynchronous Advantage Actor-Critic，这里的 Asynchronous 是异步的意思。如下图所示，首先有一个 global network，然后有多个 worker。每个 worker 把所有的模型的权重从 global network 那里拷贝出来一份，然后自己就开始进行训练流程：自己采样数据，自己计算梯度。当 worker 计算出来梯度之后，就把这个梯度传给 global network，然后 global network 就使用这个梯度更新自己的模型的权重，更新完成之后，worker 再从 global network 这里拷贝所有的模型的权重，如此往复。</p>
+<p>注意，worker 是有多个的，所以对于某一个 worker 来说，它一开始拷贝了一份模型的权重出来，等到计算出梯度之后已经过去一段时间了，此时 global network 的权重可能已经被其他的 worker 回传的梯度更新过了，但是没有关系，不用管这个，还是将 worker 计算出的梯度直接作用到当前的 global network 的参数上。猜测这种操作的原因：一个原因是这样操作简单，另一个原因估计还是为了增加多样性和鲁棒性。</p>
+<div align=center><img src="/e4cm9Wnp/assets/01.png" width=70% /></div>
+
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=j82QLgfhFiY&amp;list=PLJV_el3uVTsODxQFgzMzPLa16h6B8kWM_&amp;index=6">https://www.youtube.com/watch?v=j82QLgfhFiY&amp;list=PLJV_el3uVTsODxQFgzMzPLa16h6B8kWM_&amp;index=6</a></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

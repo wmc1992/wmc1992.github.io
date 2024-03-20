@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/001_LLM%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83/004_LLaMA%E6%A8%A1%E5%9E%8B/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#llama" class="nav-link">LLaMA</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#1" class="nav-link">1、该篇论文的重点</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#2approach" class="nav-link">2、Approach</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#21" class="nav-link">2.1 使用的数据</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#22-architecture" class="nav-link">2.2 Architecture</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#23" class="nav-link">2.3 提高训练速度方面使用的技术</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#3" class="nav-link">3、效果</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#4instruction-finetuning" class="nav-link">4、Instruction Finetuning</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_4" class="nav-link">偏见问题与能耗问题</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p align="right">[<a href="/CQcCbuQI_no_toc/">隐藏左侧目录栏</a>][<a href="/CQcCbuQI/">显示左侧目录栏</a>]</p>
+
+<h1 id="llama">LLaMA<a class="headerlink" href="#llama" title="Permanent link">#</a></h1>
+<h2 id="1">1、该篇论文的重点<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>推进开源，不仅将训练好的模型开源，在预训练时使用的训练数据也仅使用开源数据，这样后来人能够完全的复现该模型；</p>
+</li>
+<li>
+<p>探究相对小一点的模型，加上相对比较大的数据集，所取得的最终效果；模型较小的话，下游使用时成本较低。</p>
+</li>
+</ul>
+<h2 id="2approach">2、Approach<a class="headerlink" href="#2approach" title="Permanent link">#</a></h2>
+<h3 id="21">2.1 使用的数据<a class="headerlink" href="#21" title="Permanent link">#</a></h3>
+<p>用了以下数据集，全部开源可获取。</p>
+<p><img alt="" src="/CQcCbuQI/assets/Table1.png" /></p>
+<h3 id="22-architecture">2.2 Architecture<a class="headerlink" href="#22-architecture" title="Permanent link">#</a></h3>
+<ul>
+<li>Pre-normalization：即将本来放在 MH Attention 和 FeedForward 后面的 LayerNorm，放到了这两层之前；</li>
+<li>规一化函数使用 RMSNorm；</li>
+<li>激活函数使用 SwiGLU；（来自于 PaLM）；</li>
+<li>位置嵌入层为 Rotary Embeddings，（来自于 GPTNeo）；</li>
+</ul>
+<p>各超参数信息：</p>
+<p><img alt="" src="/CQcCbuQI/assets/Table2.png" /></p>
+<h3 id="23">2.3 提高训练速度方面使用的技术<a class="headerlink" href="#23" title="Permanent link">#</a></h3>
+<ul>
+<li>xformers 库中的优化版的多头注意力，至于优化了什么原文是：not storing the attention weights and not computing the key/query scores that are masked due to the causal nature of the language modeling task；</li>
+<li>加入了减少部分重复计算的方法（来源：<a href="https://arxiv.org/pdf/2205.05198.pdf">Reducing Activation Recomputation in Large Transformer Models</a>）</li>
+</ul>
+<h2 id="3">3、效果<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<h4 id="_1">比较对象<a class="headerlink" href="#_1" title="Permanent link">#</a></h4>
+<p>非开源的 GPT-3、Gopher、Chinchilla 和 PaLM，还有开源的 OPT 、GPT-J 和 GPTNeo。</p>
+<h4 id="_2">比较的任务<a class="headerlink" href="#_2" title="Permanent link">#</a></h4>
+<ul>
+<li>常识推理</li>
+<li>闭卷问答</li>
+<li>阅读理解</li>
+<li>数学推理</li>
+<li>代码生成</li>
+<li>MMLU（massive multitask language understanding：<a href="https://paperswithcode.com/sota/multi-task-language-understanding-on-mmlu">https://paperswithcode.com/sota/multi-task-language-understanding-on-mmlu</a>）</li>
+</ul>
+<h4 id="_3">效果说明<a class="headerlink" href="#_3" title="Permanent link">#</a></h4>
+<p>待补充</p>
+<h2 id="4instruction-finetuning">4、Instruction Finetuning<a class="headerlink" href="#4instruction-finetuning" title="Permanent link">#</a></h2>
+<p>不是这篇论文的重点，做的很粗糙，略；</p>
+<h2 id="_4">偏见问题与能耗问题<a class="headerlink" href="#_4" title="Permanent link">#</a></h2>
+<p>略</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

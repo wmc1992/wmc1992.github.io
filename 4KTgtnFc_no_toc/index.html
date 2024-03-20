@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/004_LLM%E5%B7%A5%E7%A8%8B/004_%E4%B8%AD%E9%97%B4%E6%BF%80%E6%B4%BB%E5%80%BC%E6%98%BE%E5%AD%98%E5%88%86%E6%9E%90/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/4KTgtnFc_no_toc/">隐藏左侧目录栏</a>][<a href="/4KTgtnFc/">显示左侧目录栏</a>]</p>
+
+<h1 id="_1">中间激活值显存分析<a class="headerlink" href="#_1" title="Permanent link">#</a></h1>
+<p>中间激活值（intermediate activations）：是在前向传播的过程中，为了让后向传播完成计算，所需要保留的模型中间结果。</p>
+<h2 id="1">1、什么是中间激活值？<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<p>以一个四个 Linear 的模型结构为例进行说明。其前向传播和损失函数的公式如下所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{split}
+x_1 &amp;= W_1 x + b_1 \\
+x_2 &amp;= W_2 x_1 + b_2 \\
+x_3 &amp;= W_3 x_2 + b_3 \\
+x_4 &amp;= W_4 x_3 + b_4 \\
+l &amp;= (y - x_4)^2
+\end{split}</div>
+<script type="math/tex; mode=display">\begin{split}
+x_1 &= W_1 x + b_1 \\
+x_2 &= W_2 x_1 + b_2 \\
+x_3 &= W_3 x_2 + b_3 \\
+x_4 &= W_4 x_3 + b_4 \\
+l &= (y - x_4)^2
+\end{split}</script>
+</div>
+<p>在该公式中：<span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">y</span><script type="math/tex">y</script></span> 为数据的特征和标签；<span class="arithmatex"><span class="MathJax_Preview">W_1</span><script type="math/tex">W_1</script></span>、<span class="arithmatex"><span class="MathJax_Preview">b_1</span><script type="math/tex">b_1</script></span>、<span class="arithmatex"><span class="MathJax_Preview">W_2</span><script type="math/tex">W_2</script></span>、<span class="arithmatex"><span class="MathJax_Preview">b_2</span><script type="math/tex">b_2</script></span>、<span class="arithmatex"><span class="MathJax_Preview">W_3</span><script type="math/tex">W_3</script></span>、<span class="arithmatex"><span class="MathJax_Preview">b_3</span><script type="math/tex">b_3</script></span>、<span class="arithmatex"><span class="MathJax_Preview">W_4</span><script type="math/tex">W_4</script></span>、<span class="arithmatex"><span class="MathJax_Preview">b_4</span><script type="math/tex">b_4</script></span> 为四个 Linear 层的权重和偏置；<span class="arithmatex"><span class="MathJax_Preview">x_1</span><script type="math/tex">x_1</script></span>、<span class="arithmatex"><span class="MathJax_Preview">x_2</span><script type="math/tex">x_2</script></span>、<span class="arithmatex"><span class="MathJax_Preview">x_3</span><script type="math/tex">x_3</script></span>、<span class="arithmatex"><span class="MathJax_Preview">x_4</span><script type="math/tex">x_4</script></span> 都是计算过程中的中间状态。</p>
+<p>反向传播过程中要对权重进行更新，也就是求损失相对于 <span class="arithmatex"><span class="MathJax_Preview">W_1</span><script type="math/tex">W_1</script></span>、<span class="arithmatex"><span class="MathJax_Preview">W_2</span><script type="math/tex">W_2</script></span>、<span class="arithmatex"><span class="MathJax_Preview">W_3</span><script type="math/tex">W_3</script></span>、<span class="arithmatex"><span class="MathJax_Preview">W_4</span><script type="math/tex">W_4</script></span> 的偏导，按照链式求导法则得到公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{split}
+\frac{\partial l}{\partial W_4} &amp;= \frac{\partial l}{\partial x_4} \cdot \frac{\partial x_4}{\partial W_4} = \Bigg[ -2(y-x_4)\Bigg] \cdot x_3 \\
+\frac{\partial l}{\partial W_3} &amp;= \frac{\partial l}{\partial x_4} \cdot \frac{\partial x_4}{\partial x_3} \cdot \frac{\partial x_3}{\partial W_3} =  \Bigg[ [-2(y-x_4)] \cdot W_4 \Bigg] \cdot x_2 \\
+\frac{\partial l}{\partial W_2} &amp;= \frac{\partial l}{\partial x_4} \cdot \frac{\partial x_4}{\partial x_3} \cdot \frac{\partial x_3}{\partial x_2} \cdot \frac{\partial x_2}{\partial W_2} =  \Bigg[ [-2(y-x_4)] \cdot W_4 \cdot W_3 \Bigg] \cdot x_1 \\
+\frac{\partial l}{\partial W_1} &amp;= \frac{\partial l}{\partial x_4} \cdot \frac{\partial x_4}{\partial x_3} \cdot \frac{\partial x_3}{\partial x_2} \cdot \frac{\partial x_2}{\partial x_1} \cdot \frac{\partial x_1}{\partial W_1} =  \Bigg[ [-2(y-x_4)] \cdot W_4 \cdot W_3 \cdot W_2 \Bigg] \cdot x \\
+\end{split}</div>
+<script type="math/tex; mode=display">\begin{split}
+\frac{\partial l}{\partial W_4} &= \frac{\partial l}{\partial x_4} \cdot \frac{\partial x_4}{\partial W_4} = \Bigg[ -2(y-x_4)\Bigg] \cdot x_3 \\
+\frac{\partial l}{\partial W_3} &= \frac{\partial l}{\partial x_4} \cdot \frac{\partial x_4}{\partial x_3} \cdot \frac{\partial x_3}{\partial W_3} =  \Bigg[ [-2(y-x_4)] \cdot W_4 \Bigg] \cdot x_2 \\
+\frac{\partial l}{\partial W_2} &= \frac{\partial l}{\partial x_4} \cdot \frac{\partial x_4}{\partial x_3} \cdot \frac{\partial x_3}{\partial x_2} \cdot \frac{\partial x_2}{\partial W_2} =  \Bigg[ [-2(y-x_4)] \cdot W_4 \cdot W_3 \Bigg] \cdot x_1 \\
+\frac{\partial l}{\partial W_1} &= \frac{\partial l}{\partial x_4} \cdot \frac{\partial x_4}{\partial x_3} \cdot \frac{\partial x_3}{\partial x_2} \cdot \frac{\partial x_2}{\partial x_1} \cdot \frac{\partial x_1}{\partial W_1} =  \Bigg[ [-2(y-x_4)] \cdot W_4 \cdot W_3 \cdot W_2 \Bigg] \cdot x \\
+\end{split}</script>
+</div>
+<p>对上面这四个权重矩阵的链式求导公式找一下规律，可以发现对于权重矩阵 <span class="arithmatex"><span class="MathJax_Preview">W_i</span><script type="math/tex">W_i</script></span> 的梯度在计算时主要有两项：</p>
+<ul>
+<li>
+<p>第一项是上述公式中使用特别大的中括号扩起来的部分，这部分是第 <span class="arithmatex"><span class="MathJax_Preview">i+1</span><script type="math/tex">i+1</script></span> 层反传回来的值，我们使用符号 <span class="arithmatex"><span class="MathJax_Preview">l_{i+1}</span><script type="math/tex">l_{i+1}</script></span> 来表示这一项；</p>
+</li>
+<li>
+<p>另一项则是第 <span class="arithmatex"><span class="MathJax_Preview">i-1</span><script type="math/tex">i-1</script></span> 层计算出来的中间值，使用符号 <span class="arithmatex"><span class="MathJax_Preview">x_{i-1}</span><script type="math/tex">x_{i-1}</script></span> 来表示；</p>
+</li>
+</ul>
+<p>那么对于 <span class="arithmatex"><span class="MathJax_Preview">W_i</span><script type="math/tex">W_i</script></span> 的梯度计算公式就变为了 <span class="arithmatex"><span class="MathJax_Preview">\frac{\partial l}{\partial W_i} = l_{i+1} \cdot x_{i-1}</span><script type="math/tex">\frac{\partial l}{\partial W_i} = l_{i+1} \cdot x_{i-1}</script></span>，这里的 <span class="arithmatex"><span class="MathJax_Preview">l_{i+1}</span><script type="math/tex">l_{i+1}</script></span> 是第 <span class="arithmatex"><span class="MathJax_Preview">i+1</span><script type="math/tex">i+1</script></span> 层反传过来的，所以计算第 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 层的梯度时只需要做一次矩阵乘法即可。这里的 <span class="arithmatex"><span class="MathJax_Preview">x_{i-1}</span><script type="math/tex">x_{i-1}</script></span> 正是在前向传播时计算出来的中间状态，比较官方的术语为 <strong>中间激活值</strong>。</p>
+<h2 id="2">2、中间激活值显存分析<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<h3 id="21-tranformer">2.1 tranformer 的结构<a class="headerlink" href="#21-tranformer" title="Permanent link">#</a></h3>
+<p>这里把 transformer 层分为两部分，一部分是 MHA 层，一部分是 FFN 层。下面分别写一下这两部分的公式。一般的资料中关于 transformer 的公式仅写主要的部分，像dropout、normalize、激活函数都会被省略，但是这里由于需要分析中间激活值的显存，所以会把整个 transformer 的所有操作都体现到公式中，如下。</p>
+<p>MHA 层的公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+Q &amp;= x \cdot W_Q, \quad K = x \cdot W_k, \quad V = x \cdot W_v \\
+x_{\text{self}} &amp;= \text{Dropout}\Big[ \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \Big] \cdot V \\
+x_{\text{attn}} &amp;= \text{LN}\Big[ \text{Dropout}\big(x_{\text{self}} \cdot w_o \big) + x \Big]
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+Q &= x \cdot W_Q, \quad K = x \cdot W_k, \quad V = x \cdot W_v \\
+x_{\text{self}} &= \text{Dropout}\Big[ \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \Big] \cdot V \\
+x_{\text{attn}} &= \text{LN}\Big[ \text{Dropout}\big(x_{\text{self}} \cdot w_o \big) + x \Big]
+\end{split}\end{equation}</script>
+</div>
+<p>FFN 层的公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+x_{\text{ffn}} &amp;= \text{GeLU}(x_{\text{attn}} \cdot W_{\text{ff1}}) \cdot W_{\text{ff2}} \\ 
+x_o &amp;= \text{LN}\Big[\text{Dropout}\big(x_{\text{ffn}} \big) + x_{\text{attn}} \Big]
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+x_{\text{ffn}} &= \text{GeLU}(x_{\text{attn}} \cdot W_{\text{ff1}}) \cdot W_{\text{ff2}} \\ 
+x_o &= \text{LN}\Big[\text{Dropout}\big(x_{\text{ffn}} \big) + x_{\text{attn}} \Big]
+\end{split}\end{equation}</script>
+</div>
+<p>总的来说，MHA 层的输入为 <span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span>，输出为 <span class="arithmatex"><span class="MathJax_Preview">x_{\text{attn}}</span><script type="math/tex">x_{\text{attn}}</script></span>；FFN 层的输入为 <span class="arithmatex"><span class="MathJax_Preview">x_{\text{attn}}</span><script type="math/tex">x_{\text{attn}}</script></span>，输出为 <span class="arithmatex"><span class="MathJax_Preview">x_o</span><script type="math/tex">x_o</script></span>；</p>
+<h3 id="22-tranformer">2.2 tranformer 的中间激活值分析<a class="headerlink" href="#22-tranformer" title="Permanent link">#</a></h3>
+<p>首先面定义几个符号：</p>
+<ul>
+<li><span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span>：表示batch_size；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span>：表示seq_length，为文本长度；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span>：表示hidden_dim，为隐藏层的维度；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span>：表示多头注意力中有多个头；</li>
+<li><span class="arithmatex"><span class="MathJax_Preview">h_a</span><script type="math/tex">h_a</script></span>：表示hidden_dim_per_head，为多头注意力中每个头的隐藏层维度；</li>
+</ul>
+<p>另外，在实际使用时一般都有 <span class="arithmatex"><span class="MathJax_Preview">h_a * a = h</span><script type="math/tex">h_a * a = h</script></span> 成立。</p>
+<p>MHA 层需要保存的激活值，以及每个激活值的大小：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{alignat}{10}
+Q = x \cdot W_Q \quad &amp;: \quad \text{维度为 } [b, a, s, h_a] = [b, s, h], &amp;\text{大小为 } 2bsh \text{ 字节} \\
+K = x \cdot W_k \quad &amp;: \quad \text{维度为 } [b, a, s, h_a] = [b, s, h], &amp;\text{大小为 } 2bsh \text{ 字节} \\
+V = x \cdot W_v \quad &amp;: \quad \text{维度为 } [b, a, s, h_a] = [b, s, h], &amp;\text{大小为 } 2bsh \text{ 字节} \\
+Q \cdot K^T \quad &amp;: \quad \text{维度为 } [b, a, s, s], &amp;\text{大小为 } 2bas^2 \text{ 字节} \\
+\text{softmax}(\frac{Q^T K}{\sqrt{d}}) \quad &amp;: \quad \text{维度为 } [b, a, s, s], &amp;\text{大小为 } 2bas^2 \text{ 字节} \\
+\text{Dropout}\Big[ \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \Big] \quad &amp;: \quad \text{维度为 } [b, a, s, s], &amp;\text{Dropout 层大小为 } bas^2 \text{ 字节} \\
+x_{\text{self}} = \text{Dropout}\Big[ \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \Big] \cdot V \quad &amp;: \quad \text{维度为 } [b, a, s, h_a] = [b, s, h], &amp;\text{大小为 } 2bsh \text{ 字节} \\
+x_{\text{self}} \cdot W_o \quad &amp;: \quad \text{维度为 } [b, s, h], &amp;\text{大小为 } 2bsh \text{ 字节} \\
+\text{Dropout}\big(x_{\text{self} \cdot w_o} \big) \quad &amp;: \quad \text{维度为 } [b, s, h], &amp;\text{Dropout 层大小为 } bsh \text{ 字节} \\
+x_{\text{attn}} = \text{LN}\Big[ \text{Dropout}\big(x_{\text{self}} \cdot w_o \big) + x \Big] \quad &amp;: \quad \text{维度为 } [b, s, h], &amp;\text{大小为 } 2bsh \text{ 字节}
+\end{alignat}</div>
+<script type="math/tex; mode=display">\begin{alignat}{10}
+Q = x \cdot W_Q \quad &: \quad \text{维度为 } [b, a, s, h_a] = [b, s, h], &\text{大小为 } 2bsh \text{ 字节} \\
+K = x \cdot W_k \quad &: \quad \text{维度为 } [b, a, s, h_a] = [b, s, h], &\text{大小为 } 2bsh \text{ 字节} \\
+V = x \cdot W_v \quad &: \quad \text{维度为 } [b, a, s, h_a] = [b, s, h], &\text{大小为 } 2bsh \text{ 字节} \\
+Q \cdot K^T \quad &: \quad \text{维度为 } [b, a, s, s], &\text{大小为 } 2bas^2 \text{ 字节} \\
+\text{softmax}(\frac{Q^T K}{\sqrt{d}}) \quad &: \quad \text{维度为 } [b, a, s, s], &\text{大小为 } 2bas^2 \text{ 字节} \\
+\text{Dropout}\Big[ \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \Big] \quad &: \quad \text{维度为 } [b, a, s, s], &\text{Dropout 层大小为 } bas^2 \text{ 字节} \\
+x_{\text{self}} = \text{Dropout}\Big[ \text{softmax}\big(\frac{Q \cdot K^T}{\sqrt{d}} \big) \Big] \cdot V \quad &: \quad \text{维度为 } [b, a, s, h_a] = [b, s, h], &\text{大小为 } 2bsh \text{ 字节} \\
+x_{\text{self}} \cdot W_o \quad &: \quad \text{维度为 } [b, s, h], &\text{大小为 } 2bsh \text{ 字节} \\
+\text{Dropout}\big(x_{\text{self} \cdot w_o} \big) \quad &: \quad \text{维度为 } [b, s, h], &\text{Dropout 层大小为 } bsh \text{ 字节} \\
+x_{\text{attn}} = \text{LN}\Big[ \text{Dropout}\big(x_{\text{self}} \cdot w_o \big) + x \Big] \quad &: \quad \text{维度为 } [b, s, h], &\text{大小为 } 2bsh \text{ 字节}
+\end{alignat}</script>
+</div>
+<p>FFN 层需要保存的激活值，以及每个激活值的大小：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{alignat}{2}
+x_{\text{attn}} \cdot W_{\text{ff1}} \quad &amp;: \quad \text{维度为 } [b, s, 4h], &amp;\text{大小为 } 8bsh \text{ 字节} \\
+\text{GeLU} (x_{\text{attn}} \cdot W_{\text{ff1}}) \quad &amp;: \quad \text{维度为 } [b, s, 4h], &amp;\text{大小为 } 8bsh \text{ 字节} \\
+x_{\text{ffn}} = \text{GeLU}(x_{\text{attn}} \cdot W_{\text{ff1}}) \cdot W_{\text{ff2}} \quad &amp;: \quad \text{维度为 } [b, s, h], &amp;\text{大小为 } 2bsh \text{ 字节} \\
+\text{Dropout}\big(x_{\text{ffn}} \big) \quad &amp;: \quad \text{维度为 } [b, s, h], \qquad &amp;\text{Dropout 层大小为 } bsh \text{ 字节} \\
+\text{LN}\Big[\text{Dropout}\big(x_{\text{ffn}} \big) + x_{\text{attn}} \Big] \quad &amp;: \quad \text{维度为 } [b, s, h], &amp;\text{大小为 } 2bsh \text{ 字节} \\
+\end{alignat}</div>
+<script type="math/tex; mode=display">\begin{alignat}{2}
+x_{\text{attn}} \cdot W_{\text{ff1}} \quad &: \quad \text{维度为 } [b, s, 4h], &\text{大小为 } 8bsh \text{ 字节} \\
+\text{GeLU} (x_{\text{attn}} \cdot W_{\text{ff1}}) \quad &: \quad \text{维度为 } [b, s, 4h], &\text{大小为 } 8bsh \text{ 字节} \\
+x_{\text{ffn}} = \text{GeLU}(x_{\text{attn}} \cdot W_{\text{ff1}}) \cdot W_{\text{ff2}} \quad &: \quad \text{维度为 } [b, s, h], &\text{大小为 } 2bsh \text{ 字节} \\
+\text{Dropout}\big(x_{\text{ffn}} \big) \quad &: \quad \text{维度为 } [b, s, h], \qquad &\text{Dropout 层大小为 } bsh \text{ 字节} \\
+\text{LN}\Big[\text{Dropout}\big(x_{\text{ffn}} \big) + x_{\text{attn}} \Big] \quad &: \quad \text{维度为 } [b, s, h], &\text{大小为 } 2bsh \text{ 字节} \\
+\end{alignat}</script>
+</div>
+<p>将 MHA 和 FFN 层全部加起来得到：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{split}
+&amp; 2bsh+2bsh+2bsh+2bas^2+2bas^2+bas^2+2bsh+2bsh+bsh+2bsh+ \\
+&amp; 8bsh+8bsh+2bsh+bsh+2bsh=34bsh+5bas^2
+\end{split}</div>
+<script type="math/tex; mode=display">\begin{split}
+& 2bsh+2bsh+2bsh+2bas^2+2bas^2+bas^2+2bsh+2bsh+bsh+2bsh+ \\
+& 8bsh+8bsh+2bsh+bsh+2bsh=34bsh+5bas^2
+\end{split}</script>
+</div>
+<p>如果有 <span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 层 transformer，那么这 <span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 层 transformer 总的中间激活值占用的显存为：<span class="arithmatex"><span class="MathJax_Preview">l * (34bsh+5bas^2)</span><script type="math/tex">l * (34bsh+5bas^2)</script></span></p>
+<h3 id="23-embedding">2.3 embedding 层和解码层<a class="headerlink" href="#23-embedding" title="Permanent link">#</a></h3>
+<p>上面仅分析了多个 transformer 对应的中间激活值消耗的显存的大小。模型中还会有 embedding 层和解码层。其中解码层没有对应的中间激活值，只需要分析一下 embedding 层即可。</p>
+<p>embedding 层的功能是将输入的 token ID 转为向量，其输出的矩阵维度为 [batch_size, seq_length, hidden_size]，即 [b, s, h]，该中间激活值占用的显存为 <span class="arithmatex"><span class="MathJax_Preview">2bsh</span><script type="math/tex">2bsh</script></span>。</p>
+<p>综上所述，整个模型所有的中间激活值的大小为 <span class="arithmatex"><span class="MathJax_Preview">l * (34bsh + 5bas^2) + 2bsh</span><script type="math/tex">l * (34bsh + 5bas^2) + 2bsh</script></span>。随着模型越来越大，<span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 是比较大的，所以有时会忽略 <span class="arithmatex"><span class="MathJax_Preview">2bsh</span><script type="math/tex">2bsh</script></span> 这一项，直接使用 <span class="arithmatex"><span class="MathJax_Preview">l*(34bsh+5bas^2)</span><script type="math/tex">l*(34bsh+5bas^2)</script></span> 来估计模型的中间激活值的大小。</p>
+<h2 id="3bert-base">3、实例分析之bert-base<a class="headerlink" href="#3bert-base" title="Permanent link">#</a></h2>
+<p>以 bert-base 为例分析其中间激活值所需要的显存的大小。在文章 <a href="/ss8GDrmf/#3bert-base">静态显存分析</a> 中已经得出对于 bert-base 来说，模型参数、梯度、优化器状态三部分总共需要的显存为 1.76G，下面分析一下该模型的中间激活值所需要的显存。</p>
+<p>计算的公式为 <span class="arithmatex"><span class="MathJax_Preview">l * (34bsh + 5bas^2) + 2bsh</span><script type="math/tex">l * (34bsh + 5bas^2) + 2bsh</script></span>，先来看这里的每个值分别是多少：</p>
+<ul>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 为 tranformer 的层数，bert-base 为 12 层；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span> 为 batch_size，这里分别取 batch_size 为 16 和 1 计算两个不同 batch_size 下所需要显存的差别；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 为 seq_length，模型 bert-base 的最大长度为 512；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span> 为隐藏层的维度，为 768；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 为多头注意力层的 head 个数，为 12；</p>
+</li>
+</ul>
+<p>当 batch_size 为 1 时，计算结果如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp;12 * (34 * 1 * 512 * 768 + 5 * 1 * 12 * 512 * 512) + 2 * 1 * 512 * 768 \\
+= &amp;12 * (13.4M + 15.7M) + 0.79M \\
+= &amp;12 * 29.1M + 0.79M \\
+= &amp;250M
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+&12 * (34 * 1 * 512 * 768 + 5 * 1 * 12 * 512 * 512) + 2 * 1 * 512 * 768 \\
+= &12 * (13.4M + 15.7M) + 0.79M \\
+= &12 * 29.1M + 0.79M \\
+= &250M
+\end{split}\end{equation}</script>
+</div>
+<p>当 batch_size 为 16 时，计算结果如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp;12 * (34 * 16 * 512 * 768 + 5 * 16 * 12 * 512 * 512) + 2 * 16 * 512 * 768 \\
+= &amp;12 * (213M + 251M) + 12M \\
+= &amp;12 * 464M + 12M \\
+= &amp;5.58G
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+&12 * (34 * 16 * 512 * 768 + 5 * 16 * 12 * 512 * 512) + 2 * 16 * 512 * 768 \\
+= &12 * (213M + 251M) + 12M \\
+= &12 * 464M + 12M \\
+= &5.58G
+\end{split}\end{equation}</script>
+</div>
+<p>从公式 <span class="arithmatex"><span class="MathJax_Preview">l * (34bsh + 5bas^2) + 2bsh</span><script type="math/tex">l * (34bsh + 5bas^2) + 2bsh</script></span> 中就可以看出，中间激活值消耗的显存的大小与 batch_size 是正相关的，在 bert-base 这个模型中，batch_size 每增加 1，那么中间激活值所需要的显存就会增加大约 250M 左右。</p>
+<p>可以看到当 batch_size 为 16 时，中间激活值所需要的显存为 5.58G，而静态显存只有 1.76G，中间激活值比这部分静态显存还要大。</p>
+<p>在实际训练时，遇到显存不足时，调小 batch_size 实际减少的就是中间激活值这部分所需要的显存。而模型参数、梯度、优化器这部分静态显存与 batch_size 是无关的，调小 batch_size 不会影响这里所需要的显存。</p>
+<h2 id="4llama-65b">4、实例分析之LLAMA-65B<a class="headerlink" href="#4llama-65b" title="Permanent link">#</a></h2>
+<p>以 LLAMA-65B 为例分析其中间激活值所需要的显存的大小。在文章 <a href="/ss8GDrmf/#4llama-65b">静态显存分析</a> 中已经得出对于 LLAMA-65B 来说，模型参数、梯度、优化器状态三部分总共需要的显存为 1040G，下面分析一下该模型的中间激活值所需要的显存。</p>
+<p>计算的公式为 <span class="arithmatex"><span class="MathJax_Preview">l * (34bsh + 5bas^2) + 2bsh</span><script type="math/tex">l * (34bsh + 5bas^2) + 2bsh</script></span>，先来看这里的每个值分别是多少：</p>
+<ul>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">l</span><script type="math/tex">l</script></span> 为 tranformer 的层数，LLAMA-65B 为 80 层；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">b</span><script type="math/tex">b</script></span> 为 batch_size，这里分别取 batch_size 为 16 和 1 计算两个不同 batch_size 下所需要显存的差别；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">s</span><script type="math/tex">s</script></span> 为 seq_length，模型 LLAMA-65B 的最大长度为 2048；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">h</span><script type="math/tex">h</script></span> 为隐藏层的维度，为 8192；</p>
+</li>
+<li>
+<p><span class="arithmatex"><span class="MathJax_Preview">a</span><script type="math/tex">a</script></span> 为多头注意力层的 head 个数，为 64；</p>
+</li>
+</ul>
+<p>当 batch_size 为 1 时，计算结果如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp;80 * (34 * 1 * 2048 * 8192 + 5 * 1 * 64 * 2048 * 2048) + 2 * 1 * 2048 * 8192 \\
+= &amp;80 * (570M + 1342M) + 33M \\
+= &amp;80 * 1912M + 33M \\
+= &amp;153G
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+&80 * (34 * 1 * 2048 * 8192 + 5 * 1 * 64 * 2048 * 2048) + 2 * 1 * 2048 * 8192 \\
+= &80 * (570M + 1342M) + 33M \\
+= &80 * 1912M + 33M \\
+= &153G
+\end{split}\end{equation}</script>
+</div>
+<p>当 batch_size 为 16 时，计算结果如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp;80 * (34 * 16 * 2048 * 8192 + 5 * 16 * 64 * 2048 * 2048) + 2 * 16 * 2048 * 8192 \\
+= &amp;80 * (9.13G + 21.47G) + 536M \\
+= &amp;80 * 30.6G + 536M \\
+= &amp;2448G
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+&80 * (34 * 16 * 2048 * 8192 + 5 * 16 * 64 * 2048 * 2048) + 2 * 16 * 2048 * 8192 \\
+= &80 * (9.13G + 21.47G) + 536M \\
+= &80 * 30.6G + 536M \\
+= &2448G
+\end{split}\end{equation}</script>
+</div>
+<p>从公式 <span class="arithmatex"><span class="MathJax_Preview">l * (34bsh + 5bas^2) + 2bsh</span><script type="math/tex">l * (34bsh + 5bas^2) + 2bsh</script></span> 中就可以看出，中间激活值消耗的显存的大小与 batch_size 是正相关的，在 LLAMA-65B 这个模型中，batch_size 每增加 1，那么中间激活值所需要的显存就会增加大约 153G 左右。</p>
+<p>可以看到当 batch_size 为 16 时，中间激活值所需要的显存为 2448G，而静态显存只有 1040G，中间激活值比这部分静态显存还要大。</p>
+<p>对于大模型，在实际训练时，现在基本都会使用梯度检查技术，这样中间激活值这里需要的显存就会大幅减少，所以实际训练时并不会真实消耗这么多的显存。</p>
+<h2 id="_2">总结<a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
+<p>本文介绍了在训练阶段中，哪一部分是中间激活值；以及中间激活值的大小如何估算；最后以模型 bert-base 和 LLAMA-65B 为例计算了其训练时中间激活值所需的显存。</p>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/639872915">LLM训练指南(二):模型参数、计算量、显存、计算时间计算</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/624740065">分析transformer模型的参数量、计算量、中间激活、KV cache</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/424180513">BertLarge 中间激活值分析</a></p>
+</li>
+<li>
+<p><a href="https://arxiv.org/pdf/1910.02054.pdf">ZeRO: Memory Optimizations Toward Training Trillion Parameter Models</a></p>
+</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

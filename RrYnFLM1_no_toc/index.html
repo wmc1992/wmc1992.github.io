@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/003_LLM%E5%B8%B8%E8%A7%84%E6%8A%80%E6%9C%AF/001_prompt%E5%B7%A5%E7%A8%8B/001_openai_guides/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Index - 笔记</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../../css/extra.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/RrYnFLM1_no_toc/">隐藏左侧目录栏</a>][<a href="/RrYnFLM1/">显示左侧目录栏</a>]</p>
+
+<h2 id="1">1、使用更清晰的指令<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<h3 id="11">1.1 指令尽量详细<a class="headerlink" href="#11" title="Permanent link">#</a></h3>
+<p>尽量不要使用太过笼统的指令，让 LLM 自己发挥。而是把细节都在指令中指定清楚，比如下述的例子。当然，在保证各细节的含义相同的情况下，尽量保证指令的简洁不罗嗦也是必要的。</p>
+<table>
+<thead>
+<tr>
+<th>Worse</th>
+<th>Better</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>How do I add numbers in Excel?</td>
+<td>How do I add up a row of dollar amounts in Excel? I want to do this automatically for a whole sheet of rows with all the totals ending up on the right in a column called "Total".</td>
+</tr>
+<tr>
+<td>Who’s president?</td>
+<td>Who was the president of Mexico in 2021, and how frequently are elections held?</td>
+</tr>
+<tr>
+<td>Write code to calculate the Fibonacci sequence.</td>
+<td>Write a TypeScript function to efficiently calculate the Fibonacci sequence. Comment the code liberally to explain what each piece does and why it's written that way.</td>
+</tr>
+<tr>
+<td>Summarize the meeting notes.</td>
+<td>Summarize the meeting notes in a single paragraph. Then write a markdown list of the speakers and each of their key points. Finally, list the next steps or action items suggested by the speakers, if any.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12">1.2 在指令中要求模型扮演某个角色<a class="headerlink" href="#12" title="Permanent link">#</a></h3>
+<p>这部分的说明一般是放在 system 部分。举例如下：</p>
+<pre><code class="language-text">SYSTEM : When I ask for help to write something, you will reply with a document that contains at least one joke or playful comment in every paragraph.
+USER : Write a thank you note to my steel bolt vendor for getting the delivery in on time and in short notice. This made it possible for us to deliver an important order.
+</code></pre>
+<h3 id="13">1.3 使用各种分隔符将指令中各部分不同功能部分分割开来<a class="headerlink" href="#13" title="Permanent link">#</a></h3>
+<p>可以使用的分隔符有：引号、XML标签、html标签等等。对于越简单的任务，分隔符的作用越不明显。但是当任务越复杂，那么使用分隔符将指令中各部分清晰的分隔开来就非常重要了，对最终的效果有着明显的影响。举例如下：</p>
+<pre><code class="language-text">USER ：Summarize the text delimited by triple quotes with a haiku.
+
+&quot;&quot;&quot;insert text here&quot;&quot;&quot;
+</code></pre>
+<pre><code class="language-text">SYSTEM : You will be provided with a pair of articles (delimited with XML tags) about the same topic. First summarize the arguments of each article. Then indicate which of them makes a better argument and explain why.
+
+USER : 
+&lt;article&gt; insert first article here &lt;/article&gt;
+&lt;article&gt; insert second article here &lt;/article&gt;
+</code></pre>
+<pre><code class="language-text">SYSTEM : You will be provided with a thesis abstract and a suggested title for it. The thesis title should give the reader a good idea of the topic of the thesis but should also be eye-catching. If the title does not meet these criteria, suggest 5 alternatives.
+
+USER : 
+Abstract: insert abstract here
+Title: insert title here
+</code></pre>
+<h3 id="14">1.4 给复杂的任务指定每个步骤<a class="headerlink" href="#14" title="Permanent link">#</a></h3>
+<p>对于复杂的任务，可以拆分为多个步骤，并且在指令中明确写明每个步骤做什么事。举例如下：</p>
+<pre><code class="language-text">SYSTEM : Use the following step-by-step instructions to respond to user inputs.
+
+Step 1 - The user will provide you with text in triple quotes. Summarize this text in one sentence with a prefix that says &quot;Summary: &quot;.
+
+Step 2 - Translate the summary from Step 1 into Spanish, with a prefix that says &quot;Translation: &quot;.
+
+USER : &quot;&quot;&quot;insert text here&quot;&quot;&quot;
+</code></pre>
+<h3 id="15">1.5 提供示例<a class="headerlink" href="#15" title="Permanent link">#</a></h3>
+<p>在指令中提供一些例子，有助于 LLM 给出更高质量的结果。</p>
+<h3 id="16">1.6 指定输入结果的长度<a class="headerlink" href="#16" title="Permanent link">#</a></h3>
+<p>对于部分任务，可以要求模型输出的长度。这个长度可以是单词个数、句子个数、段落个数等等。</p>
+<p>唯一需要注意的是即使指定了长度，模型的输出结果也不会完全遵守这个长度。</p>
+<p>举例如下：</p>
+<pre><code class="language-text">USER : Summarize the text delimited by triple quotes in about 50 words.
+
+&quot;&quot;&quot;insert text here&quot;&quot;&quot;
+</code></pre>
+<pre><code class="language-text">USER : Summarize the text delimited by triple quotes in 2 paragraphs.
+
+&quot;&quot;&quot;insert text here&quot;&quot;&quot;
+</code></pre>
+<pre><code class="language-text">USER : Summarize the text delimited by triple quotes in 3 bullet points.
+
+&quot;&quot;&quot;insert text here&quot;&quot;&quot;
+</code></pre>
+<h2 id="2-llm">2、给 LLM 提供参考文本<a class="headerlink" href="#2-llm" title="Permanent link">#</a></h2>
+<h3 id="21-llm">2.1 给 LLM 提供参考文本<a class="headerlink" href="#21-llm" title="Permanent link">#</a></h3>
+<p>这个也就是类似 RAG 之类的技术了，举例如下：</p>
+<pre><code class="language-text">SYSTEM : Use the provided articles delimited by triple quotes to answer questions. If the answer cannot be found in the articles, write &quot;I could not find an answer.&quot;
+
+USER : &lt;insert articles, each delimited by triple quotes&gt;
+
+Question: &lt;insert question here&gt;
+</code></pre>
+<h3 id="22-llm">2.2 要求 LLM 引用给定文本进行回答<a class="headerlink" href="#22-llm" title="Permanent link">#</a></h3>
+<p>这一小节的方法和上一小节方法的区别在于，上一小节的方法仅是给 LLM 提供参考文本，LLM 如果自己本来就知道问题的答案，它可以不用参考文本。这一小节是指要求 LLM 直接引用给定文本中的部分来对问题进行回答，类似于一个抽取式任务，至于回答的结果是否在给定的文本中，可以直接做字符匹配来验证。</p>
+<pre><code class="language-text">SYSTEM : You will be provided with a document delimited by triple quotes and a question. Your task is to answer the question using only the provided document and to cite the passage(s) of the document used to answer the question. If the document does not contain the information needed to answer this question then simply write: &quot;Insufficient information.&quot; If an answer to the question is provided, it must be annotated with a citation. Use the following format for to cite relevant passages ({&quot;citation&quot;: …}).
+
+USER : 
+
+&quot;&quot;&quot;&lt;insert document here&gt;&quot;&quot;&quot;
+
+Question: &lt;insert question here&gt;
+</code></pre>
+<h2 id="3">3、将复杂任务拆分为子任务<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<h3 id="31">3.1 使用意图识别技术识别最相关的指令<a class="headerlink" href="#31" title="Permanent link">#</a></h3>
+<p>这种方法主要适用于任务极其复杂时，此时需要一系列的指令分别处理每个子任务。就可以先通过一个意图识别任务识别出当前时属于哪个子任务，再执行子任务的指令。例子如下，该例子中第一个是意图识别任务，该意图识别任务有4个一级类别、15个二级类别。在意图识别任务重识别出类别为 "troubleshooting" 之后，再执行该类别的指令。</p>
+<pre><code class="language-text">SYSTEM : You will be provided with customer service queries. Classify each query into a primary category and a secondary category. Provide your output in json format with the keys: primary and secondary.
+
+Primary categories: Billing, Technical Support, Account Management, or General Inquiry.
+
+Billing secondary categories:
+- Unsubscribe or upgrade
+- Add a payment method
+- Explanation for charge
+- Dispute a charge
+
+Technical Support secondary categories:
+- Troubleshooting
+- Device compatibility
+- Software updates
+
+Account Management secondary categories:
+- Password reset
+- Update personal information
+- Close account
+- Account security
+
+General Inquiry secondary categories:
+- Product information
+- Pricing
+- Feedback
+- Speak to a human
+
+USER : I need to get my internet working again.
+</code></pre>
+<pre><code class="language-text">SYSTEM : You will be provided with customer service inquiries that require troubleshooting in a technical support context. Help the user by:
+
+- Ask them to check that all cables to/from the router are connected. Note that it is common for cables to come loose over time.
+- If all cables are connected and the issue persists, ask them which router model they are using
+- Now you will advise them how to restart their device:
+-- If the model number is MTD-327J, advise them to push the red button and hold it for 5 seconds, then wait 5 minutes before testing the connection.
+-- If the model number is MTD-327S, advise them to unplug and replug it, then wait 5 minutes before testing the connection.
+- If the customer's issue persists after restarting the device and waiting 5 minutes, connect them to IT support by outputting {&quot;IT support requested&quot;}.
+- If the user starts asking questions that are unrelated to this topic then confirm if they would like to end the current chat about troubleshooting and classify their request according to the following scheme:
+
+&lt;insert primary/secondary classification scheme from above here&gt;
+
+USER : I need to get my internet working again.
+</code></pre>
+<h3 id="32">3.2 总结之前的对话<a class="headerlink" href="#32" title="Permanent link">#</a></h3>
+<p>该方法主要用于之前的对话特别长的场景下。当已经进行过多轮对话之后，之前的对话已经比较长了，当 LLM 的上下文长度不足时：</p>
+<ul>
+<li>
+<p>可以先对之前的对话进行 summary，然后再使用 summary 之后的历史对话信息执行当前 query；</p>
+</li>
+<li>
+<p>动态选择与当前 query 最相关的历史对话信息，对于那些不重要的历史对话信息进行丢弃；</p>
+</li>
+</ul>
+<h3 id="33">3.3 对输入的长文本进行摘要<a class="headerlink" href="#33" title="Permanent link">#</a></h3>
+<p>当一个任务需要传入一段非常长的文本时，就可以先对该文本进行摘要，再处理当前 query。</p>
+<p>另外，摘要也可以构建分级形式，比如先对每个章节进行摘要，然后再对所有章节的摘要构建一个总的摘要，这样就是一个二级结构的摘要。</p>
+<h2 id="4-think">4、要求模型 "think"<a class="headerlink" href="#4-think" title="Permanent link">#</a></h2>
+<p>这里是典型的 cot 思想，不过这里提到的方法更加高级一些，通用性也更低一些，各自适用于一些具体的场景。</p>
+<h3 id="41">4.1 对于判断任务先让模型生成自己的答案再做判断<a class="headerlink" href="#41" title="Permanent link">#</a></h3>
+<p>比如如果任务是判断学生的答案是否正确，直接让 LLM 输出是否正确的结果，效果会差一些。但是如果先让 LLM 自己生成问题的答案，再根据问题的答案与学生的答案做比较，得到最终的结果--学生的答案是否正确。此时 LLM 的效果会更好一些。</p>
+<p>举例如下，第一个指令是要求 LLM 直接给出最终结果；第二个指令要求 LLM 先自己计算出结果，然后比较自己的结果和学生的结果，再给出最终结果。效果上是第二个指令的效果要好于第一个指令。</p>
+<pre><code class="language-text">SYSTEM : Determine if the student's solution is correct or not.
+
+USER : Problem Statement: I'm building a solar power installation and I need help working out the financials.
+- Land costs $100 / square foot
+- I can buy solar panels for $250 / square foot
+- I negotiated a contract for maintenance that will cost me a flat $100k per year, and an additional $10 / square foot
+What is the total cost for the first year of operations as a function of the number of square feet.
+
+Student's Solution: Let x be the size of the installation in square feet.
+1. Land cost: 100x
+2. Solar panel cost: 250x
+3. Maintenance cost: 100,000 + 100x
+Total cost: 100x + 250x + 100,000 + 100x = 450x + 100,000
+
+ASSISTANT : The student's solution is correct.
+</code></pre>
+<pre><code class="language-text">SYSTEM : First work out your own solution to the problem. Then compare your solution to the student's solution and evaluate if the student's solution is correct or not. Don't decide if the student's solution is correct until you have done the problem yourself.
+
+USER : Problem Statement: I'm building a solar power installation and I need help working out the financials.
+- Land costs $100 / square foot
+- I can buy solar panels for $250 / square foot
+- I negotiated a contract for maintenance that will cost me a flat $100k per year, and an additional $10 / square foot
+What is the total cost for the first year of operations as a function of the number of square feet.
+
+Student's Solution: Let x be the size of the installation in square feet.
+1. Land cost: 100x
+2. Solar panel cost: 250x
+3. Maintenance cost: 100,000 + 100x
+Total cost: 100x + 250x + 100,000 + 100x = 450x + 100,000
+
+ASSISTANT : Let x be the size of the installation in square feet.
+1. Land cost: 100x
+2. Solar panel cost: 250x
+3. Maintenance cost: 100,000 + 10x
+Total cost: 100x + 250x + 100,000 + 10x = 360x + 100,000
+
+The student's solution is incorrect. They made an error in the maintenance cost calculation, using 100x instead of 10x. The correct total cost for the first year of operations is 360x + 100,000.
+</code></pre>
+<h3 id="42">4.2 隐藏推理过程<a class="headerlink" href="#42" title="Permanent link">#</a></h3>
+<p>这个技术的适用场景就更具体了。主要是用于那些模型的推理过程不方便展示个最终用户的场景。有两个思路实现该需求：</p>
+<ul>
+<li>
+<p><strong>Inner monologue</strong> ：内心独白是指要求模型将其推理过程放在特定结构化的部分中，这样后边就可以把这部分内容解析出来并隐藏掉。</p>
+</li>
+<li>
+<p><strong>a sequence of queries</strong>：也可以通过多次提问的方式，把中间过程的问题的答案都隐藏掉，不返回给用户，只将最终结果返回给用户。</p>
+</li>
+</ul>
+<p>内心独白方式的样例如下：</p>
+<pre><code class="language-text">SYSTEM : Follow these steps to answer the user queries.
+
+Step 1 - First work out your own solution to the problem. Don't rely on the student's solution since it may be incorrect. Enclose all your work for this step within triple quotes (&quot;&quot;&quot;).
+
+Step 2 - Compare your solution to the student's solution and evaluate if the student's solution is correct or not. Enclose all your work for this step within triple quotes (&quot;&quot;&quot;).
+
+Step 3 - If the student made a mistake, determine what hint you could give the student without giving away the answer. Enclose all your work for this step within triple quotes (&quot;&quot;&quot;).
+
+Step 4 - If the student made a mistake, provide the hint from the previous step to the student (outside of triple quotes). Instead of writing &quot;Step 4 - ...&quot; write &quot;Hint:&quot;.
+
+USER : Problem Statement: &lt;insert problem statement&gt;
+
+Student Solution: &lt;insert student solution&gt;
+</code></pre>
+<p>多次提问的样例如下：</p>
+<ul>
+<li>第一次提问是让 LLM 自己回答该问题；</li>
+<li>第二次提问是让 LLM 判断学生的回答是否正确；</li>
+<li>第三次提问是当学生的回答不正确时，让 LLM 给出一些提示，但是该提示不能直接包含答案；</li>
+</ul>
+<p>该场景下是不希望将模型自己求解答案的部分让学生看到。</p>
+<pre><code class="language-text">USER : &lt;insert problem statement&gt;
+</code></pre>
+<pre><code class="language-text">SYSTEM : Compare your solution to the student's solution and evaluate if the student's solution is correct or not.
+
+USER : Problem statement: &quot;&quot;&quot;&lt;insert problem statement&gt;&quot;&quot;&quot;
+
+Your solution: &quot;&quot;&quot;&lt;insert model generated solution&gt;&quot;&quot;&quot;
+
+Student’s solution: &quot;&quot;&quot;&lt;insert student's solution&gt;&quot;&quot;&quot;
+</code></pre>
+<pre><code class="language-text">SYSTEM : You are a math tutor. If the student made an error, offer a hint to the student in a way that does not reveal the answer. If the student did not make an error, simply offer them an encouraging comment.
+
+USER : Problem statement: &quot;&quot;&quot;&lt;insert problem statement&gt;&quot;&quot;&quot;
+
+Your solution: &quot;&quot;&quot;&lt;insert model generated solution&gt;&quot;&quot;&quot;
+
+Student’s solution: &quot;&quot;&quot;&lt;insert student's solution&gt;&quot;&quot;&quot;
+
+Analysis: &quot;&quot;&quot;&lt;insert model generated analysis from previous step&gt;&quot;&quot;&quot;
+</code></pre>
+<h3 id="43">4.3 提问模型上次回答中是否有遗漏<a class="headerlink" href="#43" title="Permanent link">#</a></h3>
+<p>该技术主要的应用场景是输入文本过程，或者答案过长导致超过了上下文窗口的限制时。直接向 LLM 再次提供上次的回答是否有遗漏，让 LLM 进行补充。</p>
+<p>不过该技术的适用范围是比较广的，比如在测试阶段，可以将模型自己回答的结果再询问一遍是否有遗漏、是否正确等。但是在线上服务时要考虑性能问题。</p>
+<p>以下是一个询问 LLM 上次回答中是否有遗漏的样例：</p>
+<pre><code class="language-text">SYSTEM : You will be provided with a document delimited by triple quotes. Your task is to select excerpts which pertain to the following question: &quot;What significant paradigm shifts have occurred in the history of artificial intelligence.&quot;
+
+Ensure that excerpts contain all relevant context needed to interpret them - in other words don't extract small snippets that are missing important context. Provide output in JSON format as follows:
+
+[{&quot;excerpt&quot;: &quot;...&quot;},
+...
+{&quot;excerpt&quot;: &quot;...&quot;}]
+
+USER : &quot;&quot;&quot;&lt;insert document here&gt;&quot;&quot;&quot;
+
+ASSISTANT : 
+[{&quot;excerpt&quot;: &quot;the model writes an excerpt here&quot;},
+...
+{&quot;excerpt&quot;: &quot;the model writes another excerpt here&quot;}]
+
+USER : Are there more relevant excerpts? Take care not to repeat excerpts. Also ensure that excerpts contain all relevant context needed to interpret them - in other words don't extract small snippets that are missing important context.
+</code></pre></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

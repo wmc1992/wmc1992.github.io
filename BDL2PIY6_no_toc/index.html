@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="mingchao.wang">
+        <link rel="canonical" href="https://mingchao.wang/003_LLM%E5%B8%B8%E8%A7%84%E6%8A%80%E6%9C%AF/009_RoPE/">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Index - 笔记</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/obsidian.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/python.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-274394082"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-274394082');
+        </script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="../..">笔记</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/wmc1992/" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-12" role="main">
+
+<p align="right">[<a href="/BDL2PIY6_no_toc/">隐藏左侧目录栏</a>][<a href="/BDL2PIY6/">显示左侧目录栏</a>]</p>
+
+<h1 id="-rope">旋转位置编码-RoPE<a class="headerlink" href="#-rope" title="Permanent link">#</a></h1>
+<blockquote>
+<p>说明：本文中在符号的使用上没有区分矢量和标量。</p>
+</blockquote>
+<h2 id="1">1、问题引出<a class="headerlink" href="#1" title="Permanent link">#</a></h2>
+<h3 id="11">1.1 背景<a class="headerlink" href="#11" title="Permanent link">#</a></h3>
+<p>整个 transformer 的前向传播过程如下所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+q_m &amp;= f_d(x_m, m) \\
+k_n &amp;= f_k(x_n, n) \\
+v_n &amp;= f_v(x_n, n) \\
+a_{m,n} &amp;= \frac{\text{exp}(\frac{q_m^{\intercal} k_n}{\sqrt{d}})}{\sum_{j=1}^N \text{exp}(\frac{q_m^{\intercal} k_j}{\sqrt{d}})} \\
+o_m &amp;= \sum_{n=1}^N a_{m,n} v_n
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+q_m &= f_d(x_m, m) \\
+k_n &= f_k(x_n, n) \\
+v_n &= f_v(x_n, n) \\
+a_{m,n} &= \frac{\text{exp}(\frac{q_m^{\intercal} k_n}{\sqrt{d}})}{\sum_{j=1}^N \text{exp}(\frac{q_m^{\intercal} k_j}{\sqrt{d}})} \\
+o_m &= \sum_{n=1}^N a_{m,n} v_n
+\end{split}\end{equation}</script>
+</div>
+<p>原始的 transformer 和 bert 这两篇论文中所使用的位置编码都是 "相加" 的方式，即如下公式：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}f_{\{q,k,v\}}(x_i,i)=W_{\{q,k,v\}}(x_i+p_i)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}f_{\{q,k,v\}}(x_i,i)=W_{\{q,k,v\}}(x_i+p_i)\end{equation}</script>
+</div>
+<p>不过 bert 中的位置编码是可训练的，transformer 中的编码是一种绝对位置编码，公式如下所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+PE_{(pos, 2i)} &amp;= sin(pos/10000^{2i/d_{model}}) \\
+PE_{(pos, 2i+1)} &amp;= cos(pos/10000^{2i/d_{model}})
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+PE_{(pos, 2i)} &= sin(pos/10000^{2i/d_{model}}) \\
+PE_{(pos, 2i+1)} &= cos(pos/10000^{2i/d_{model}})
+\end{split}\end{equation}</script>
+</div>
+<h3 id="12">1.2 问题引出<a class="headerlink" href="#12" title="Permanent link">#</a></h3>
+<p>像原始的 transformer 和 bert 这两篇论文中所使用的位置编码都是仅从构造 <span class="arithmatex"><span class="MathJax_Preview">q</span><script type="math/tex">q</script></span>、<span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span>、<span class="arithmatex"><span class="MathJax_Preview">v</span><script type="math/tex">v</script></span> 这三个向量的环节考虑，在构造旋转位置编码时加上了计算注意力权重矩阵的过程，该位置编码的原始想法基于：通过绝对位置编码的方式实现相对位置编码。这句话对应的公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}&lt;f(q,m),f(k,n)&gt;=g(q,k,m-n)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}<f(q,m),f(k,n)>=g(q,k,m-n)\end{equation}</script>
+</div>
+<p>对上述公式进行求解的过程较为复杂。下面先假设已经给出了答案，验证所给出的答案是否满足上述公式的要求。验证完成之后对旋转位置编码做一些直观的理解。待上面两部分都完成之后，再看如何由上式求解出最终的位置编码方案。</p>
+<h2 id="2">2、验证答案的正确性<a class="headerlink" href="#2" title="Permanent link">#</a></h2>
+<h3 id="21">2.1 基础知识<a class="headerlink" href="#21" title="Permanent link">#</a></h3>
+<h4 id="211">2.1.1 三角恒等式<a class="headerlink" href="#211" title="Permanent link">#</a></h4>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\cos(\alpha + \beta)=\cos \alpha \cos \beta - \sin \alpha \sin \beta\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\cos(\alpha + \beta)=\cos \alpha \cos \beta - \sin \alpha \sin \beta\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\sin(\alpha + \beta) = \sin \alpha \cos \beta + \cos \alpha \sin \beta\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\sin(\alpha + \beta) = \sin \alpha \cos \beta + \cos \alpha \sin \beta\end{equation}</script>
+</div>
+<h4 id="212">2.1.2 复数<a class="headerlink" href="#212" title="Permanent link">#</a></h4>
+<p>对形为 <span class="arithmatex"><span class="MathJax_Preview">z=x+iy</span><script type="math/tex">z=x+iy</script></span> 的式子称为复数，其中 <span class="arithmatex"><span class="MathJax_Preview">i=\sqrt{-1}</span><script type="math/tex">i=\sqrt{-1}</script></span>，<span class="arithmatex"><span class="MathJax_Preview">x</span><script type="math/tex">x</script></span> 为实部，<span class="arithmatex"><span class="MathJax_Preview">y</span><script type="math/tex">y</script></span> 为虚部，记为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}x=\text{Re}(z)=\text{Re}(x+iy)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}x=\text{Re}(z)=\text{Re}(x+iy)\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}y=\text{Im}(z)=\text{Im}(x+iy)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}y=\text{Im}(z)=\text{Im}(x+iy)\end{equation}</script>
+</div>
+<h4 id="213">2.1.3 共轭复数<a class="headerlink" href="#213" title="Permanent link">#</a></h4>
+<p>实部相同，虚部互为相反数即为共轭复数，比如复数 <span class="arithmatex"><span class="MathJax_Preview">z=x+iy</span><script type="math/tex">z=x+iy</script></span> 的共轭复数为 <span class="arithmatex"><span class="MathJax_Preview">z^*=x-iy</span><script type="math/tex">z^*=x-iy</script></span>。</p>
+<h4 id="214">2.1.4 欧拉公式<a class="headerlink" href="#214" title="Permanent link">#</a></h4>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}e^{i\theta}=\cos \theta + i \sin \theta\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}e^{i\theta}=\cos \theta + i \sin \theta\end{equation}</script>
+</div>
+<h4 id="215-hermitian">2.1.5 Hermitian内积<a class="headerlink" href="#215-hermitian" title="Permanent link">#</a></h4>
+<p>设 <span class="arithmatex"><span class="MathJax_Preview">\bold{x}</span><script type="math/tex">\bold{x}</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">\bold{y}</span><script type="math/tex">\bold{y}</script></span> 是复向量，则其Hermitian内积为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}&lt;\bold{x},\bold{y}&gt;=\bold{x}^{\intercal} \bold{y}^*=\sum^n_{i=1}x_i y^*_i\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}<\bold{x},\bold{y}>=\bold{x}^{\intercal} \bold{y}^*=\sum^n_{i=1}x_i y^*_i\end{equation}</script>
+</div>
+<h4 id="216">2.1.6 几个坐标系<a class="headerlink" href="#216" title="Permanent link">#</a></h4>
+<p>直角坐标系和极坐标系；</p>
+<p>实数域和复数域；</p>
+<h4 id="217">2.1.7 旋转矩阵<a class="headerlink" href="#217" title="Permanent link">#</a></h4>
+<p>如下矩阵即为旋转矩阵：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{bmatrix}
+   \cos \theta &amp; -\sin \theta \\
+   \sin \theta &amp; \cos \theta
+\end{bmatrix}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{bmatrix}
+   \cos \theta & -\sin \theta \\
+   \sin \theta & \cos \theta
+\end{bmatrix}\end{equation}</script>
+</div>
+<p>向量左乘上该矩阵，对应到几何中就是：该向量的模长不变，沿逆时针方向旋转 <span class="arithmatex"><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> 度。</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{bmatrix}
+   x^{\prime} \\
+   y^{\prime}
+\end{bmatrix}=\begin{bmatrix}
+   \cos \theta &amp; -\sin \theta \\
+   \sin \theta &amp; \cos \theta
+\end{bmatrix}\begin{bmatrix}
+   x \\
+   y
+\end{bmatrix}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{bmatrix}
+   x^{\prime} \\
+   y^{\prime}
+\end{bmatrix}=\begin{bmatrix}
+   \cos \theta & -\sin \theta \\
+   \sin \theta & \cos \theta
+\end{bmatrix}\begin{bmatrix}
+   x \\
+   y
+\end{bmatrix}\end{equation}</script>
+</div>
+<h3 id="22">2.2 待证明的问题<a class="headerlink" href="#22" title="Permanent link">#</a></h3>
+<p>已知如下条件，要求解 <span class="arithmatex"><span class="MathJax_Preview">f</span><script type="math/tex">f</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">g</span><script type="math/tex">g</script></span> 函数：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}&lt;f_q(x_m,m),f_k(x_n,n)&gt;=g(x_m,x_n,m-n)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}<f_q(x_m,m),f_k(x_n,n)>=g(x_m,x_n,m-n)\end{equation}</script>
+</div>
+<p>这里直接给出答案，然后验证该答案的正确性：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+f_q(x_m, m) &amp;= (W_q x_m) e^{im\theta} \\
+f_k(x_n, n) &amp;= (W_k x_n) e^{in\theta} \\
+g(x_m, x_n, m-n) &amp;= Re \Big[(W_qx_m)(W_kx_n)^*e^{i(m-n)\theta}\Big]
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+f_q(x_m, m) &= (W_q x_m) e^{im\theta} \\
+f_k(x_n, n) &= (W_k x_n) e^{in\theta} \\
+g(x_m, x_n, m-n) &= Re \Big[(W_qx_m)(W_kx_n)^*e^{i(m-n)\theta}\Big]
+\end{split}\end{equation}</script>
+</div>
+<h3 id="23">2.3 证明过程<a class="headerlink" href="#23" title="Permanent link">#</a></h3>
+<p>使用欧拉公式可以将上述公式中的指数形式切换为三角函数形式，欧拉公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}e^{i\theta}=\cos \theta + i \sin\theta\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}e^{i\theta}=\cos \theta + i \sin\theta\end{equation}</script>
+</div>
+<p>上述公式中的指数形式与三角函数形式切换的公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+e^{im\theta} &amp;= \cos(m\theta) + i \sin(m\theta) \\
+e^{in\theta} &amp;= \cos(n\theta) + i \sin(n\theta) \\
+e^{i(m-n)\theta} &amp;= \cos((m-n)\theta) + i \sin((m-n)\theta)
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+e^{im\theta} &= \cos(m\theta) + i \sin(m\theta) \\
+e^{in\theta} &= \cos(n\theta) + i \sin(n\theta) \\
+e^{i(m-n)\theta} &= \cos((m-n)\theta) + i \sin((m-n)\theta)
+\end{split}\end{equation}</script>
+</div>
+<p>仅考虑二维的情况，对 <span class="arithmatex"><span class="MathJax_Preview">f</span><script type="math/tex">f</script></span> 函数进行变换和化简。其中 <span class="arithmatex"><span class="MathJax_Preview">q_m</span><script type="math/tex">q_m</script></span> 如下所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}q_m = \begin{pmatrix}
+   q^{(1)}_m \\
+   q^{(2)}_m
+\end{pmatrix} = W_q x_m = \begin{pmatrix}
+   W^{(11)}_q &amp; W^{(12)}_q \\
+   W^{(21)}_q &amp; W^{(22)}_q
+\end{pmatrix}\begin{pmatrix}
+   x^{(1)}_m \\
+   x^{(2)}_m
+\end{pmatrix}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}q_m = \begin{pmatrix}
+   q^{(1)}_m \\
+   q^{(2)}_m
+\end{pmatrix} = W_q x_m = \begin{pmatrix}
+   W^{(11)}_q & W^{(12)}_q \\
+   W^{(21)}_q & W^{(22)}_q
+\end{pmatrix}\begin{pmatrix}
+   x^{(1)}_m \\
+   x^{(2)}_m
+\end{pmatrix}\end{equation}</script>
+</div>
+<p>由于是二维的，可以直接将其写为复数形式，即：<span class="arithmatex"><span class="MathJax_Preview">q_m^{(1)} + i q_m^{(2)}</span><script type="math/tex">q_m^{(1)} + i q_m^{(2)}</script></span>。这样 <span class="arithmatex"><span class="MathJax_Preview">f</span><script type="math/tex">f</script></span> 函数就变成了纯粹的复数运算了。化简过程如下所示：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}f_d(x_m, m)=(W_q x_m) e^{im\theta} = q_m e^{im \theta}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}f_d(x_m, m)=(W_q x_m) e^{im\theta} = q_m e^{im \theta}\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+q_m e^{im\theta} &amp;= (q^{(1)}_m + i q^{(2)}_m) * (\cos(m\theta) + i \sin(m \theta)) \\
+&amp;=(q^{(1)}_m \cos(m\theta) - q^{(2)}_m \sin(m\theta)) + i(q^{(2)}_m \cos(m\theta) + q^{(1)}_m \sin(m\theta))
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+q_m e^{im\theta} &= (q^{(1)}_m + i q^{(2)}_m) * (\cos(m\theta) + i \sin(m \theta)) \\
+&=(q^{(1)}_m \cos(m\theta) - q^{(2)}_m \sin(m\theta)) + i(q^{(2)}_m \cos(m\theta) + q^{(1)}_m \sin(m\theta))
+\end{split}\end{equation}</script>
+</div>
+<p>再将化简后的 <span class="arithmatex"><span class="MathJax_Preview">q_m</span><script type="math/tex">q_m</script></span> 写回向量形式，如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+q_m e^{im\theta} &amp;= \begin{bmatrix}
+   q^{(1)}_m \cos(m\theta) - q^{(2)}_m \sin(m\theta) \\
+   q^{(2)}_m \cos(m\theta) + q^{(1)}_m \sin(m\theta)
+\end{bmatrix}
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+q_m e^{im\theta} &= \begin{bmatrix}
+   q^{(1)}_m \cos(m\theta) - q^{(2)}_m \sin(m\theta) \\
+   q^{(2)}_m \cos(m\theta) + q^{(1)}_m \sin(m\theta)
+\end{bmatrix}
+\end{split}\end{equation}</script>
+</div>
+<p>可以看出这就是一个旋转矩阵，公式如下所示。也就是说：对 <span class="arithmatex"><span class="MathJax_Preview">q_m</span><script type="math/tex">q_m</script></span> 乘上 <span class="arithmatex"><span class="MathJax_Preview">e^{im\theta}</span><script type="math/tex">e^{im\theta}</script></span> 就等同于对 <span class="arithmatex"><span class="MathJax_Preview">q_m</span><script type="math/tex">q_m</script></span> 左乘上一个旋转矩阵。</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+f_d(x_m, m) &amp;= (W_q x_m) e^{im\theta} = q_m e^{im \theta} \\
+&amp;= \begin{bmatrix}
+   q^{(1)}_m \cos(m\theta) - q^{(2)}_m \sin(m\theta) \\
+   q^{(2)}_m \cos(m\theta) + q^{(1)}_m \sin(m\theta)
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+   \cos(m\theta) &amp; -\sin(m\theta) \\
+   \sin(m\theta) &amp; \cos(m\theta)
+\end{bmatrix}\begin{bmatrix}
+   q^{(1)}_m \\
+   q^{(2)}_m
+\end{bmatrix}
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+f_d(x_m, m) &= (W_q x_m) e^{im\theta} = q_m e^{im \theta} \\
+&= \begin{bmatrix}
+   q^{(1)}_m \cos(m\theta) - q^{(2)}_m \sin(m\theta) \\
+   q^{(2)}_m \cos(m\theta) + q^{(1)}_m \sin(m\theta)
+\end{bmatrix} \\
+&= \begin{bmatrix}
+   \cos(m\theta) & -\sin(m\theta) \\
+   \sin(m\theta) & \cos(m\theta)
+\end{bmatrix}\begin{bmatrix}
+   q^{(1)}_m \\
+   q^{(2)}_m
+\end{bmatrix}
+\end{split}\end{equation}</script>
+</div>
+<blockquote>
+<p>上述整个对函数 <span class="arithmatex"><span class="MathJax_Preview">f</span><script type="math/tex">f</script></span> 的变形过程其实没有必要，放在这里只是为了加深理解。根据复数域极式下的乘法运算的几何含义可知：两个复数相乘，等于它们的模相乘，幅角相加。所以对向量 <span class="arithmatex"><span class="MathJax_Preview">q_m</span><script type="math/tex">q_m</script></span> 乘上 <span class="arithmatex"><span class="MathJax_Preview">e^{im\theta}</span><script type="math/tex">e^{im\theta}</script></span> 的几何含义就是：模长不变，幅角向逆时针方向旋转 <span class="arithmatex"><span class="MathJax_Preview">m\theta</span><script type="math/tex">m\theta</script></span> 度。</p>
+</blockquote>
+<p>上面求解出了 <span class="arithmatex"><span class="MathJax_Preview">f_q</span><script type="math/tex">f_q</script></span> 的矩阵形式，下面使用同样的方法求解 <span class="arithmatex"><span class="MathJax_Preview">f_k</span><script type="math/tex">f_k</script></span> 的矩阵形式，结果如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+f_k(x_n,n) &amp;= (W_k x_n) e^{in\theta} = k_n e^{in\theta} \\
+&amp;= \begin{bmatrix}
+   k_n^{(1)} \cos(n\theta) - k_n^{(2)} \sin(n\theta) \\
+   k_n^{(2)} \cos(n\theta) + k_n^{(1)} \sin(n\theta)
+\end{bmatrix} \\
+&amp;= \begin{pmatrix}
+   \cos(n\theta) &amp; -\sin(n\theta) \\
+   \sin(n\theta) &amp; \cos(n\theta)
+\end{pmatrix}\begin{pmatrix}
+   k^{(1)}_n \\
+   k^{(2)}_n
+\end{pmatrix}
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+f_k(x_n,n) &= (W_k x_n) e^{in\theta} = k_n e^{in\theta} \\
+&= \begin{bmatrix}
+   k_n^{(1)} \cos(n\theta) - k_n^{(2)} \sin(n\theta) \\
+   k_n^{(2)} \cos(n\theta) + k_n^{(1)} \sin(n\theta)
+\end{bmatrix} \\
+&= \begin{pmatrix}
+   \cos(n\theta) & -\sin(n\theta) \\
+   \sin(n\theta) & \cos(n\theta)
+\end{pmatrix}\begin{pmatrix}
+   k^{(1)}_n \\
+   k^{(2)}_n
+\end{pmatrix}
+\end{split}\end{equation}</script>
+</div>
+<p>至此，原始公式中等号左侧的两个就都变形完成了。下面对 <span class="arithmatex"><span class="MathJax_Preview">g</span><script type="math/tex">g</script></span> 函数做一下变形。</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}g(x_m, x_n, m-n) = Re \Big[(W_qx_m)(W_kx_n)^*e^{i(m-n)\theta}\Big]\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}g(x_m, x_n, m-n) = Re \Big[(W_qx_m)(W_kx_n)^*e^{i(m-n)\theta}\Big]\end{equation}</script>
+</div>
+<p>其中：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+W_q x_m &amp;= q_m = q^{(1)}_m + i q^{(2)}_m \\
+W_k x_n &amp;= k_n = k^{(1)}_n + i k^{(2)}_n \\
+(W_k x_n)^* &amp;= k_n^* = k^{(1)}_n - i k^{(2)}_n \\
+e^{i(m-n)\theta} &amp;= \cos((m-n)\theta) + i \sin((m-n)\theta)
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+W_q x_m &= q_m = q^{(1)}_m + i q^{(2)}_m \\
+W_k x_n &= k_n = k^{(1)}_n + i k^{(2)}_n \\
+(W_k x_n)^* &= k_n^* = k^{(1)}_n - i k^{(2)}_n \\
+e^{i(m-n)\theta} &= \cos((m-n)\theta) + i \sin((m-n)\theta)
+\end{split}\end{equation}</script>
+</div>
+<p>代进去继续变形得到：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp;\quad g(x_m, x_n, m-n) \\
+&amp;= Re \Big[(W_qx_m)(W_kx_n)^*e^{i(m-n)\theta}\Big] \\
+&amp;= Re \Big[ \Big(q^{(1)}_m + i q^{(2)}_m \Big) \Big(k^{(1)}_n - i k^{(2)}_n \Big) \Big(\cos((m-n)\theta) + i \sin((m-n)\theta) \Big) \Big]\\
+&amp;= Re \Big[ \Big((q^{(1)}_mk^{(1)}_n + q^{(2)}_mk^{(2)}_n) +i(q^{(2)}_mk^{(1)}_n - q^{(1)}_mk^{(2)}_n) \Big) \Big(\cos((m-n)\theta) + i \sin((m-n)\theta) \Big) \Big]\\
+&amp;= (q^{(1)}_mk^{(1)}_n + q^{(2)}_mk^{(2)}_n) \cos \big((m-n)\theta\big) - (q^{(2)}_mk^{(1)}_n - q^{(1)}_mk^{(2)}_n) \sin \big((m-n)\theta \big)
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+&\quad g(x_m, x_n, m-n) \\
+&= Re \Big[(W_qx_m)(W_kx_n)^*e^{i(m-n)\theta}\Big] \\
+&= Re \Big[ \Big(q^{(1)}_m + i q^{(2)}_m \Big) \Big(k^{(1)}_n - i k^{(2)}_n \Big) \Big(\cos((m-n)\theta) + i \sin((m-n)\theta) \Big) \Big]\\
+&= Re \Big[ \Big((q^{(1)}_mk^{(1)}_n + q^{(2)}_mk^{(2)}_n) +i(q^{(2)}_mk^{(1)}_n - q^{(1)}_mk^{(2)}_n) \Big) \Big(\cos((m-n)\theta) + i \sin((m-n)\theta) \Big) \Big]\\
+&= (q^{(1)}_mk^{(1)}_n + q^{(2)}_mk^{(2)}_n) \cos \big((m-n)\theta\big) - (q^{(2)}_mk^{(1)}_n - q^{(1)}_mk^{(2)}_n) \sin \big((m-n)\theta \big)
+\end{split}\end{equation}</script>
+</div>
+<p>最后，就是把等号左侧的两个式子相乘得到结果，看起是否和等号右侧部分相同就可以了：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+f_q(x_m,m) &amp;= \begin{bmatrix}
+   q^{(1)}_m \cos(m\theta) - q^{(2)}_m \sin(m\theta) \\
+   q^{(2)}_m \cos(m\theta) + q^{(1)}_m \sin(m\theta)
+\end{bmatrix} \\
+f_k(x_n,n) &amp;= \begin{bmatrix}
+   k_n^{(1)} \cos(n\theta) - k_n^{(2)} \sin(n\theta) \\
+   k_n^{(2)} \cos(n\theta) + k_n^{(1)} \sin(n\theta)
+\end{bmatrix} \\
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+f_q(x_m,m) &= \begin{bmatrix}
+   q^{(1)}_m \cos(m\theta) - q^{(2)}_m \sin(m\theta) \\
+   q^{(2)}_m \cos(m\theta) + q^{(1)}_m \sin(m\theta)
+\end{bmatrix} \\
+f_k(x_n,n) &= \begin{bmatrix}
+   k_n^{(1)} \cos(n\theta) - k_n^{(2)} \sin(n\theta) \\
+   k_n^{(2)} \cos(n\theta) + k_n^{(1)} \sin(n\theta)
+\end{bmatrix} \\
+\end{split}\end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp;\quad &lt;f_q(x_m,m),f_k(x_n,n)&gt; \\
+&amp;= \Big(q^{(1)}_m \cos(m\theta) - q^{(2)}_m \sin(m\theta)\Big)\Big(k_n^{(1)} \cos(n\theta) - k_n^{(2)} \sin(n\theta)\Big) \\
+&amp;\quad + \Big(q^{(2)}_m \cos(m\theta) + q^{(1)}_m \sin(m\theta)\Big)\Big(k_n^{(2)} \cos(n\theta) + k_n^{(1)} \sin(n\theta)\Big) \\
+&amp;= q^{(1)}_m \cos(m\theta) k^{(1)}_n \cos(n\theta) - q^{(1)}_m \cos(m\theta) k^{(2)}_n \sin(n\theta) \\
+&amp;\quad - q^{(2)}_m \sin(m\theta) k^{(1)}_n \cos(n\theta) + q^{(2)}_m \sin(m\theta) k^{(2)}_n \sin(n\theta) \\
+&amp;\quad + q^{(2)}_m \cos(m\theta) k^{(2)}_n \cos(n\theta) + q^{(2)}_m \cos(m\theta) k^{(1)}_n \sin(n\theta) \\
+&amp;\quad + q^{(1)}_m \sin(m\theta) k^{(2)}_n \cos(n\theta) + q^{(1)}_m \sin(m\theta) k^{(1)}_n \sin(n\theta) 
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+&\quad <f_q(x_m,m),f_k(x_n,n)> \\
+&= \Big(q^{(1)}_m \cos(m\theta) - q^{(2)}_m \sin(m\theta)\Big)\Big(k_n^{(1)} \cos(n\theta) - k_n^{(2)} \sin(n\theta)\Big) \\
+&\quad + \Big(q^{(2)}_m \cos(m\theta) + q^{(1)}_m \sin(m\theta)\Big)\Big(k_n^{(2)} \cos(n\theta) + k_n^{(1)} \sin(n\theta)\Big) \\
+&= q^{(1)}_m \cos(m\theta) k^{(1)}_n \cos(n\theta) - q^{(1)}_m \cos(m\theta) k^{(2)}_n \sin(n\theta) \\
+&\quad - q^{(2)}_m \sin(m\theta) k^{(1)}_n \cos(n\theta) + q^{(2)}_m \sin(m\theta) k^{(2)}_n \sin(n\theta) \\
+&\quad + q^{(2)}_m \cos(m\theta) k^{(2)}_n \cos(n\theta) + q^{(2)}_m \cos(m\theta) k^{(1)}_n \sin(n\theta) \\
+&\quad + q^{(1)}_m \sin(m\theta) k^{(2)}_n \cos(n\theta) + q^{(1)}_m \sin(m\theta) k^{(1)}_n \sin(n\theta) 
+\end{split}\end{equation}</script>
+</div>
+<p>使用上三角恒等式，得到：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\begin{split}
+&amp;\quad &lt;f_q(x_m,m),f_k(x_n,n)&gt; \\
+&amp;= q^{(1)}_mk^{(1)}_n \Big(\cos(m\theta)\cos(n\theta)+\sin(m\theta)\sin(n\theta) \Big) \\
+&amp;\quad + q^{(1)}_mk^{(2)}_n \Big(-\cos(m\theta)\sin(n\theta)+\sin(m\theta)\cos(n\theta) \Big) \\
+&amp;\quad + q^{(2)}_mk^{(1)}_n \Big(-\sin(m\theta)\cos(n\theta)+\cos(m\theta)\sin(n\theta) \Big) \\
+&amp;\quad + q^{(2)}_mk^{(2)}_n \Big(\sin(m\theta)\sin(n\theta)+\cos(m\theta)\cos(n\theta) \Big) \\
+&amp;= q^{(1)}_mk^{(1)}_n\cos((m-n)\theta) + q^{(1)}_mk^{(2)}_n\sin((m-n)\theta) \\
+&amp;\quad - q^{(2)}_mk^{(1)}_n\sin((m-n)\theta) + q^{(2)}_mk^{(2)}_n\cos((m-n)\theta) \\
+&amp;=(q^{(1)}_mk^{(1)}_n+q^{(2)}_mk^{(2)}_n)\cos((m-n)\theta) + (q^{(1)}_mk^{(2)}_n-q^{(2)}_mk^{(1)}_n)\sin((m-n)\theta) \\
+&amp;=(q^{(1)}_mk^{(1)}_n+q^{(2)}_mk^{(2)}_n)\cos((m-n)\theta) - (q^{(2)}_mk^{(1)}_n-q^{(1)}_mk^{(2)}_n)\sin((m-n)\theta) \\
+&amp;= g(x_m,x_n,m-n)
+\end{split}\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\begin{split}
+&\quad <f_q(x_m,m),f_k(x_n,n)> \\
+&= q^{(1)}_mk^{(1)}_n \Big(\cos(m\theta)\cos(n\theta)+\sin(m\theta)\sin(n\theta) \Big) \\
+&\quad + q^{(1)}_mk^{(2)}_n \Big(-\cos(m\theta)\sin(n\theta)+\sin(m\theta)\cos(n\theta) \Big) \\
+&\quad + q^{(2)}_mk^{(1)}_n \Big(-\sin(m\theta)\cos(n\theta)+\cos(m\theta)\sin(n\theta) \Big) \\
+&\quad + q^{(2)}_mk^{(2)}_n \Big(\sin(m\theta)\sin(n\theta)+\cos(m\theta)\cos(n\theta) \Big) \\
+&= q^{(1)}_mk^{(1)}_n\cos((m-n)\theta) + q^{(1)}_mk^{(2)}_n\sin((m-n)\theta) \\
+&\quad - q^{(2)}_mk^{(1)}_n\sin((m-n)\theta) + q^{(2)}_mk^{(2)}_n\cos((m-n)\theta) \\
+&=(q^{(1)}_mk^{(1)}_n+q^{(2)}_mk^{(2)}_n)\cos((m-n)\theta) + (q^{(1)}_mk^{(2)}_n-q^{(2)}_mk^{(1)}_n)\sin((m-n)\theta) \\
+&=(q^{(1)}_mk^{(1)}_n+q^{(2)}_mk^{(2)}_n)\cos((m-n)\theta) - (q^{(2)}_mk^{(1)}_n-q^{(1)}_mk^{(2)}_n)\sin((m-n)\theta) \\
+&= g(x_m,x_n,m-n)
+\end{split}\end{equation}</script>
+</div>
+<p>到此，证明完毕。</p>
+<h2 id="3">3、直观理解该位置编码在做什么<a class="headerlink" href="#3" title="Permanent link">#</a></h2>
+<h3 id="31">3.1 完整公式<a class="headerlink" href="#31" title="Permanent link">#</a></h3>
+<p>第2小节的整个证明过程都是在二维的情况下证明的，需要将其扩展到高维情况。高维情况时以矩阵的形式进行表示，公式如下：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}f_{\{q,k\}}(x_m,m)=R^d_{\Theta,m}W_{\{q,k\}}x_m\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}f_{\{q,k\}}(x_m,m)=R^d_{\Theta,m}W_{\{q,k\}}x_m\end{equation}</script>
+</div>
+<p>上面公式中的 <span class="arithmatex"><span class="MathJax_Preview">R^d_{\Theta,m}</span><script type="math/tex">R^d_{\Theta,m}</script></span> 是一个由多个小二维旋转矩阵拼接的大矩阵。如下图所示，左侧的矩阵即为 <span class="arithmatex"><span class="MathJax_Preview">R^d_{\Theta,m}</span><script type="math/tex">R^d_{\Theta,m}</script></span>：</p>
+<p><img alt="" src="assets/003.png" /></p>
+<p>其中 <span class="arithmatex"><span class="MathJax_Preview">\theta_i</span><script type="math/tex">\theta_i</script></span> 的公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\theta_i = 10000^{-2(i-1)/d} \qquad i=1,2,...,d/2\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\theta_i = 10000^{-2(i-1)/d} \qquad i=1,2,...,d/2\end{equation}</script>
+</div>
+<h3 id="32">3.2 物理含义<a class="headerlink" href="#32" title="Permanent link">#</a></h3>
+<h4 id="321">3.2.1 直观理解<a class="headerlink" href="#321" title="Permanent link">#</a></h4>
+<p>下图是旋转位置编码的一个直观理解的图片。下图中的这条样本总共六个token：Enhanced、Transformer、with、Rotary、Position、Embedding，每个 token 对应一个 d 维的向量。把向量中的分量两两分组，对每组分量做一个旋转。</p>
+<p><img alt="" src="assets/024.png" /></p>
+<h4 id="322">3.2.2 旋转的角度大小<a class="headerlink" href="#322" title="Permanent link">#</a></h4>
+<p>每个 token 的每组分量的旋转角度为 <span class="arithmatex"><span class="MathJax_Preview">m\theta_i</span><script type="math/tex">m\theta_i</script></span>，其中 <span class="arithmatex"><span class="MathJax_Preview">\theta_i</span><script type="math/tex">\theta_i</script></span> 的公式为 <span class="arithmatex"><span class="MathJax_Preview">\theta_i = 10000^{-2(i-1)/d}</span><script type="math/tex">\theta_i = 10000^{-2(i-1)/d}</script></span>，下面先分析其增减性。（特别注意这里有两个不同维度的变量，后续的所有优化和改进都是在这两个变量上做文章）</p>
+<ul>
+<li>
+<p>随着token所处的位置 <span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 的增大，旋转角度增大，旋转速度变快，频率变大；</p>
+</li>
+<li>
+<p>随着分量位置 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 的增大，旋转角度变小，旋转速度变慢，频率变小；</p>
+</li>
+</ul>
+<div align=center><img src="./assets/005.png" width=70% /></div>
+
+<p>对于每个token所处的位置 <span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 的不同，旋转角度的差异如下图所示：</p>
+<div align=center><img src="./assets/006.png" width=50% /></div>
+
+<p>对于分量位置 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 的不同，旋转角度的差异如下图所示：</p>
+<div align=center><img src="./assets/007.png" width=50% /></div>
+
+<h2 id="4">4、问题求解<a class="headerlink" href="#4" title="Permanent link">#</a></h2>
+<p>直接见作者的原始文章，写的非常好：<a href="https://kexue.fm/archives/8265#%E6%B1%82%E8%A7%A3%E8%BF%87%E7%A8%8B">https://kexue.fm/archives/8265#%E6%B1%82%E8%A7%A3%E8%BF%87%E7%A8%8B</a></p>
+<p>下面补充一些推导过程。</p>
+<p><strong>原文章中公式（6）中的最后一个等号</strong></p>
+<p>由于初始条件中 <span class="arithmatex"><span class="MathJax_Preview">f(q,0)=q</span><script type="math/tex">f(q,0)=q</script></span>、<span class="arithmatex"><span class="MathJax_Preview">f(k,0)=k</span><script type="math/tex">f(k,0)=k</script></span>，所以当 <span class="arithmatex"><span class="MathJax_Preview">m=0</span><script type="math/tex">m=0</script></span> 时，<span class="arithmatex"><span class="MathJax_Preview">f(q,m)=R_f(q,m)e^{i\Theta_f(q,m)}=R_f(q,m)</span><script type="math/tex">f(q,m)=R_f(q,m)e^{i\Theta_f(q,m)}=R_f(q,m)</script></span>，</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}f(q,0)f(k,0)=R_f(q,0) R_f(k,0) e^{i\Theta_f(q,0)} e^{i\Theta_f(k,0)} = qk\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}f(q,0)f(k,0)=R_f(q,0) R_f(k,0) e^{i\Theta_f(q,0)} e^{i\Theta_f(k,0)} = qk\end{equation}</script>
+</div>
+<p>由复数的极式下向量的乘法可知，<span class="arithmatex"><span class="MathJax_Preview">qk</span><script type="math/tex">qk</script></span>的模就等于 <span class="arithmatex"><span class="MathJax_Preview">q</span><script type="math/tex">q</script></span> 的模乘以 <span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span> 的模。</p>
+<p><strong>原文章中公式（8）的推导</strong></p>
+<p>已知：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\varphi(m)=\Theta_f(q,m)-\Theta(q) \end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\varphi(m)=\Theta_f(q,m)-\Theta(q) \end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\varphi(m)=\Theta_f(k,m)-\Theta(k) \end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\varphi(m)=\Theta_f(k,m)-\Theta(k) \end{equation}</script>
+</div>
+<p>简单变换可得：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\Theta_f(q,m)=\varphi(m)+\Theta(q) \end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\Theta_f(q,m)=\varphi(m)+\Theta(q) \end{equation}</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\Theta_f(k,m)=\varphi(m)+\Theta(k) \end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\Theta_f(k,m)=\varphi(m)+\Theta(k) \end{equation}</script>
+</div>
+<p>将上述两个式子代入到原文章中公式（5）的第二个式子可得：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}\Big(\varphi(m)+\Theta(q)\Big)-\Big(\varphi(m)+\Theta(k)\Big)=\Theta_g(q,k,m-n)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}\Big(\varphi(m)+\Theta(q)\Big)-\Big(\varphi(m)+\Theta(k)\Big)=\Theta_g(q,k,m-n)\end{equation}</script>
+</div>
+<p>将 <span class="arithmatex"><span class="MathJax_Preview">n=m-1</span><script type="math/tex">n=m-1</script></span> 代入上式之后，做一个简单的变换就得到原文章中的公式（8）。原文章中的公式（8）的等号右侧里面 <span class="arithmatex"><span class="MathJax_Preview">q</span><script type="math/tex">q</script></span> 和 <span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span> 都是定值，只有位置 <span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 和分量的索引 <span class="arithmatex"><span class="MathJax_Preview">i</span><script type="math/tex">i</script></span> 是变量。所以等号后侧也是一个定值，所以 <span class="arithmatex"><span class="MathJax_Preview">\varphi(m)</span><script type="math/tex">\varphi(m)</script></span> 是一个等差数列。</p>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><a href="https://kexue.fm/archives/8130">https://kexue.fm/archives/8130</a></p>
+</li>
+<li>
+<p><a href="https://kexue.fm/archives/8265">https://kexue.fm/archives/8265</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/642884818">https://zhuanlan.zhihu.com/p/642884818</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/667864459">https://zhuanlan.zhihu.com/p/667864459</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/670280576">https://zhuanlan.zhihu.com/p/670280576</a></p>
+</li>
+</ul>
+<h2 id="_1">其他<a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
+<p>该种位置编码的整个求解公式都基于一句话：通过绝对位置编码的方式实现相对位置编码。这句话对应的公式为：</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">\begin{equation}&lt;f(q,m),f(k,n)&gt;=g(q,k,m-n)\end{equation}</div>
+<script type="math/tex; mode=display">\begin{equation}<f(q,m),f(k,n)>=g(q,k,m-n)\end{equation}</script>
+</div>
+<p>这里看一下右半部分求解之后的最终结果（注意该结果仅为理论结果，代码实现中是按照上述公式的左侧部分实现的）。下图是对于整个注意力权重矩阵求解之后的结果，可以看出在最终的结果中仅有 <span class="arithmatex"><span class="MathJax_Preview">m-n</span><script type="math/tex">m-n</script></span> 这一项，不存在单独的 <span class="arithmatex"><span class="MathJax_Preview">m</span><script type="math/tex">m</script></span> 或者 <span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span>，这也就是说最终的注意力权重仅跟两个 token 之间的相对位置有关，与每个 token 的绝对位置是无关的。</p>
+<p><img alt="" src="assets/001.png" /></p>
+<blockquote>
+<p>上图出自：<a href="https://arxiv.org/abs/2306.15595">Extending Context Window of Large Language Models via Positional Interpolation</a></p>
+</blockquote></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2021 Microsoft Research;<a href="https://beian.miit.gov.cn/">备案号：京ICP备2022025323号-1</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../mathjax-config.js" defer></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
